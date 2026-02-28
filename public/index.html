@@ -1,0 +1,1092 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Randevu Yönetimi</title>
+    <meta name="description" content="İşletmenizin randevularını gerçek zamanlı olarak yönetin." />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css" id="fp-dark-theme"
+        disabled>
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="settings.css?v=2" />
+    <style>
+        /* ══ LOGIN ARKA PLAN ANİMASYONLARI ══════════════════════════════════ */
+        .login-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            background: #0a0b10;
+        }
+
+        /* Mesh gradient arka plan */
+        .login-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 70% 60% at 15% 20%, rgba(79, 70, 229, 0.45) 0%, transparent 55%),
+                radial-gradient(ellipse 65% 75% at 85% 80%, rgba(99, 102, 241, 0.35) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 45% at 50% 110%, rgba(139, 92, 246, 0.25) 0%, transparent 55%);
+            animation: bgShift 12s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgShift {
+            0% {
+                opacity: 0.6;
+                transform: scale(1) rotate(0deg);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1.08) rotate(2deg);
+            }
+        }
+
+        /* Yüzen orb'lar */
+        .login-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: orbFloat linear infinite;
+        }
+
+        .login-orb-1 {
+            width: 650px;
+            height: 650px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.32), transparent 70%);
+            left: -150px;
+            top: -150px;
+            animation-duration: 20s;
+            animation-delay: 0s;
+            opacity: 0.95;
+        }
+
+        .login-orb-2 {
+            width: 750px;
+            height: 750px;
+            background: radial-gradient(circle, rgba(79, 70, 229, 0.22), transparent 70%);
+            right: -200px;
+            bottom: -150px;
+            animation-duration: 25s;
+            animation-delay: -8s;
+            opacity: 0.9;
+        }
+
+        .login-orb-3 {
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.18), transparent 70%);
+            right: 18%;
+            top: 8%;
+            animation-duration: 18s;
+            animation-delay: -4s;
+            opacity: 0.75;
+        }
+
+        .login-orb-4 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 70%);
+            left: 22%;
+            bottom: 12%;
+            animation-duration: 22s;
+            animation-delay: -12s;
+            opacity: 0.65;
+        }
+
+        @keyframes orbFloat {
+            0% {
+                transform: translate(0px, 0px) scale(1);
+            }
+
+            25% {
+                transform: translate(30px, -40px) scale(1.05);
+            }
+
+            50% {
+                transform: translate(-20px, 20px) scale(0.97);
+            }
+
+            75% {
+                transform: translate(40px, 30px) scale(1.03);
+            }
+
+            100% {
+                transform: translate(0px, 0px) scale(1);
+            }
+        }
+
+        /* Yüzen partiküller */
+        .login-particles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0;
+            animation: particleRise linear infinite;
+        }
+
+        .particle:nth-child(1) {
+            left: 8%;
+            animation-duration: 8s;
+            animation-delay: 0s;
+            width: 2px;
+            height: 2px;
+        }
+
+        .particle:nth-child(2) {
+            left: 18%;
+            animation-duration: 12s;
+            animation-delay: -3s;
+            opacity: 0.6;
+        }
+
+        .particle:nth-child(3) {
+            left: 28%;
+            animation-duration: 9s;
+            animation-delay: -6s;
+            width: 4px;
+            height: 4px;
+            background: rgba(201, 168, 76, 0.5);
+        }
+
+        .particle:nth-child(4) {
+            left: 40%;
+            animation-duration: 14s;
+            animation-delay: -1s;
+        }
+
+        .particle:nth-child(5) {
+            left: 52%;
+            animation-duration: 10s;
+            animation-delay: -8s;
+            width: 2px;
+            height: 2px;
+        }
+
+        .particle:nth-child(6) {
+            left: 63%;
+            animation-duration: 11s;
+            animation-delay: -4s;
+            background: rgba(99, 102, 241, 0.5);
+        }
+
+        .particle:nth-child(7) {
+            left: 74%;
+            animation-duration: 13s;
+            animation-delay: -7s;
+            width: 4px;
+            height: 4px;
+        }
+
+        .particle:nth-child(8) {
+            left: 85%;
+            animation-duration: 7s;
+            animation-delay: -2s;
+            width: 2px;
+            height: 2px;
+            background: rgba(34, 197, 94, 0.5);
+        }
+
+        .particle:nth-child(9) {
+            left: 93%;
+            animation-duration: 15s;
+            animation-delay: -5s;
+        }
+
+        .particle:nth-child(10) {
+            left: 35%;
+            animation-duration: 9s;
+            animation-delay: -9s;
+            background: rgba(201, 168, 76, 0.4);
+        }
+
+        .particle:nth-child(11) {
+            left: 56%;
+            animation-duration: 16s;
+            animation-delay: -3.5s;
+            width: 2px;
+            height: 2px;
+        }
+
+        .particle:nth-child(12) {
+            left: 78%;
+            animation-duration: 8s;
+            animation-delay: -6.5s;
+            background: rgba(99, 102, 241, 0.4);
+        }
+
+        @keyframes particleRise {
+            0% {
+                transform: translateY(105vh) scale(1);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.8;
+            }
+
+            90% {
+                opacity: 0.3;
+            }
+
+            100% {
+                transform: translateY(-10vh) scale(0.4);
+                opacity: 0;
+            }
+        }
+
+        /* Işık çizgileri */
+        .login-line {
+            position: absolute;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, rgba(201, 168, 76, 0.3), transparent);
+            animation: lineSlide linear infinite;
+            opacity: 0;
+        }
+
+        .login-line-1 {
+            height: 200px;
+            left: 22%;
+            top: -200px;
+            animation-duration: 8s;
+            animation-delay: 0s;
+        }
+
+        .login-line-2 {
+            height: 300px;
+            left: 58%;
+            top: -300px;
+            animation-duration: 12s;
+            animation-delay: -4s;
+        }
+
+        .login-line-3 {
+            height: 150px;
+            left: 80%;
+            top: -150px;
+            animation-duration: 9s;
+            animation-delay: -7s;
+            background: linear-gradient(to bottom, transparent, rgba(99, 102, 241, 0.25), transparent);
+        }
+
+        @keyframes lineSlide {
+            0% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: translateY(120vh);
+                opacity: 0;
+            }
+        }
+
+        /* Grid overlay */
+        .login-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(201, 168, 76, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(201, 168, 76, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+            animation: gridPulse 6s ease-in-out infinite;
+        }
+
+        @keyframes gridPulse {
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Login card üzerine glassmorphism */
+        .login-screen {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Light tema için login bg */
+        :root.theme-light .login-bg::before {
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 20%, rgba(201, 168, 76, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 80% at 80% 80%, rgba(99, 102, 241, 0.06) 0%, transparent 60%);
+        }
+
+        :root.theme-light .particle {
+            background: var(--accent);
+        }
+
+        :root.theme-light .login-orb-1 {
+            background: radial-gradient(circle, rgba(201, 168, 76, 0.1), transparent 70%);
+        }
+
+        :root.theme-light .login-grid {
+            background-image:
+                linear-gradient(rgba(100, 100, 150, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(100, 100, 150, 0.05) 1px, transparent 1px);
+        }
+
+        /* ══ YENİ LOGIN KART TASARIMI ══════════════════════════════════════ */
+
+        /* Login ekranı tam ekran ortalama */
+        .login-screen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        /* Kart — glassmorphism */
+        .login-new-card {
+            width: 100%;
+            max-width: 380px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.25rem;
+            padding: 2.5rem 2rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+            animation: cardIn 0.35s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(24px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .login-new-title {
+            font-size: 1.85rem;
+            font-weight: 600;
+            color: #fff;
+            text-align: center;
+            margin: 0 0 0.35rem;
+            letter-spacing: -0.03em;
+        }
+
+        .login-new-sub {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.45);
+            text-align: center;
+            margin: 0 0 1.75rem;
+        }
+
+        /* Pill input alanı */
+        .login-new-field {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            height: 48px;
+            padding: 0 1.2rem;
+            margin-bottom: 0.85rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .login-new-field:focus-within {
+            border-color: rgba(99, 102, 241, 0.65);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .login-new-field svg {
+            flex-shrink: 0;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        .login-new-field input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.88rem;
+            -webkit-box-shadow: none !important;
+            -webkit-text-fill-color: #fff !important;
+        }
+
+        .login-new-field input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .login-new-field input:-webkit-autofill,
+        .login-new-field input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px rgba(20, 20, 40, 0.8) inset !important;
+            -webkit-text-fill-color: #fff !important;
+        }
+
+        /* Şifremi unuttum satırı */
+        .login-new-forgot-row {
+            text-align: left;
+            margin-bottom: 0.75rem;
+        }
+
+        .login-new-forgot {
+            background: none;
+            border: none;
+            color: #818cf8;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 0;
+            transition: text-decoration 0.15s;
+        }
+
+        .login-new-forgot:hover {
+            text-decoration: underline;
+        }
+
+        /* Giriş Butonu */
+        .login-new-submit {
+            width: 100%;
+            height: 44px;
+            border-radius: 9999px;
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.02em;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-new-submit:hover {
+            background: #4338ca;
+            box-shadow: 0 6px 24px rgba(79, 70, 229, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .login-new-submit:active {
+            transform: translateY(0);
+        }
+
+        /* Login error mesajı */
+        .login-error {
+            font-size: 0.78rem;
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            padding: 0.45rem 0.8rem;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        /* Light tema uyumu */
+        :root.theme-light .login-new-card {
+            background: rgba(255, 255, 255, 0.75);
+            border-color: rgba(0, 0, 0, 0.08);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+        }
+
+        :root.theme-light .login-new-title {
+            color: #1e1b4b;
+        }
+
+        :root.theme-light .login-new-sub {
+            color: rgba(0, 0, 0, 0.45);
+        }
+
+        :root.theme-light .login-new-field {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        :root.theme-light .login-new-field svg {
+            color: rgba(0, 0, 0, 0.45);
+        }
+
+        :root.theme-light .login-new-field input {
+            color: #1e1b4b;
+            -webkit-text-fill-color: #1e1b4b !important;
+        }
+
+        :root.theme-light .login-new-field input::placeholder {
+            color: rgba(0, 0, 0, 0.35);
+        }
+
+        :root.theme-light #login-theme-btn {
+            background: rgba(0, 0, 0, 0.06) !important;
+            border-color: rgba(0, 0, 0, 0.12) !important;
+            color: rgba(0, 0, 0, 0.6) !important;
+        }
+
+
+        .reset-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.72);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+        }
+
+        .reset-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem 2rem 1.75rem;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(201, 168, 76, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+            animation: modalIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(14px) scale(.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .reset-card h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .reset-card p.reset-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: -0.3rem;
+        }
+
+        .reset-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.15s;
+        }
+
+        .reset-close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .forgot-link {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            letter-spacing: 0.02em;
+            transition: color 0.15s;
+            padding: 0;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .forgot-link:hover {
+            color: var(--accent);
+        }
+
+        /* ── Tema Butonu (sidebar içinde) ── */
+        .btn-theme-sidebar {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+            padding: 0.3rem 0.7rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        .btn-theme-sidebar:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        /* Block grid */
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+        }
+
+        .block-slot {
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 0.25rem;
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            color: var(--text-primary);
+            background: transparent;
+            position: relative;
+        }
+
+        .block-slot:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .block-slot.blocked {
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: var(--red);
+        }
+
+        .block-slot.blocked::after {
+            content: '✕';
+            display: block;
+            font-size: 0.6rem;
+            opacity: 0.7;
+        }
+
+        .block-slot.has-appt {
+            border-color: var(--yellow);
+            color: var(--yellow);
+        }
+
+        /* Service row delete button */
+        .svc-delete-btn {
+            background: transparent;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: var(--red);
+            border-radius: var(--radius-sm);
+            padding: 0.25rem 0.6rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .svc-delete-btn:hover {
+            background: rgba(239, 68, 68, 0.12);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── GİRİŞ EKRANI ARKA PLAN EFEKTLERİ ──────────────────────────────── -->
+    <div class="login-bg" id="login-bg">
+        <div class="login-grid"></div>
+        <div class="login-orb login-orb-1"></div>
+        <div class="login-orb login-orb-2"></div>
+        <div class="login-orb login-orb-3"></div>
+        <div class="login-orb login-orb-4"></div>
+        <div class="login-particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="login-line login-line-1"></div>
+        <div class="login-line login-line-2"></div>
+        <div class="login-line login-line-3"></div>
+    </div>
+
+    <!-- ── ŞİFRE SIFIRLAMA MODAL ────────────────────────────────────────────── -->
+    <div id="reset-overlay" class="reset-overlay hidden">
+        <div class="reset-card">
+            <button class="reset-close-btn" id="reset-close-btn" title="Kapat">&#10005;</button>
+            <h2>🔑 Şifre Belirle</h2>
+            <p class="reset-hint">İşletme kodunuzu girin ve yeni şifrenizi belirleyin.</p>
+            <div class="input-group">
+                <label for="reset-slug">İşletme Kodu</label>
+                <input id="reset-slug" type="text" placeholder="örn: salon-ayse" autocomplete="off"
+                    spellcheck="false" />
+            </div>
+
+            <div class="input-group">
+                <label for="reset-new-pw">Yeni Şifre</label>
+                <input id="reset-new-pw" type="password" placeholder="En az 4 karakter" autocomplete="new-password" />
+            </div>
+            <div class="input-group">
+                <label for="reset-confirm-pw">Yeni Şifre (Tekrar)</label>
+                <input id="reset-confirm-pw" type="password" placeholder="Yeni şifreyi tekrar girin"
+                    autocomplete="new-password" />
+            </div>
+            <button id="reset-submit-btn" class="btn btn-primary btn-full">Şifreyi Güncelle</button>
+            <p id="reset-msg" class="login-error hidden"></p>
+        </div>
+    </div>
+
+    <!-- ── LOGIN EKRANI ─────────────────────────────────────────────────── -->
+    <div id="login-screen" class="login-screen">
+        <!-- Tema butonu (sağ üst) -->
+        <button id="login-theme-btn" onclick="toggleTheme()" title="Temayı Değiştir"
+            style="position:fixed;top:1.25rem;right:1.25rem;z-index:9999;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);border-radius:8px;padding:0.45rem 0.8rem;font-size:0.85rem;cursor:pointer;transition:all 0.2s;font-family:'Montserrat',sans-serif;backdrop-filter:blur(8px);">🌙</button>
+
+        <!-- Login Kartı -->
+        <form id="login-form" class="login-new-card" onsubmit="return false;">
+            <h1 class="login-new-title">Giriş Yap</h1>
+            <p class="login-new-sub">Devam etmek için giriş yapın</p>
+
+            <!-- İşletme Kodu -->
+            <div class="login-new-field">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                <input id="tenant-slug-input" type="text" placeholder="Kullanıcı Adı" autocomplete="off"
+                    spellcheck="false" />
+            </div>
+
+            <!-- Şifre -->
+            <div class="login-new-field">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <input id="admin-password-input" type="password" placeholder="Şifre" autocomplete="current-password" />
+            </div>
+
+            <!-- Şifremi unuttum -->
+            <div class="login-new-forgot-row">
+                <button type="button" class="login-new-forgot" id="forgot-pw-btn">Şifremi unuttum</button>
+            </div>
+
+            <!-- Giriş Butonu -->
+            <button id="login-btn" type="submit" class="login-new-submit">Giriş Yap</button>
+
+            <!-- Hata mesajı -->
+            <p id="login-error" class="login-error hidden"></p>
+        </form>
+    </div>
+
+
+    <!-- ── ANA DASHBOARD ────────────────────────────────────────────────── -->
+    <div id="app" class="app hidden">
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-mark small"></div>
+                <span class="sidebar-brand">Randevu</span>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tab="today" id="nav-today"><span
+                        class="nav-icon">&#9632;</span><span>Bugün</span></button>
+                <button class="nav-item" data-tab="all" id="nav-all"><span class="nav-icon">&#9632;</span><span>Tüm
+                        Randevular</span></button>
+                <button class="nav-item" data-tab="new" id="nav-new"><span class="nav-icon">&#9632;</span><span>Yeni
+                        Randevu</span></button>
+                <button class="nav-item" data-tab="settings" id="nav-settings"><span
+                        class="nav-icon">&#9632;</span><span>Ayarlar</span></button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-footer-top">
+                    <button id="theme-toggle-btn" class="btn-theme-sidebar" title="Temayı Değiştir">
+                        <span id="theme-icon">🌙</span>
+                        <span id="theme-label">Koyu</span>
+                    </button>
+                </div>
+                <div class="sidebar-footer-bottom">
+                    <div id="realtime-badge" class="realtime-badge">
+                        <span class="pulse-dot"></span>
+                        <span>Canlı</span>
+                    </div>
+                    <button id="logout-btn" class="btn-logout">Çıkış</button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h2 id="page-title">Bugünün Randevuları</h2>
+                    <div id="tenant-name-badge" class="tenant-badge"></div>
+                </div>
+                <div class="topbar-right">
+                    <div id="current-datetime" class="datetime-display"></div>
+                    <div id="connection-status" class="connection-status connected">Bağlı</div>
+                </div>
+            </header>
+
+            <!-- TAB: BUGÜN -->
+            <section id="tab-today" class="tab-content active">
+                <div class="stats-row" id="stats-row">
+                    <div class="stat-card"><span class="stat-value" id="stat-total">–</span><span
+                            class="stat-label">Toplam</span></div>
+                    <div class="stat-card"><span class="stat-value" id="stat-confirmed">–</span><span
+                            class="stat-label">Onaylı</span></div>
+                    <div class="stat-card"><span class="stat-value" id="stat-pending">–</span><span
+                            class="stat-label">Bekleyen</span></div>
+                    <div class="stat-card"><span class="stat-value" id="stat-cancelled">–</span><span
+                            class="stat-label">İptal</span></div>
+                </div>
+                <div class="section-header">
+                    <h3>Bugün — <span id="today-date-label"></span></h3>
+                    <button class="btn btn-secondary" id="refresh-today-btn">Yenile</button>
+                </div>
+                <div id="today-appointments" class="appointments-grid">
+                    <div class="loading-state">Yükleniyor...</div>
+                </div>
+            </section>
+
+            <!-- TAB: TÜM RANDEVULAR -->
+            <section id="tab-all" class="tab-content hidden">
+                <div class="filters-bar">
+                    <div class="input-group inline">
+                        <label for="filter-date">Tarih</label>
+                        <input type="date" id="filter-date" />
+                    </div>
+                    <div class="input-group inline">
+                        <label for="filter-status">Durum</label>
+                        <select id="filter-status">
+                            <option value="">Tümü</option>
+                            <option value="pending">Bekleyen</option>
+                            <option value="confirmed">Onaylı</option>
+                            <option value="cancelled">İptal</option>
+                        </select>
+                    </div>
+                    <div class="input-group inline">
+                        <label for="filter-staff">Personel</label>
+                        <select id="filter-staff">
+                            <option value="">Tümü</option>
+                            <!-- JS ile dolacak -->
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="apply-filter-btn">Filtrele</button>
+                    <button class="btn btn-ghost" id="clear-filter-btn">Temizle</button>
+                </div>
+                <div id="all-appointments" class="appointments-grid" style="margin-top:1.5rem;">
+                    <div class="loading-state">Yükleniyor...</div>
+                </div>
+            </section>
+
+            <!-- TAB: YENİ RANDEVU -->
+            <section id="tab-new" class="tab-content hidden">
+                <div class="form-card">
+                    <h3>Yeni Randevu Oluştur</h3>
+                    <p class="form-hint">Manuel randevu girişi için bu formu kullanın.</p>
+                    <form id="new-appointment-form" novalidate>
+                        <div class="form-row">
+                            <div class="input-group"><label for="f-name">Ad Soyad</label><input type="text" id="f-name"
+                                    placeholder="Müşteri adı soyadı" required /></div>
+                            <div class="input-group"><label for="f-phone">Telefon</label><input type="tel" id="f-phone"
+                                    placeholder="+905xx xxx xx xx" required /></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="f-service">Hizmet</label>
+                                <select id="f-service">
+                                    <option value="">Seçiniz</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="f-staff">Personel</label>
+                                <select id="f-staff">
+                                    <option value="">Farketmez (Herhangi Biri)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group"><label for="f-date">Tarih</label><input type="date" id="f-date"
+                                    required /></div>
+                            <div class="input-group">
+                                <label for="f-time">Saat</label>
+                                <select id="f-time" required>
+                                    <option value="">Seçiniz</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="f-notes">Notlar</label>
+                            <textarea id="f-notes" rows="3" placeholder="Ek notlar (opsiyonel)"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="create-btn">Randevu Oluştur</button>
+                            <p id="form-message" class="form-message hidden"></p>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- TAB: AYARLAR -->
+            <section id="tab-settings" class="tab-content hidden">
+
+                <div class="form-card">
+                    <h3>İşletme Bilgileri</h3>
+                    <div id="settings-info" class="settings-info">
+                        <div class="loading-state">Yükleniyor...</div>
+                    </div>
+                </div>
+
+                <div class="form-card" style="margin-top:1.5rem">
+                    <h3>Müşteri Form Linki</h3>
+                    <p class="form-hint">Bu linki müşterilerinizle paylaşın:</p>
+                    <div class="webhook-box">
+                        <code id="booking-url"></code>
+                        <button class="btn btn-ghost btn-sm" id="copy-booking-btn">Kopyala</button>
+                    </div>
+                </div>
+
+                <div class="form-card" style="margin-top:1.5rem">
+                    <h3>Hizmetler</h3>
+                    <p class="form-hint">Sunduğunuz hizmetleri ekleyin — müşteri form üzerinden bunları seçecek.</p>
+                    <div class="svc-add-row">
+                        <div class="input-group"><label>Hizmet Adı</label><input type="text" id="svc-name"
+                                placeholder="örn: Masaj, Konsültasyon..." /></div>
+                        <div class="input-group"><label>Süre (dk)</label><input type="number" id="svc-duration"
+                                placeholder="60" min="5" step="5" /></div>
+                        <div class="input-group"><label>Ücret (₺)</label><input type="number" id="svc-price"
+                                placeholder="0" min="0" /></div>
+                        <button class="btn btn-primary" id="add-svc-btn">+ Ekle</button>
+                    </div>
+                    <p id="svc-msg" class="form-message hidden"></p>
+                    <div id="services-list" class="services-list">
+                        <div class="loading-state">Henüz hizmet eklenmemiş.</div>
+                    </div>
+                </div>
+
+                <div class="form-card" style="margin-top:1.5rem">
+                    <h3>Çalışanlar (Ekip)</h3>
+                    <p class="form-hint">Müşterilerin seçebilmesi için personellerinizi ekleyin.</p>
+                    <div class="svc-add-row" style="grid-template-columns: 1fr auto;">
+                        <div class="input-group">
+                            <label>Personel Adı</label>
+                            <input type="text" id="staff-name" placeholder="örn: Ayşe, Ahmet..." />
+                        </div>
+                        <button class="btn btn-primary" id="add-staff-btn" style="margin-top: 22px;">+ Ekle</button>
+                    </div>
+                    <p id="staff-msg" class="form-message hidden"></p>
+                    <div id="staff-list" class="services-list" style="margin-top: 1rem;">
+                        <div class="loading-state">Henüz personel eklenmemiş.</div>
+                    </div>
+                </div>
+
+                <div class="form-card" style="margin-top:1.5rem;margin-bottom:2rem">
+                    <h3>Saat Yönetimi</h3>
+                    <p class="form-hint">Kapatmak istediğiniz saate tıklayın — kırmızı = kapalı. Müşteri o saate
+                        belirlediğiniz personel için randevu alamaz.</p>
+                    <div class="form-row" style="margin-bottom:1.25rem;">
+                        <div class="input-group">
+                            <label>Tarih</label>
+                            <input type="date" id="block-date" />
+                        </div>
+                        <div class="input-group">
+                            <label>Personel</label>
+                            <select id="block-staff">
+                                <option value="">Tümü için kapat (Farketmez dahil)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="block-grid" class="block-grid">
+                        <div class="loading-state">Tarih seçin...</div>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ── RANDEVU DETAY MODAL ─────────────────────────────────────────────── -->
+    <div id="detail-modal" class="modal hidden">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-title">Randevu Detayı</h3>
+                <button class="modal-close" id="modal-close-btn">&#10005;</button>
+            </div>
+            <div id="modal-body" class="modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="modal-confirm-btn">Onayla</button>
+                <button class="btn btn-danger" id="modal-cancel-btn">İptal Et</button>
+                <button class="btn btn-whatsapp" id="modal-whatsapp-btn">WhatsApp Gönder</button>
+                <button class="btn btn-ghost" id="modal-delete-btn"
+                    style="margin-left:auto;border-color:rgba(239,68,68,.4);color:#ef4444;"
+                    title="Randevuyu Kalıcı Sil">🗑 Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/tr.js"></script>
+    <script src="app.js?v=4"></script>
+</body>
+
+</html>
