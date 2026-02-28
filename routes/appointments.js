@@ -1,0 +1,268 @@
+﻿const express = require('express');
+const router = express.Router();
+const supabase = require('../lib/supabase');
+const { sendWhatsApp, buildConfirmationMessage } = require('../services/whatsapp');
+
+// ─── Yardımcı: Tarih+Saat geçmişte mi? ───────────────────────────────────────
+function isPastSlot(dateStr, timeStr) {
+    const now = new Date();
+    const slotDateTime = new Date(`${dateStr}T${timeStr}:00`);
+    return slotDateTime <= now;
+}
+
+// ─── Tally.so form alanlarını parse et ───────────────────────────────────────
+function parseTallyFields(fields = []) {
+    const result = {};
+    fields.forEach((f) => {
+        const label = (f.label || '').toLowerCase();
+        const value = Array.isArray(f.value) ? f.value[0] : f.value;
+        if (label.includes('ad') || label.includes('isim')) result.customer_name = value;
+        if (label.includes('telefon') || label.includes('phone')) result.customer_phone = value;
+        if (label.includes('tarih') || label.includes('date')) result.appointment_date = value;
+        if (label.includes('saat') || label.includes('time')) result.appointment_time = value;
+        if (label.includes('hizmet') || label.includes('servis') || label.includes('service')) result.service_name = value;
+        if (label.includes('not') || label.includes('açıklama')) result.notes = value;
+    });
+    return result;
+}
+
+// ─── POST /api/appointments  (Manuel veya Tally Webhook) ─────────────────────
+router.post('/', async (req, res) => {
+    try {
+        const tenantSlug = req.query.tenant;
+        let payload = {};
+
+        if (req.body?.data?.fields) {
+            payload = parseTallyFields(req.body.data.fields);
+        } else {
+            payload = req.body;
+        }
+
+        const { customer_name, customer_phone, appointment_date, appointment_time, service_name, notes, staff_id } = payload;
+
+        if (!customer_name || !customer_phone || !appointment_date || !appointment_time) {
+            return res.status(400).json({ error: 'Ad, telefon, tarih ve saat zorunludur.' });
+        }
+
+        const normalizedPhone = customer_phone.startsWith('+')
+            ? customer_phone
+            : `+90${customer_phone.replace(/\D/g, '').slice(-10)}`;
+
+        if (isPastSlot(appointment_date, appointment_time)) {
+            return res.status(400).json({ error: 'Geçmiş bir tarih veya saate randevu alınamaz.' });
+        }
+
+        let tenantId = payload.tenant_id;
+        let tenant = null;
+
+        if (!tenantId && tenantSlug) {
+            const { data: t } = await supabase
+                .from('tenants').select('*').eq('slug', tenantSlug).single();
+            if (!t) return res.status(404).json({ error: `İşletme bulunamadı: ${tenantSlug}` });
+            tenant = t;
+            tenantId = t.id;
+        }
+        if (!tenantId) {
+            return res.status(400).json({ error: 'tenant_id veya ?tenant= slug parametresi gerekli.' });
+        }
+
+        const normalizedTime = appointment_time.length === 5 ? appointment_time + ':00' : appointment_time;
+
+        const { data: staffList } = await supabase.from('staff').select('id, name').eq('tenant_id', tenantId);
+        const hasStaff = staffList && staffList.length > 0;
+
+        let finalStaffId = staff_id || null;
+
+        const { data: generalBlock } = await supabase
+            .from('blocked_slots')
+            .select('id')
+            .eq('tenant_id', tenantId)
+            .eq('blocked_date', appointment_date)
+            .eq('blocked_time', normalizedTime)
+            .is('staff_id', null)
+            .maybeSingle();
+
+        if (generalBlock) {
+            return res.status(409).json({ error: 'Bu saat işletme tarafından kapatılmış.' });
+        }
+
+        if (hasStaff) {
+            const { data: existingAppts } = await supabase
+                .from('appointments')
+                .select('staff_id')
+                .eq('tenant_id', tenantId)
+                .eq('appointment_date', appointment_date)
+                .eq('appointment_time', normalizedTime)
+                .neq('status', 'cancelled');
+
+            const { data: staffBlocks } = await supabase
+                .from('blocked_slots')
+                .select('staff_id')
+                .eq('tenant_id', tenantId)
+                .eq('blocked_date', appointment_date)
+                .eq('blocked_time', normalizedTime)
+                .not('staff_id', 'is', null);
+
+            const bookedStaffIds = new Set((existingAppts || []).map(a => a.staff_id));
+            const blockedStaffIds = new Set((staffBlocks || []).map(b => b.staff_id));
+
+            if (finalStaffId) {
+                if (bookedStaffIds.has(finalStaffId)) {
+                    return res.status(409).json({ error: 'Seçilen personel bu saatte doludur.' });
+                }
+                if (blockedStaffIds.has(finalStaffId)) {
+                    return res.status(409).json({ error: 'Seçilen personel için bu saat kapatılmıştır.' });
+                }
+            } else {
+                const availableStaff = staffList.find(s => !bookedStaffIds.has(s.id) && !blockedStaffIds.has(s.id));
+                if (availableStaff) {
+                    finalStaffId = availableStaff.id;
+                } else {
+                    return res.status(409).json({ error: 'Bu saatte tüm personellerimiz doludur.' });
+                }
+            }
+        } else {
+            const { data: existing } = await supabase
+                .from('appointments')
+                .select('id')
+                .eq('tenant_id', tenantId)
+                .eq('appointment_date', appointment_date)
+                .eq('appointment_time', normalizedTime)
+                .neq('status', 'cancelled')
+                .maybeSingle();
+
+            if (existing) {
+                return res.status(409).json({ error: 'Bu tarih ve saatte zaten bir randevu alınmış.' });
+            }
+        }
+
+        let serviceId = payload.service_id || null;
+        let serviceName = service_name || 'Belirtilmedi';
+
+        if (!serviceId && service_name) {
+            const { data: svc } = await supabase
+                .from('services')
+                .select('id, name')
+                .eq('tenant_id', tenantId)
+                .ilike('name', `%${service_name}%`)
+                .limit(1)
+                .single();
+            if (svc) {
+                serviceId = svc.id;
+                serviceName = svc.name;
+            }
+        }
+
+        const { data: appointment, error } = await supabase
+            .from('appointments')
+            .insert([{
+                tenant_id: tenantId,
+                service_id: serviceId, staff_id: finalStaffId,
+                customer_name,
+                customer_phone: normalizedPhone,
+                appointment_date,
+                appointment_time: normalizedTime,
+                notes: notes || null,
+                status: 'pending',
+            }])
+            .select()
+            .single();
+
+        if (error) {
+            if (error.code === '23505') {
+                return res.status(409).json({ error: 'Bu tarih ve saatte zaten bir randevu bulunuyor.' });
+            }
+            throw error;
+        }
+
+        if (!tenant) {
+            const { data: t } = await supabase.from('tenants').select('*').eq('id', tenantId).single();
+            tenant = t;
+        }
+
+        const message = buildConfirmationMessage({
+            customerName: customer_name,
+            serviceName,
+            date: appointment_date,
+            time: appointment_time,
+            businessName: tenant?.name || 'İşletme',
+            businessPhone: tenant?.phone || '',
+        });
+
+        sendWhatsApp(normalizedPhone, message)
+            .then(() => {
+                supabase.from('appointments').update({ notification_sent: true }).eq('id', appointment.id);
+            })
+            .catch((err) => console.error('[Bildirim] Hata:', err.message));
+
+        return res.status(201).json({ success: true, appointment });
+    } catch (err) {
+        console.error('[POST /appointments]', err);
+        return res.status(500).json({ error: 'Sunucu hatası: ' + err.message });
+    }
+});
+
+// ─── GET /api/appointments/:tenantId  (Dashboard) ───────────────────────────
+router.get('/:tenantId', async (req, res) => {
+    try {
+        const { tenantId } = req.params;
+        const { date, status, staff_id } = req.query;
+
+        let query = supabase
+            .from('appointments')
+            .select('*, services(name, price, duration_minutes), staff(name)')
+            .eq('tenant_id', tenantId)
+            .order('appointment_date', { ascending: true })
+            .order('appointment_time', { ascending: true });
+
+        if (date) query = query.eq('appointment_date', date);
+        if (status) query = query.eq('status', status);
+        if (staff_id) query = query.eq('staff_id', staff_id);
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        return res.json({ appointments: data });
+    } catch (err) {
+        console.error('[GET /appointments]', err);
+        return res.status(500).json({ error: err.message });
+    }
+});
+
+// ─── PATCH /api/appointments/:id/status ─────────────────────────────────────
+router.patch('/:id/status', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!['pending', 'confirmed', 'cancelled'].includes(status)) {
+            return res.status(400).json({ error: 'Geçersiz durum. pending | confirmed | cancelled' });
+        }
+
+        const { data, error } = await supabase
+            .from('appointments')
+            .update({ status })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return res.json({ success: true, appointment: data });
+    } catch (err) {
+        console.error('[PATCH /appointments/status]', err);
+        return res.status(500).json({ error: err.message });
+    }
+});
+
+// ─── DELETE /api/appointments/:id ───────────────────────────────────────────
+router.delete('/:id', async (req, res) => {
+    try {
+        const { error } = await supabase.from('appointments').delete().eq('id', req.params.id);
+        if (error) throw error;
+        return res.json({ success: true });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+});
+
+module.exports = router;

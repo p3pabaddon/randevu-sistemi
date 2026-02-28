@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Randevu Al</title>
+    <meta name="description" content="Online randevu oluşturun." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <style>
+        /* ── RESET & BASE ──────────────────────────────────────────────────── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #07090f;
+            --card: #0f1520;
+            --card-hover: #131b2a;
+            --border: #1a2640;
+            --border-light: #243352;
+            --accent: #c9a84c;
+            --accent-2: #e0bf6e;
+            --accent-glow: rgba(201, 168, 76, 0.15);
+            --text: #eef2ff;
+            --muted: #6b7fa0;
+            --dim: #2e3f5c;
+            --green: #22c55e;
+            --red: #ef4444;
+            --radius: 14px;
+            --radius-sm: 8px;
+            --trans: 0.25s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem 4rem;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── ANIMATED BACKGROUND ───────────────────────────────────────────── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 70% 50% at 20% -10%, rgba(201, 168, 76, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 80% 110%, rgba(59, 130, 246, 0.04) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── SCROLLBAR ─────────────────────────────────────────────────────── */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--dim);
+            border-radius: 3px;
+        }
+
+        /* ── HEADER ────────────────────────────────────────────────────────── */
+        .page-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            position: relative;
+            z-index: 1;
+            animation: fadeDown 0.5s ease both;
+        }
+
+        .business-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--accent), #7a4a10);
+            margin: 0 auto 1.2rem;
+            box-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(201, 168, 76, 0.06);
+            position: relative;
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+
+        .business-logo::after {
+            content: '';
+            position: absolute;
+            inset: 25%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        @keyframes logoPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 30px var(--accent-glow);
+            }
+
+            50% {
+                box-shadow: 0 0 60px rgba(201, 168, 76, 0.3);
+            }
+        }
+
+        .business-name {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--text) 40%, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .business-tagline {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-top: 0.4rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+        }
+
+        /* ── CARD ──────────────────────────────────────────────────────────── */
+        .form-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 560px;
+            padding: 2.2rem 2rem;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: fadeUp 0.5s ease 0.1s both;
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+
+        /* ── STEPS INDICATOR ──────────────────────────────────────────────── */
+        .steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 2rem;
+        }
+
+        .step-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--muted);
+            transition: all var(--trans);
+            position: relative;
+        }
+
+        .step-dot.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .step-dot.done {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+        }
+
+        .step-line {
+            flex: 1;
+            max-width: 80px;
+            height: 2px;
+            background: var(--border-light);
+            transition: background var(--trans);
+        }
+
+        .step-line.done {
+            background: var(--accent);
+        }
+
+        /* ── SECTION TITLE ─────────────────────────────────────────────────── */
+        .section-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.25rem;
+        }
+
+        /* ── INPUTS ──────────────────────────────────────────────────────── */
+        .field-group {
+            margin-bottom: 1rem;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 0.35rem;
+        }
+
+        label .req {
+            color: var(--accent);
+            margin-left: 2px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 0.7rem 1rem;
+            outline: none;
+            transition: border-color var(--trans), background var(--trans), box-shadow var(--trans);
+            appearance: none;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: var(--dim);
+        }
+
+        input:hover,
+        select:hover,
+        textarea:hover {
+            border-color: var(--border-light);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--accent);
+            background: rgba(201, 168, 76, 0.04);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        select option {
+            background: #131b2a;
+            color: var(--text);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* ── SERVICE CARDS ───────────────────────────────────────────────── */
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-card {
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem 0.75rem;
+            cursor: pointer;
+            transition: all var(--trans);
+            text-align: center;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--accent-glow);
+            opacity: 0;
+            transition: opacity var(--trans);
+        }
+
+        .service-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .service-card:hover::before {
+            opacity: 1;
+        }
+
+        .service-card.selected {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .service-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            font-size: 0.65rem;
+            color: var(--accent);
+            font-weight: 800;
+        }
+
+        .svc-name-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .svc-detail {
+            font-size: 0.7rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        /* ── TIME SLOTS ──────────────────────────────────────────────────── */
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+
+        .time-slot {
+            border: 1.5px solid var(--border-light);
+            border-radius: 6px;
+            padding: 0.5rem 0.25rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--trans);
+            color: var(--text);
+            background: transparent;
+        }
+
+        .time-slot:hover:not(.disabled):not(.disabled-blocked):not(.disabled-booked) {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.04);
+        }
+
+        .time-slot.selected {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+        }
+
+        .time-slot.disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+        }
+
+        .time-slot.disabled-blocked {
+            opacity: 0.6;
+            background: repeating-linear-gradient(45deg, rgba(239, 68, 68, 0.05), rgba(239, 68, 68, 0.05) 10px, transparent 10px, transparent 20px);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--muted);
+            cursor: not-allowed;
+        }
+
+        .time-slot.disabled-booked {
+            opacity: 0.3;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--dim);
+            cursor: not-allowed;
+        }
+
+        /* ── DATE PICKER WRAPPER ────────────────────────────────────────── */
+        .date-wrapper {
+            position: relative;
+        }
+
+        .date-wrapper input[type="date"] {
+            cursor: pointer;
+        }
+
+        /* ── SUBMIT BUTTON ───────────────────────────────────────────────── */
+        .submit-btn {
+            width: 100%;
+            padding: 0.85rem;
+            background: linear-gradient(135deg, var(--accent), #a07030);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: #07090f;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: all var(--trans);
+            position: relative;
+            overflow: hidden;
+            margin-top: 1.5rem;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(201, 168, 76, 0.4);
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-btn.loading {
+            pointer-events: none;
+        }
+
+        /* ── SPINNER ────────────────────────────────────────────────────── */
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── MESSAGES ────────────────────────────────────────────────────── */
+        .msg {
+            border-radius: var(--radius-sm);
+            padding: 0.65rem 1rem;
+            font-size: 0.81rem;
+            font-weight: 600;
+            margin-top: 0.75rem;
+            display: none;
+        }
+
+        .msg.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--red);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            display: block;
+        }
+
+        .msg.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            display: block;
+        }
+
+        /* ── SUCCESS SCREEN ──────────────────────────────────────────────── */
+        .success-screen {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            display: none;
+        }
+
+        .success-screen.show {
+            display: block;
+        }
+
+        .success-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(34, 197, 94, 0.12);
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 1.5rem;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .success-sub {
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        .success-details {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            text-align: left;
+            display: grid;
+            gap: 0.6rem;
+        }
+
+        .success-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+        }
+
+        .success-row span:first-child {
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .success-row span:last-child {
+            font-weight: 700;
+        }
+
+        .new-booking-btn {
+            background: transparent;
+            border: 1.5px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 0.65rem 1.5rem;
+            cursor: pointer;
+            transition: all var(--trans);
+            letter-spacing: 0.02em;
+        }
+
+        .new-booking-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ── FOOTER ─────────────────────────────────────────────────────── */
+        .page-footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.72rem;
+            color: var(--dim);
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            position: relative;
+            z-index: 1;
+            animation: fadeUp 0.5s ease 0.3s both;
+        }
+
+        /* ── ANIMATIONS ──────────────────────────────────────────────────── */
+        @keyframes fadeDown {
+            from {
+                transform: translateY(-16px);
+                opacity: 0;
+            }
+
+            to {
+                transform: none;
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                transform: translateY(16px);
+                opacity: 0;
+            }
+
+            to {
+                transform: none;
+                opacity: 1;
+            }
+        }
+
+        /* ── RESPONSIVE ──────────────────────────────────────────────────── */
+        @media (max-width: 480px) {
+            .field-row {
+                grid-template-columns: 1fr;
+            }
+
+            .time-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .form-card {
+                padding: 1.5rem 1.25rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="page-header">
+        <div class="business-logo"></div>
+        <h1 class="business-name" id="biz-name">Yükleniyor...</h1>
+        <p class="business-tagline" id="biz-tagline">Online Randevu</p>
+    </header>
+
+    <div class="form-card">
+
+        <!-- Steps -->
+        <div class="steps">
+            <div class="step-dot active" id="s1">1</div>
+            <div class="step-line" id="l1"></div>
+            <div class="step-dot" id="s2">2</div>
+            <div class="step-line" id="l2"></div>
+            <div class="step-dot" id="s3">3</div>
+        </div>
+
+        <!-- ── ADIM 1: Kişisel Bilgiler + Hizmet ─────────────────────────── -->
+        <div id="step-1">
+            <div class="section-title">Kişisel Bilgiler</div>
+
+            <div class="field-row">
+                <div class="field-group">
+                    <label>Ad <span class="req">*</span></label>
+                    <input type="text" id="f-firstname" placeholder="Adınız" autocomplete="given-name" />
+                </div>
+                <div class="field-group">
+                    <label>Soyad <span class="req">*</span></label>
+                    <input type="text" id="f-lastname" placeholder="Soyadınız" autocomplete="family-name" />
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Telefon <span class="req">*</span></label>
+                <input type="tel" id="f-phone" placeholder="+90 5xx xxx xx xx" autocomplete="tel" />
+            </div>
+
+            <div class="field-group" style="margin-top:1.5rem">
+                <div class="section-title">Hizmet Seçin</div>
+                <div class="service-grid" id="service-grid">
+                    <div style="color:var(--muted);font-size:0.8rem;grid-column:1/-1;padding:1rem 0">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <div class="field-group" style="margin-top:1.5rem">
+                <div class="section-title">Personel Seçin</div>
+                <div class="service-grid" id="staff-grid">
+                    <div style="color:var(--muted);font-size:0.8rem;grid-column:1/-1;padding:1rem 0">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <div id="msg-1" class="msg"></div>
+
+            <button class="submit-btn" id="next-btn-1" onclick="goStep2()">
+                Devam — Tarih &amp; Saat
+            </button>
+        </div>
+
+        <!-- ── ADIM 2: Tarih & Saat ───────────────────────────────────────── -->
+        <div id="step-2" style="display:none">
+            <div class="section-title">Tarih Seçin</div>
+            <div class="field-group date-wrapper">
+                <input type="date" id="f-date" />
+            </div>
+
+            <div class="section-title" style="margin-top:1.25rem">Saat Seçin</div>
+            <div class="time-grid" id="time-grid"></div>
+
+            <div class="field-group" style="margin-top:0.5rem">
+                <label>Not (opsiyonel)</label>
+                <textarea id="f-notes" placeholder="Varsa özel notunuz..."></textarea>
+            </div>
+
+            <div id="msg-2" class="msg"></div>
+
+            <div style="display:flex;gap:0.75rem;margin-top:1.25rem">
+                <button class="submit-btn"
+                    style="background:transparent;border:1.5px solid var(--border-light);color:var(--text);font-weight:700;flex:0 0 auto;width:auto;padding:0.85rem 1.25rem"
+                    onclick="goStep(1)">Geri</button>
+                <button class="submit-btn" style="flex:1" id="next-btn-2" onclick="goStep3()">
+                    Randevuyu Onayla
+                </button>
+            </div>
+        </div>
+
+        <!-- ── ADIM 3: Özet & Gönder ─────────────────────────────────────── -->
+        <div id="step-3" style="display:none">
+            <div class="section-title">Randevu Özeti</div>
+            <div class="success-details" id="summary-box"></div>
+
+            <div id="msg-3" class="msg"></div>
+
+            <div style="display:flex;gap:0.75rem;margin-top:0.5rem">
+                <button class="submit-btn"
+                    style="background:transparent;border:1.5px solid var(--border-light);color:var(--text);font-weight:700;flex:0 0 auto;width:auto;padding:0.85rem 1.25rem"
+                    onclick="goStep(2)">Geri</button>
+                <button class="submit-btn" style="flex:1" id="submit-btn" onclick="submitBooking()">
+                    Randevuyu Oluştur
+                </button>
+            </div>
+        </div>
+
+        <!-- ── BAŞARILI EKRAN ─────────────────────────────────────────────── -->
+        <div class="success-screen" id="success-screen">
+            <div class="success-icon">✓</div>
+            <h2 class="success-title">Randevunuz Alındı!</h2>
+            <p class="success-sub">Size kısa süre içinde bildirim gönderilecektir.</p>
+            <div class="success-details" id="success-details"></div>
+            <button class="new-booking-btn" onclick="resetForm()">Yeni Randevu Al</button>
+        </div>
+
+    </div>
+
+    <footer class="page-footer">
+        <span id="footer-biz"></span> &nbsp;·&nbsp; Online Randevu Sistemi
+    </footer>
+
+    <script>
+        /* ─── CONFIG ──────────────────────────────────────────────────────── */
+        const API = window.location.origin + '/api';
+        const params = new URLSearchParams(window.location.search);
+        const TENANT_SLUG = params.get('tenant') || 'salon-ayse';
+
+        /* ─── STATE ───────────────────────────────────────────────────────── */
+        const form = {
+            firstname: '', lastname: '', phone: '',
+            serviceId: null, serviceName: '',
+            staffId: '', staffName: 'Farketmez',
+            date: '', time: '', notes: '',
+        };
+
+        let tenant = null;
+        let services = [];
+        let staff = [];
+        let appointmentsData = [];
+        let blockedSlotsData = [];
+        let currentStep = 1;
+        const TODAY = new Date().toISOString().slice(0, 10);
+
+        /* ─── INIT ────────────────────────────────────────────────────────── */
+        async function init() {
+            try {
+                const res = await fetch(`${API}/tenants/${TENANT_SLUG}`);
+                if (!res.ok) throw new Error('İşletme bulunamadı.');
+                const data = await res.json();
+                tenant = data.tenant;
+                services = data.tenant.services || [];
+                document.getElementById('biz-name').textContent = tenant.name;
+                document.getElementById('biz-tagline').textContent = tenant.address || 'Online Randevu';
+                document.getElementById('footer-biz').textContent = tenant.name;
+                document.title = `Randevu Al — ${tenant.name}`;
+                try { const r = await fetch(`${API}/staff/${tenant.id}`); staff = (await r.json()).staff || []; } catch (e) { }
+                renderServices();
+                renderStaff();
+                setupDate();
+            } catch (e) {
+                document.getElementById('biz-name').textContent = 'Bağlantı Hatası';
+                document.getElementById('biz-tagline').textContent = e.message;
+            }
+        }
+
+        /* ─── SERVICES ────────────────────────────────────────────────────── */
+        function renderServices() {
+            const grid = document.getElementById('service-grid');
+            if (!services.length) {
+                grid.innerHTML = '<div style="color:var(--muted);font-size:0.8rem;grid-column:1/-1">Hizmet bulunamadı.</div>';
+                return;
+            }
+            grid.innerHTML = services.map(s => `
+        <div class="service-card" id="svc-${s.id}" onclick="selectService('${s.id}','${esc(s.name)}')">
+          <span class="svc-name-label">${esc(s.name)}</span>
+          <span class="svc-detail">
+            ${s.duration_minutes ? s.duration_minutes + ' dk' : ''}
+            ${s.price != null ? ' · ' + Number(s.price).toLocaleString('tr-TR') + ' ₺' : ''}
+          </span>
+        </div>`).join('');
+        }
+
+        function selectService(id, name) {
+            services.forEach(s => document.getElementById('svc-' + s.id)?.classList.remove('selected'));
+            document.getElementById('svc-' + id)?.classList.add('selected');
+            form.serviceId = id;
+            form.serviceName = name;
+        }
+
+        function renderStaff() {
+            const grid = document.getElementById('staff-grid');
+            let html = `<div class="service-card selected" id="stf-any" onclick="selectStaff('','Farketmez')">
+              <span class="svc-name-label">Farketmez</span>
+              <span class="svc-detail">Herhangi biri</span>
+            </div>`;
+            if (staff.length) {
+                html += staff.map(s => `
+                <div class="service-card" id="stf-${s.id}" onclick="selectStaff('${s.id}','${esc(s.name)}')">
+                  <span class="svc-name-label">${esc(s.name)}</span>
+                </div>`).join('');
+            }
+            grid.innerHTML = html;
+        }
+
+        function selectStaff(id, name) {
+            document.querySelectorAll('[id^="stf-"]').forEach(el => el.classList.remove('selected'));
+            document.getElementById('stf-' + (id || 'any'))?.classList.add('selected');
+            form.staffId = id;
+            form.staffName = name;
+            renderTimeSlots();
+        }
+
+        /* ─── DATE & TIME ─────────────────────────────────────────────────── */
+        function setupDate() {
+            const d = document.getElementById('f-date');
+            d.min = TODAY;
+            d.value = TODAY;
+            form.date = TODAY;
+            d.addEventListener('change', () => { form.date = d.value; fetchAvailabilityAndRender(); });
+            fetchAvailabilityAndRender();
+        }
+
+        async function fetchAvailabilityAndRender() {
+            // Fetch appointments and blocked slots for the selected date
+            try {
+                const r1 = await fetch(`${API}/appointments/${tenant.id}?date=${form.date}`);
+                appointmentsData = (await r1.json()).appointments || [];
+            } catch (e) { appointmentsData = []; }
+
+            try {
+                const r2 = await fetch(`${API}/blocked-slots/${tenant.id}?date=${form.date}`);
+                const bRes = await r2.json();
+                blockedSlotsData = bRes.blocked || bRes.slots || [];
+            } catch (e) { blockedSlotsData = []; }
+
+            renderTimeSlots();
+        }
+
+        function renderTimeSlots() {
+            const grid = document.getElementById('time-grid');
+            const now = new Date();
+            const isToday = form.date === TODAY;
+            const slots = [];
+
+            for (let h = 9; h <= 20; h++) {
+                ['00', '30'].forEach(m => {
+                    const val = pad(h) + ':' + m;
+                    const pastOnToday = isToday && (h < now.getHours() || (h === now.getHours() && +m <= now.getMinutes()));
+
+                    let isBlocked = false;
+                    let isBooked = false;
+
+                    const normalizedTime = val + ':00';
+
+
+                    const isGenerallyBlocked = blockedSlotsData.some(b => b.blocked_time === normalizedTime && b.staff_id === null);
+
+                    if (isGenerallyBlocked) {
+                        isBlocked = true; // Genel işletme kapaması
+                    } else if (form.staffId) {
+                        // Belirli personel seçili
+                        isBlocked = blockedSlotsData.some(b => b.blocked_time === normalizedTime && b.staff_id === form.staffId);
+                        isBooked = appointmentsData.some(a => a.appointment_time === normalizedTime && a.staff_id === form.staffId && a.status !== 'cancelled');
+                    } else if (staff.length > 0) {
+                        // Farketmez seçili - tüm personel doluysa kapat
+                        const staffCount = staff.length;
+                        let unavailableCount = 0;
+
+                        staff.forEach(s => {
+                            const stfBlock = blockedSlotsData.some(b => b.blocked_time === normalizedTime && b.staff_id === s.id);
+                            const stfBook = appointmentsData.some(a => a.appointment_time === normalizedTime && a.staff_id === s.id && a.status !== 'cancelled');
+                            if (stfBlock || stfBook) unavailableCount++;
+                        });
+
+                        if (unavailableCount >= staffCount) {
+                            // Hepsi farklı randevularla veya özel bloklarla doluysa müşteri kaynaklı dolu görünür
+                            isBooked = true;
+                        }
+                    } else {
+                        // Personel sistemi hiç kullanılmıyorsa (eski mantık fallback)
+                        isBlocked = blockedSlotsData.some(b => b.blocked_time === normalizedTime);
+                        isBooked = appointmentsData.some(a => a.appointment_time === normalizedTime && a.status !== 'cancelled');
+                    }
+
+                    slots.push({ val, pastOnToday, isBlocked, isBooked });
+                });
+            }
+            grid.innerHTML = slots.map(s => {
+                let cssClass = '';
+                let onclick = '';
+
+                if (s.pastOnToday) { cssClass = 'disabled'; }
+                else if (s.isBlocked) { cssClass = 'disabled-blocked'; }
+                else if (s.isBooked) { cssClass = 'disabled-booked'; }
+                else {
+                    cssClass = form.time === s.val ? 'selected' : '';
+                    onclick = `onclick="selectTime('${s.val}')"`;
+                }
+
+                return `<div class="time-slot ${cssClass}" ${onclick}>${s.val}</div>`;
+            }).join('');
+        }
+
+        function selectTime(val) {
+            form.time = val;
+            document.querySelectorAll('.time-slot:not(.disabled):not(.disabled-blocked):not(.disabled-booked)').forEach(el => {
+                el.classList.toggle('selected', el.textContent.trim() === val);
+            });
+        }
+
+        /* ─── NAVIGATION ──────────────────────────────────────────────────── */
+        function goStep2() {
+            form.firstname = document.getElementById('f-firstname').value.trim();
+            form.lastname = document.getElementById('f-lastname').value.trim();
+            form.phone = document.getElementById('f-phone').value.trim();
+
+            if (!form.firstname || !form.lastname || !form.phone) {
+                return showMsg('msg-1', 'Ad, soyad ve telefon zorunludur.', 'error');
+            }
+            if (!form.serviceId) {
+                return showMsg('msg-1', 'Lütfen bir hizmet seçin.', 'error');
+            }
+            // staffId opsiyonel, boşsa Farketmez
+            hideMsg('msg-1');
+            goStep(2);
+        }
+
+        function goStep3() {
+            if (!form.date) return showMsg('msg-2', 'Lütfen tarih seçin.', 'error');
+            if (!form.time) return showMsg('msg-2', 'Lütfen saat seçin.', 'error');
+            form.notes = document.getElementById('f-notes').value.trim();
+            hideMsg('msg-2');
+            renderSummary();
+            goStep(3);
+        }
+
+        function goStep(n) {
+            [1, 2, 3].forEach(i => {
+                document.getElementById('step-' + i).style.display = i === n ? 'block' : 'none';
+                const dot = document.getElementById('s' + i);
+                dot.classList.toggle('active', i === n);
+                dot.classList.toggle('done', i < n);
+            });
+            [1, 2].forEach(i => {
+                document.getElementById('l' + i)?.classList.toggle('done', i < n);
+            });
+            currentStep = n;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* ─── SUMMARY ─────────────────────────────────────────────────────── */
+        function renderSummary() {
+            const fullName = form.firstname + ' ' + form.lastname;
+            const [y, m, d] = form.date.split('-');
+            const dateStr = d + '.' + m + '.' + y;
+            document.getElementById('summary-box').innerHTML = `
+        <div class="success-row"><span>Müşteri</span><span>${esc(fullName)}</span></div>
+        <div class="success-row"><span>Telefon</span><span>${esc(form.phone)}</span></div>
+        <div class="success-row"><span>Hizmet</span><span>${esc(form.serviceName)}</span></div>
+        <div class="success-row"><span>Personel</span><span>${esc(form.staffName)}</span></div>
+        <div class="success-row"><span>Tarih</span><span>${dateStr}</span></div>
+        <div class="success-row"><span>Saat</span><span>${form.time}</span></div>
+        ${form.notes ? `<div class="success-row"><span>Not</span><span>${esc(form.notes)}</span></div>` : ''}
+      `;
+        }
+
+        /* ─── SUBMIT ──────────────────────────────────────────────────────── */
+        async function submitBooking() {
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Gönderiliyor...';
+            hideMsg('msg-3');
+
+            try {
+                const res = await fetch(`${API}/appointments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tenant_id: tenant.id,
+                        staff_id: form.staffId || null,
+                        customer_name: form.firstname + ' ' + form.lastname,
+                        customer_phone: form.phone,
+                        service_id: form.serviceId,
+                        appointment_date: form.date,
+                        appointment_time: form.time,
+                        notes: form.notes || null,
+                    }),
+                });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.error || 'Bir hata oluştu.');
+
+                // Başarı ekranı
+                const [y, m, d] = form.date.split('-');
+                const dateStr = d + '.' + m + '.' + y;
+                document.getElementById('success-details').innerHTML = `
+          <div class="success-row"><span>Hizmet</span><span>${esc(form.serviceName)}</span></div>
+          <div class="success-row"><span>Personel</span><span>${esc(form.staffName)}</span></div>
+          <div class="success-row"><span>Tarih</span><span>${dateStr}</span></div>
+          <div class="success-row"><span>Saat</span><span>${form.time}</span></div>
+          <div class="success-row"><span>İşletme</span><span>${esc(tenant.name)}</span></div>
+          ${tenant.phone ? `<div class="success-row"><span>Telefon</span><span>${esc(tenant.phone)}</span></div>` : ''}
+        `;
+                document.getElementById('step-3').style.display = 'none';
+                document.getElementById('success-screen').classList.add('show');
+                document.querySelector('.steps').style.display = 'none';
+            } catch (err) {
+                showMsg('msg-3', err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Randevuyu Oluştur';
+            }
+        }
+
+        /* ─── RESET ───────────────────────────────────────────────────────── */
+        function resetForm() {
+            form.firstname = form.lastname = form.phone = form.notes = form.time = '';
+            form.serviceId = null; form.serviceName = '';
+            document.getElementById('f-firstname').value = '';
+            document.getElementById('f-lastname').value = '';
+            document.getElementById('f-phone').value = '';
+            document.getElementById('f-notes').value = '';
+            renderServices();
+            document.getElementById('success-screen').classList.remove('show');
+            document.querySelector('.steps').style.display = '';
+            goStep(1);
+        }
+
+        /* ─── UTILS ───────────────────────────────────────────────────────── */
+        const pad = n => String(n).padStart(2, '0');
+        const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const showMsg = (id, txt, type) => { const el = document.getElementById(id); el.textContent = txt; el.className = 'msg ' + type; };
+        const hideMsg = id => { const el = document.getElementById(id); el.className = 'msg'; el.textContent = ''; };
+
+        init();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,340 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Randevu Yönetimi</title>
+    <meta name="description" content="İşletmenizin randevularını gerçek zamanlı olarak yönetin." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="settings.css?v=2" />
+    <style>
+        /* Block grid */
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+        }
+
+        .block-slot {
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 0.25rem;
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            color: var(--text-primary);
+            background: transparent;
+            position: relative;
+        }
+
+        .block-slot:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .block-slot.blocked {
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: var(--red);
+        }
+
+        .block-slot.blocked::after {
+            content: '✕';
+            display: block;
+            font-size: 0.6rem;
+            opacity: 0.7;
+        }
+
+        .block-slot.has-appt {
+            border-color: var(--yellow);
+            color: var(--yellow);
+        }
+
+        /* Service row delete button */
+        .svc-delete-btn {
+            background: transparent;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: var(--red);
+            border-radius: var(--radius-sm);
+            padding: 0.25rem 0.6rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .svc-delete-btn:hover {
+            background: rgba(239, 68, 68, 0.12);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── LOGIN EKRANI ─────────────────────────────────────────────────── -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-card">
+            <div class="login-logo">
+                <div class="logo-mark"></div>
+            </div>
+            <h1 class="login-title">Randevu Yönetimi</h1>
+            <p class="login-subtitle">İşletme adresinizi girin</p>
+            <div class="input-group">
+                <label for="tenant-slug-input">İşletme Kodu</label>
+                <input id="tenant-slug-input" type="text" placeholder="örn: salon-ayse" autocomplete="off"
+                    spellcheck="false" />
+            </div>
+            <button id="login-btn" class="btn btn-primary btn-full">Giriş Yap</button>
+            <p id="login-error" class="login-error hidden"></p>
+        </div>
+    </div>
+
+    <!-- ── ANA DASHBOARD ────────────────────────────────────────────────── -->
+    <div id="app" class="app hidden">
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-mark small"></div>
+                <span class="sidebar-brand">Randevu</span>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tab="today" id="nav-today"><span
+                        class="nav-icon">&#9632;</span><span>Bugün</span></button>
+                <button class="nav-item" data-tab="all" id="nav-all"><span class="nav-icon">&#9632;</span><span>Tüm
+                        Randevular</span></button>
+                <button class="nav-item" data-tab="new" id="nav-new"><span class="nav-icon">&#9632;</span><span>Yeni
+                        Randevu</span></button>
+                <button class="nav-item" data-tab="settings" id="nav-settings"><span
+                        class="nav-icon">&#9632;</span><span>Ayarlar</span></button>
+            </nav>
+            <div class="sidebar-footer">
+                <div id="realtime-badge" class="realtime-badge">
+                    <span class="pulse-dot"></span>
+                    <span>Canlı</span>
+                </div>
+                <button id="logout-btn" class="btn-logout">Çıkış</button>
+            </div>
+        </aside>
+
+        <main class="main">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h2 id="page-title">Bugünün Randevuları</h2>
+                    <div id="tenant-name-badge" class="tenant-badge"></div>
+                </div>
+                <div class="topbar-right">
+                    <div id="current-datetime" class="datetime-display"></div>
+                    <div id="connection-status" class="connection-status connected">Bağlı</div>
+                </div>
+            </header>
+
+            <!-- TAB: BUGÜN -->
+            <section id="tab-today" class="tab-content active">
+                <div class="stats-row" id="stats-row">
+                    <div class="stat-card"><span class="stat-value" id="stat-total">–</span><span
+                            class="stat-label">Toplam</span></div>
+                    <div class="stat-card"><span class="stat-value" id="stat-confirmed">–</span><span
+                            class="stat-label">Onaylı</span></div>
+                    <div class="stat-card"><span class="stat-value" id="stat-pending">–</span><span
+                            class="stat-label">Bekleyen</span></div>
+                    <div class="stat-card"><span class="stat-value" id="stat-cancelled">–</span><span
+                            class="stat-label">İptal</span></div>
+                </div>
+                <div class="section-header">
+                    <h3>Bugün — <span id="today-date-label"></span></h3>
+                    <button class="btn btn-secondary" id="refresh-today-btn">Yenile</button>
+                </div>
+                <div id="today-appointments" class="appointments-grid">
+                    <div class="loading-state">Yükleniyor...</div>
+                </div>
+            </section>
+
+            <!-- TAB: TÜM RANDEVULAR -->
+            <section id="tab-all" class="tab-content hidden">
+                <div class="filters-bar">
+                    <div class="input-group inline">
+                        <label for="filter-date">Tarih</label>
+                        <input type="date" id="filter-date" />
+                    </div>
+                    <div class="input-group inline">
+                        <label for="filter-status">Durum</label>
+                        <select id="filter-status">
+                            <option value="">Tümü</option>
+                            <option value="pending">Bekleyen</option>
+                            <option value="confirmed">Onaylı</option>
+                            <option value="cancelled">İptal</option>
+                        </select>
+                    </div>
+                    <div class="input-group inline">
+                        <label for="filter-staff">Personel</label>
+                        <select id="filter-staff">
+                            <option value="">Tümü</option>
+                            <!-- JS ile dolacak -->
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="apply-filter-btn">Filtrele</button>
+                    <button class="btn btn-ghost" id="clear-filter-btn">Temizle</button>
+                </div>
+                <div id="all-appointments" class="appointments-grid" style="margin-top:1.5rem;">
+                    <div class="loading-state">Yükleniyor...</div>
+                </div>
+            </section>
+
+            <!-- TAB: YENİ RANDEVU -->
+            <section id="tab-new" class="tab-content hidden">
+                <div class="form-card">
+                    <h3>Yeni Randevu Oluştur</h3>
+                    <p class="form-hint">Manuel randevu girişi için bu formu kullanın.</p>
+                    <form id="new-appointment-form" novalidate>
+                        <div class="form-row">
+                            <div class="input-group"><label for="f-name">Ad Soyad</label><input type="text" id="f-name"
+                                    placeholder="Müşteri adı soyadı" required /></div>
+                            <div class="input-group"><label for="f-phone">Telefon</label><input type="tel" id="f-phone"
+                                    placeholder="+905xx xxx xx xx" required /></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="f-service">Hizmet</label>
+                                <select id="f-service">
+                                    <option value="">Seçiniz</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="f-staff">Personel</label>
+                                <select id="f-staff">
+                                    <option value="">Farketmez (Herhangi Biri)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group"><label for="f-date">Tarih</label><input type="date" id="f-date"
+                                    required /></div>
+                            <div class="input-group">
+                                <label for="f-time">Saat</label>
+                                <select id="f-time" required>
+                                    <option value="">Seçiniz</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="f-notes">Notlar</label>
+                            <textarea id="f-notes" rows="3" placeholder="Ek notlar (opsiyonel)"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="create-btn">Randevu Oluştur</button>
+                            <p id="form-message" class="form-message hidden"></p>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- TAB: AYARLAR -->
+            <section id="tab-settings" class="tab-content hidden">
+
+                <div class="form-card">
+                    <h3>İşletme Bilgileri</h3>
+                    <div id="settings-info" class="settings-info">
+                        <div class="loading-state">Yükleniyor...</div>
+                    </div>
+                </div>
+
+                <div class="form-card" style="margin-top:1.5rem">
+                    <h3>Müşteri Form Linki</h3>
+                    <p class="form-hint">Bu linki müşterilerinizle paylaşın:</p>
+                    <div class="webhook-box">
+                        <code id="booking-url"></code>
+                        <button class="btn btn-ghost btn-sm" id="copy-booking-btn">Kopyala</button>
+                    </div>
+                </div>
+
+                <div class="form-card" style="margin-top:1.5rem">
+                    <h3>Hizmetler</h3>
+                    <p class="form-hint">Sunduğunuz hizmetleri ekleyin — müşteri form üzerinden bunları seçecek.</p>
+                    <div class="svc-add-row">
+                        <div class="input-group"><label>Hizmet Adı</label><input type="text" id="svc-name"
+                                placeholder="örn: Masaj, Konsültasyon..." /></div>
+                        <div class="input-group"><label>Süre (dk)</label><input type="number" id="svc-duration"
+                                placeholder="60" min="5" step="5" /></div>
+                        <div class="input-group"><label>Ücret (₺)</label><input type="number" id="svc-price"
+                                placeholder="0" min="0" /></div>
+                        <button class="btn btn-primary" id="add-svc-btn">+ Ekle</button>
+                    </div>
+                    <p id="svc-msg" class="form-message hidden"></p>
+                    <div id="services-list" class="services-list">
+                        <div class="loading-state">Henüz hizmet eklenmemiş.</div>
+                    </div>
+                </div>
+
+                <div class="form-card" style="margin-top:1.5rem">
+                    <h3>Çalışanlar (Ekip)</h3>
+                    <p class="form-hint">Müşterilerin seçebilmesi için personellerinizi ekleyin.</p>
+                    <div class="svc-add-row" style="grid-template-columns: 1fr auto;">
+                        <div class="input-group">
+                            <label>Personel Adı</label>
+                            <input type="text" id="staff-name" placeholder="örn: Ayşe, Ahmet..." />
+                        </div>
+                        <button class="btn btn-primary" id="add-staff-btn" style="margin-top: 22px;">+ Ekle</button>
+                    </div>
+                    <p id="staff-msg" class="form-message hidden"></p>
+                    <div id="staff-list" class="services-list" style="margin-top: 1rem;">
+                        <div class="loading-state">Henüz personel eklenmemiş.</div>
+                    </div>
+                </div>
+
+                <div class="form-card" style="margin-top:1.5rem;margin-bottom:2rem">
+                    <h3>Saat Yönetimi</h3>
+                    <p class="form-hint">Kapatmak istediğiniz saate tıklayın — kırmızı = kapalı. Müşteri o saate
+                        belirlediğiniz personel için randevu alamaz.</p>
+                    <div class="form-row" style="margin-bottom:1.25rem;">
+                        <div class="input-group">
+                            <label>Tarih</label>
+                            <input type="date" id="block-date" />
+                        </div>
+                        <div class="input-group">
+                            <label>Personel</label>
+                            <select id="block-staff">
+                                <option value="">Tümü için kapat (Farketmez dahil)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="block-grid" class="block-grid">
+                        <div class="loading-state">Tarih seçin...</div>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ── RANDEVU DETAY MODAL ─────────────────────────────────────────────── -->
+    <div id="detail-modal" class="modal hidden">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-title">Randevu Detayı</h3>
+                <button class="modal-close" id="modal-close-btn">&#10005;</button>
+            </div>
+            <div id="modal-body" class="modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="modal-confirm-btn">Onayla</button>
+                <button class="btn btn-danger" id="modal-cancel-btn">İptal Et</button>
+                <button class="btn btn-whatsapp" id="modal-whatsapp-btn">WhatsApp Gönder</button>
+                <button class="btn btn-ghost" id="modal-delete-btn" style="margin-left:auto;border-color:rgba(239,68,68,.4);color:#ef4444;" title="Randevuyu Kalıcı Sil">🗑 Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="app.js?v=4"></script>
+</body>
+
+</html>
