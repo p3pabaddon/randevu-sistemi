@@ -41,11 +41,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
     : ['http://localhost:3000'];
 
 app.use(cors({
-    origin: (origin, callback) => {
-        // origin yoksa (aynı origin veya curl) izin ver
-        if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-        return callback(new Error('CORS politikası bu kaynağa izin vermiyor.'));
-    },
+    origin: true, // İsteğin geldiği origin'e izin ver (Credentials ile uyumlu)
     credentials: true,
 }));
 app.use(express.json());

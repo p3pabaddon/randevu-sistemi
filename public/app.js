@@ -62,8 +62,8 @@ function updateClock() {
 }
 
 // ── SESSION HELPER ───────────────────────────────────────────────────────────
-async function handleResponse(res) {
-    if (res.status === 401) {
+async function handleResponse(res, skipReload = false) {
+    if (res.status === 401 && !skipReload) {
         sessionStorage.removeItem('randevu_tenant');
         location.reload(); // Giriş ekranına döner
         throw new Error('Oturum süresi dolmuş.');
@@ -173,13 +173,18 @@ if (savedTenant) {
         state.tenantId = tenant.id;
         state.tenantSlug = tenant.slug;
         state.services = tenant.services || [];
+        const loader = initShaderLoader();
         fetchStaff().then(() => {
             tenantBadge.textContent = tenant.name;
             loginScreen.classList.add('hidden');
             const loginBg = document.getElementById('login-bg');
             if (loginBg) loginBg.style.display = 'none';
-            app.classList.remove('hidden');
-            initDashboard();
+
+            setTimeout(() => {
+                if (loader) loader.stop();
+                app.classList.remove('hidden');
+                initDashboard();
+            }, 2000);
         });
     } catch (e) {
         sessionStorage.removeItem('randevu_tenant');
@@ -200,7 +205,7 @@ async function doLogin() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ slug, password }),
         });
-        const { tenant } = await handleResponse(res);
+        const { tenant } = await handleResponse(res, true);
         state.tenant = tenant;
         state.tenantId = tenant.id;
         state.tenantSlug = tenant.slug;
@@ -208,11 +213,20 @@ async function doLogin() {
         sessionStorage.setItem('randevu_tenant', JSON.stringify(tenant));
         await fetchStaff();
         tenantBadge.textContent = tenant.name;
+
+        // Shader Loading Screen Başlat
+        const loader = initShaderLoader();
+
         loginScreen.classList.add('hidden');
         const loginBg = document.getElementById('login-bg');
         if (loginBg) loginBg.style.display = 'none';
-        app.classList.remove('hidden');
-        initDashboard();
+
+        // 2.5 saniye sonra dashboard'a geç
+        setTimeout(() => {
+            if (loader) loader.stop();
+            app.classList.remove('hidden');
+            initDashboard();
+        }, 2500);
     } catch (err) {
         showLoginError(err.message);
     } finally {
@@ -294,7 +308,7 @@ async function doResetPassword() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ slug, currentPassword, newPassword }),
         });
-        await handleResponse(res);
+        await handleResponse(res, true);
         setResetMsg('✅ Şifre başarıyla güncellendi! Şimdi giriş yapabilirsiniz.', false);
         setTimeout(() => {
             closeResetModal();
@@ -1410,4 +1424,106 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', maybeInitWaves);
 } else {
     maybeInitWaves();
+}
+// ── SHADER LOADING SCREEN ───────────────────────────────────────────────────
+function initShaderLoader() {
+    const container = document.getElementById('shader-container');
+    const loader = document.getElementById('shader-loader');
+    if (!container || !loader || !window.THREE) return null;
+
+    loader.classList.remove('hidden');
+
+    const vertexShader = `
+      void main() {
+        gl_Position = vec4( position, 1.0 );
+      }
+    `;
+
+    const fragmentShader = `
+      #define TWO_PI 6.2831853072
+      #define PI 3.14159265359
+      precision highp float;
+      uniform vec2 resolution;
+      uniform float time;
+        
+      float random (in float x) {
+          return fract(sin(x)*1e4);
+      }
+      float random (vec2 st) {
+          return fract(sin(dot(st.xy, vec2(12.9898,78.233)))* 43758.5453123);
+      }
+
+      void main(void) {
+        vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
+        
+        vec2 fMosaicScal = vec2(4.0, 2.0);
+        vec2 vScreenSize = vec2(256,256);
+        uv.x = floor(uv.x * vScreenSize.x / fMosaicScal.x) / (vScreenSize.x / fMosaicScal.x);
+        uv.y = floor(uv.y * vScreenSize.y / fMosaicScal.y) / (vScreenSize.y / fMosaicScal.y);       
+          
+        float t = time*0.06+random(uv.x)*0.4;
+        float lineWidth = 0.0008;
+
+        vec3 color = vec3(0.0);
+        for(int j = 0; j < 3; j++){
+          for(int i=0; i < 5; i++){
+            color[j] += lineWidth*float(i*i) / abs(fract(t - 0.01*float(j)+float(i)*0.01)*1.0 - length(uv));        
+          }
+        }
+        gl_FragColor = vec4(color[2],color[1],color[0],1.0);
+      }
+    `;
+
+    const camera = new THREE.Camera();
+    camera.position.z = 1;
+    const scene = new THREE.Scene();
+    const geometry = new THREE.PlaneGeometry(2, 2);
+    const uniforms = {
+        time: { value: 1.0 },
+        resolution: { value: new THREE.Vector2() },
+    };
+    const material = new THREE.ShaderMaterial({
+        uniforms,
+        vertexShader,
+        fragmentShader,
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    const onResize = () => {
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        uniforms.resolution.value.x = renderer.domElement.width;
+        uniforms.resolution.value.y = renderer.domElement.height;
+    };
+    window.addEventListener('resize', onResize);
+    onResize();
+
+    let animId;
+    const animate = () => {
+        animId = requestAnimationFrame(animate);
+        uniforms.time.value += 0.05;
+        renderer.render(scene, camera);
+    };
+    animate();
+
+    return {
+        stop: () => {
+            loader.classList.add('fade-out');
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                loader.classList.remove('fade-out');
+                cancelAnimationFrame(animId);
+                window.removeEventListener('resize', onResize);
+                renderer.dispose();
+                geometry.dispose();
+                material.dispose();
+                if (container.contains(renderer.domElement)) {
+                    container.removeChild(renderer.domElement);
+                }
+            }, 800);
+        }
+    };
 }
