@@ -104,7 +104,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
         // JWT Oluştur
         const token = jwt.sign(
             { tenantId: tenant.id, tenantSlug: tenant.slug },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET || 'randevu-sistemi-default-secret-key-xyz-789',
             { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
         );
 
