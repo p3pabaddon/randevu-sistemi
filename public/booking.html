@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
     <style>
         /* ── RESET & BASE ──────────────────────────────────────────────────── */
         *,
@@ -22,10 +23,10 @@
 
         :root {
             --bg: #07090f;
-            --card: #0f1520;
-            --card-hover: #131b2a;
-            --border: #1a2640;
-            --border-light: #243352;
+            --card: rgba(15, 21, 32, 0.75);
+            --card-hover: rgba(19, 27, 42, 0.85);
+            --border: rgba(26, 38, 64, 0.6);
+            --border-light: rgba(36, 51, 82, 0.5);
             --accent: #c9a84c;
             --accent-2: #e0bf6e;
             --accent-glow: rgba(201, 168, 76, 0.15);
@@ -37,6 +38,89 @@
             --radius: 14px;
             --radius-sm: 8px;
             --trans: 0.25s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        /* ── LIGHT THEME ─────────────────────────────────────────────────── */
+        html.theme-light {
+            --bg: #f0f2f8;
+            --card: rgba(255, 255, 255, 0.85);
+            --card-hover: rgba(255, 255, 255, 0.95);
+            --border: rgba(200, 210, 230, 0.8);
+            --border-light: rgba(180, 195, 220, 0.7);
+            --text: #1a1f36;
+            --muted: #6b7899;
+            --dim: #a0b0cc;
+        }
+
+        html.theme-light body {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        html.theme-light input,
+        html.theme-light select,
+        html.theme-light textarea {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.12);
+            color: var(--text);
+        }
+
+        html.theme-light input::placeholder,
+        html.theme-light textarea::placeholder {
+            color: var(--dim);
+        }
+
+        html.theme-light input:focus,
+        html.theme-light select:focus,
+        html.theme-light textarea:focus {
+            background: rgba(201, 168, 76, 0.06);
+        }
+
+        html.theme-light select option {
+            background: #fff;
+            color: #1a1f36;
+        }
+
+        html.theme-light .service-card {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        html.theme-light .time-slot {
+            color: var(--text);
+        }
+
+        /* ── THEME BUTTON ────────────────────────────────────────────────── */
+        #theme-btn {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.75);
+            border-radius: 10px;
+            padding: 0.45rem 0.85rem;
+            font-size: 0.82rem;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        #theme-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        html.theme-light #theme-btn {
+            background: rgba(0, 0, 0, 0.06);
+            border-color: rgba(0, 0, 0, 0.12);
+            color: rgba(0, 0, 0, 0.6);
         }
 
         html {
@@ -55,16 +139,19 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ── ANIMATED BACKGROUND ───────────────────────────────────────────── */
-        body::before {
-            content: '';
+        /* ── BACKGROUND KANVAS ───────────────────────────────────────────────────── */
+        .login-bg {
             position: fixed;
             inset: 0;
-            background:
-                radial-gradient(ellipse 70% 50% at 20% -10%, rgba(201, 168, 76, 0.06) 0%, transparent 60%),
-                radial-gradient(ellipse 50% 40% at 80% 110%, rgba(59, 130, 246, 0.04) 0%, transparent 60%);
-            pointer-events: none;
             z-index: 0;
+            /* İçeriğin arkasında kalsın */
+            overflow: hidden;
+        }
+
+        #wavy-canvas {
+            width: 100vw;
+            height: 100vh;
+            display: block;
         }
 
         /* ── SCROLLBAR ─────────────────────────────────────────────────────── */
@@ -149,7 +236,9 @@
             padding: 2.2rem 2rem;
             position: relative;
             z-index: 1;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             animation: fadeUp 0.5s ease 0.1s both;
         }
 
@@ -252,7 +341,7 @@
         select,
         textarea {
             width: 100%;
-            background: rgba(255, 255, 255, 0.035);
+            background: rgba(255, 255, 255, 0.025);
             border: 1px solid var(--border-light);
             border-radius: var(--radius-sm);
             color: var(--text);
@@ -263,6 +352,8 @@
             outline: none;
             transition: border-color var(--trans), background var(--trans), box-shadow var(--trans);
             appearance: none;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
 
         input::placeholder,
@@ -313,6 +404,9 @@
             user-select: none;
             position: relative;
             overflow: hidden;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
 
         .service-card::before {
@@ -359,6 +453,32 @@
             font-size: 0.7rem;
             color: var(--muted);
             font-weight: 500;
+        }
+
+        .price-original.has-discount {
+            text-decoration: line-through;
+            opacity: 0.5;
+            margin-right: 0.4rem;
+            font-size: 0.75rem;
+        }
+
+        .price-discounted {
+            font-weight: 800;
+            color: var(--text);
+            font-size: 0.95rem;
+            transition: color var(--trans), text-shadow var(--trans);
+        }
+
+        .service-card:hover .price-discounted {
+            color: #39ff14;
+            /* Cırtlak yeşil */
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+        }
+
+        .price-wrapper {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
         }
 
         /* ── TIME SLOTS ──────────────────────────────────────────────────── */
@@ -673,7 +793,15 @@
 </head>
 
 <body>
+    <!-- Tema Butonu -->
+    <button id="theme-btn" onclick="toggleBookingTheme()" title="Temayı Değiştir">
+        <span id="theme-btn-icon">🌙</span>
+        <span id="theme-btn-label">Koyu</span>
+    </button>
 
+    <div class="login-bg">
+        <canvas id="wavy-canvas"></canvas>
+    </div>
     <header class="page-header">
         <div class="business-logo"></div>
         <h1 class="business-name" id="biz-name">Yükleniyor...</h1>
@@ -847,7 +975,10 @@
           <span class="svc-name-label">${esc(s.name)}</span>
           <span class="svc-detail">
             ${s.duration_minutes ? s.duration_minutes + ' dk' : ''}
-            ${s.price != null ? ' · ' + Number(s.price).toLocaleString('tr-TR') + ' ₺' : ''}
+            <span class="price-wrapper">
+              ${s.price != null ? ' · <span class="price-original ' + (s.discounted_price ? 'has-discount' : '') + '">' + Number(s.price).toLocaleString('tr-TR') + ' ₺</span>' : ''}
+              ${s.discounted_price != null ? ' <span class="price-discounted">' + Number(s.discounted_price).toLocaleString('tr-TR') + ' ₺</span>' : ''}
+            </span>
           </span>
         </div>`).join('');
         }
@@ -1108,6 +1239,93 @@
         const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         const showMsg = (id, txt, type) => { const el = document.getElementById(id); el.textContent = txt; el.className = 'msg ' + type; };
         const hideMsg = id => { const el = document.getElementById(id); el.className = 'msg'; el.textContent = ''; };
+
+        /* ─── WAVY BACKGROUND ─────────────────────────────────────────────── */
+        function initWavyBackground() {
+            const canvas = document.getElementById('wavy-canvas');
+            if (!canvas) return; // Silent return if not found
+            if (typeof SimplexNoise === 'undefined') {
+                console.error("SimplexNoise is not loaded!");
+                return;
+            }
+
+            const ctx = canvas.getContext('2d');
+            const noise = new SimplexNoise();
+
+            let w, h, nt, i, x;
+
+            const initCanvas = () => {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+                ctx.filter = `blur(10px)`;
+                nt = 0;
+            };
+
+            window.addEventListener('resize', initCanvas);
+            initCanvas();
+
+            const drawWave = (n) => {
+                nt += 0.002;
+                for (i = 0; i < n; i++) {
+                    ctx.beginPath();
+                    ctx.lineWidth = 50; // waveWidth
+                    let strokeColor = '';
+                    switch (i % 5) {
+                        case 0: strokeColor = '#38bdf8'; break; // blue
+                        case 1: strokeColor = '#818cf8'; break; // indigo
+                        case 2: strokeColor = '#c084fc'; break; // purple
+                        case 3: strokeColor = '#e879f9'; break; // fuchsia
+                        case 4: strokeColor = '#2dd4bf'; break; // teal
+                    }
+                    ctx.strokeStyle = strokeColor + '80'; // 0.5 opacity (hex 80)
+                    for (x = 0; x < w; x += 5) {
+                        var y = noise.noise3D(x / 800, 0.3 * i, nt) * 100;
+                        ctx.lineTo(x, y + h * 0.5); // align to center
+                    }
+                    ctx.stroke();
+                    ctx.closePath();
+                }
+            };
+
+            const render = () => {
+                ctx.fillStyle = "#07090f"; // Matches --bg
+                ctx.globalAlpha = 1; // waveOpacity
+                ctx.fillRect(0, 0, w, h);
+                drawWave(5);
+                requestAnimationFrame(render);
+            };
+
+            render();
+        }
+
+        // ── TEMA ──────────────────────────────────────────────────────────────
+        function applyBookingTheme(theme) {
+            const icon = document.getElementById('theme-btn-icon');
+            const label = document.getElementById('theme-btn-label');
+            if (theme === 'light') {
+                document.documentElement.classList.add('theme-light');
+                if (icon) icon.textContent = '☀️';
+                if (label) label.textContent = 'Açık';
+            } else {
+                document.documentElement.classList.remove('theme-light');
+                if (icon) icon.textContent = '🌙';
+                if (label) label.textContent = 'Koyu';
+            }
+        }
+
+        function toggleBookingTheme() {
+            const isLight = document.documentElement.classList.contains('theme-light');
+            const next = isLight ? 'dark' : 'light';
+            localStorage.setItem('randevu-theme', next);
+            applyBookingTheme(next);
+        }
+
+        // Sayfa yüklendiğinde kaydedilmiş temayı yükle
+        applyBookingTheme(localStorage.getItem('randevu-theme') || 'dark');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initWavyBackground();
+        });
 
         init();
     </script>

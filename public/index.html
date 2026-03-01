@@ -16,348 +16,9 @@
     <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css" id="fp-dark-theme"
         disabled>
     <!-- Main CSS -->
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="style.css?v=10">
     <link rel="stylesheet" href="settings.css?v=2" />
     <style>
-        /* ══ LOGIN ARKA PLAN ANİMASYONLARI ══════════════════════════════════ */
-        .login-bg {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            overflow: hidden;
-            background: #0a0b10;
-        }
-
-        /* Mesh gradient arka plan */
-        .login-bg::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(ellipse 70% 60% at 15% 20%, rgba(79, 70, 229, 0.45) 0%, transparent 55%),
-                radial-gradient(ellipse 65% 75% at 85% 80%, rgba(99, 102, 241, 0.35) 0%, transparent 55%),
-                radial-gradient(ellipse 50% 45% at 50% 110%, rgba(139, 92, 246, 0.25) 0%, transparent 55%);
-            animation: bgShift 12s ease-in-out infinite alternate;
-        }
-
-        @keyframes bgShift {
-            0% {
-                opacity: 0.6;
-                transform: scale(1) rotate(0deg);
-            }
-
-            100% {
-                opacity: 1;
-                transform: scale(1.08) rotate(2deg);
-            }
-        }
-
-        /* Yüzen orb'lar */
-        .login-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            animation: orbFloat linear infinite;
-        }
-
-        .login-orb-1 {
-            width: 650px;
-            height: 650px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.32), transparent 70%);
-            left: -150px;
-            top: -150px;
-            animation-duration: 20s;
-            animation-delay: 0s;
-            opacity: 0.95;
-        }
-
-        .login-orb-2 {
-            width: 750px;
-            height: 750px;
-            background: radial-gradient(circle, rgba(79, 70, 229, 0.22), transparent 70%);
-            right: -200px;
-            bottom: -150px;
-            animation-duration: 25s;
-            animation-delay: -8s;
-            opacity: 0.9;
-        }
-
-        .login-orb-3 {
-            width: 450px;
-            height: 450px;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.18), transparent 70%);
-            right: 18%;
-            top: 8%;
-            animation-duration: 18s;
-            animation-delay: -4s;
-            opacity: 0.75;
-        }
-
-        .login-orb-4 {
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 70%);
-            left: 22%;
-            bottom: 12%;
-            animation-duration: 22s;
-            animation-delay: -12s;
-            opacity: 0.65;
-        }
-
-        @keyframes orbFloat {
-            0% {
-                transform: translate(0px, 0px) scale(1);
-            }
-
-            25% {
-                transform: translate(30px, -40px) scale(1.05);
-            }
-
-            50% {
-                transform: translate(-20px, 20px) scale(0.97);
-            }
-
-            75% {
-                transform: translate(40px, 30px) scale(1.03);
-            }
-
-            100% {
-                transform: translate(0px, 0px) scale(1);
-            }
-        }
-
-        /* Yüzen partiküller */
-        .login-particles {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-            background: var(--accent);
-            opacity: 0;
-            animation: particleRise linear infinite;
-        }
-
-        .particle:nth-child(1) {
-            left: 8%;
-            animation-duration: 8s;
-            animation-delay: 0s;
-            width: 2px;
-            height: 2px;
-        }
-
-        .particle:nth-child(2) {
-            left: 18%;
-            animation-duration: 12s;
-            animation-delay: -3s;
-            opacity: 0.6;
-        }
-
-        .particle:nth-child(3) {
-            left: 28%;
-            animation-duration: 9s;
-            animation-delay: -6s;
-            width: 4px;
-            height: 4px;
-            background: rgba(201, 168, 76, 0.5);
-        }
-
-        .particle:nth-child(4) {
-            left: 40%;
-            animation-duration: 14s;
-            animation-delay: -1s;
-        }
-
-        .particle:nth-child(5) {
-            left: 52%;
-            animation-duration: 10s;
-            animation-delay: -8s;
-            width: 2px;
-            height: 2px;
-        }
-
-        .particle:nth-child(6) {
-            left: 63%;
-            animation-duration: 11s;
-            animation-delay: -4s;
-            background: rgba(99, 102, 241, 0.5);
-        }
-
-        .particle:nth-child(7) {
-            left: 74%;
-            animation-duration: 13s;
-            animation-delay: -7s;
-            width: 4px;
-            height: 4px;
-        }
-
-        .particle:nth-child(8) {
-            left: 85%;
-            animation-duration: 7s;
-            animation-delay: -2s;
-            width: 2px;
-            height: 2px;
-            background: rgba(34, 197, 94, 0.5);
-        }
-
-        .particle:nth-child(9) {
-            left: 93%;
-            animation-duration: 15s;
-            animation-delay: -5s;
-        }
-
-        .particle:nth-child(10) {
-            left: 35%;
-            animation-duration: 9s;
-            animation-delay: -9s;
-            background: rgba(201, 168, 76, 0.4);
-        }
-
-        .particle:nth-child(11) {
-            left: 56%;
-            animation-duration: 16s;
-            animation-delay: -3.5s;
-            width: 2px;
-            height: 2px;
-        }
-
-        .particle:nth-child(12) {
-            left: 78%;
-            animation-duration: 8s;
-            animation-delay: -6.5s;
-            background: rgba(99, 102, 241, 0.4);
-        }
-
-        @keyframes particleRise {
-            0% {
-                transform: translateY(105vh) scale(1);
-                opacity: 0;
-            }
-
-            10% {
-                opacity: 0.8;
-            }
-
-            90% {
-                opacity: 0.3;
-            }
-
-            100% {
-                transform: translateY(-10vh) scale(0.4);
-                opacity: 0;
-            }
-        }
-
-        /* Işık çizgileri */
-        .login-line {
-            position: absolute;
-            width: 1px;
-            background: linear-gradient(to bottom, transparent, rgba(201, 168, 76, 0.3), transparent);
-            animation: lineSlide linear infinite;
-            opacity: 0;
-        }
-
-        .login-line-1 {
-            height: 200px;
-            left: 22%;
-            top: -200px;
-            animation-duration: 8s;
-            animation-delay: 0s;
-        }
-
-        .login-line-2 {
-            height: 300px;
-            left: 58%;
-            top: -300px;
-            animation-duration: 12s;
-            animation-delay: -4s;
-        }
-
-        .login-line-3 {
-            height: 150px;
-            left: 80%;
-            top: -150px;
-            animation-duration: 9s;
-            animation-delay: -7s;
-            background: linear-gradient(to bottom, transparent, rgba(99, 102, 241, 0.25), transparent);
-        }
-
-        @keyframes lineSlide {
-            0% {
-                transform: translateY(0);
-                opacity: 0;
-            }
-
-            10% {
-                opacity: 1;
-            }
-
-            90% {
-                opacity: 0.5;
-            }
-
-            100% {
-                transform: translateY(120vh);
-                opacity: 0;
-            }
-        }
-
-        /* Grid overlay */
-        .login-grid {
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(201, 168, 76, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(201, 168, 76, 0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
-            animation: gridPulse 6s ease-in-out infinite;
-        }
-
-        @keyframes gridPulse {
-
-            0%,
-            100% {
-                opacity: 0.5;
-            }
-
-            50% {
-                opacity: 1;
-            }
-        }
-
-        /* Login card üzerine glassmorphism */
-        .login-screen {
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Light tema için login bg */
-        :root.theme-light .login-bg::before {
-            background:
-                radial-gradient(ellipse 80% 60% at 20% 20%, rgba(201, 168, 76, 0.08) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 80% at 80% 80%, rgba(99, 102, 241, 0.06) 0%, transparent 60%);
-        }
-
-        :root.theme-light .particle {
-            background: var(--accent);
-        }
-
-        :root.theme-light .login-orb-1 {
-            background: radial-gradient(circle, rgba(201, 168, 76, 0.1), transparent 70%);
-        }
-
-        :root.theme-light .login-grid {
-            background-image:
-                linear-gradient(rgba(100, 100, 150, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(100, 100, 150, 0.05) 1px, transparent 1px);
-        }
-
         /* ══ YENİ LOGIN KART TASARIMI ══════════════════════════════════════ */
 
         /* Login ekranı tam ekran ortalama */
@@ -441,14 +102,16 @@
 
         .login-new-field input {
             flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            outline: none !important;
             color: #fff;
             font-family: 'Montserrat', sans-serif;
             font-size: 0.88rem;
             -webkit-box-shadow: none !important;
             -webkit-text-fill-color: #fff !important;
+            box-shadow: none !important;
         }
 
         .login-new-field input::placeholder {
@@ -456,8 +119,11 @@
         }
 
         .login-new-field input:-webkit-autofill,
-        .login-new-field input:-webkit-autofill:focus {
-            -webkit-box-shadow: 0 0 0 1000px rgba(20, 20, 40, 0.8) inset !important;
+        .login-new-field input:-webkit-autofill:hover,
+        .login-new-field input:-webkit-autofill:focus,
+        .login-new-field input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+            transition: background-color 5000s ease-in-out 0s;
             -webkit-text-fill-color: #fff !important;
         }
 
@@ -546,12 +212,24 @@
         }
 
         :root.theme-light .login-new-field input {
-            color: #1e1b4b;
+            color: #1e1b4b !important;
             -webkit-text-fill-color: #1e1b4b !important;
+            background: transparent !important;
+            -webkit-box-shadow: none !important;
+            box-shadow: none !important;
         }
 
         :root.theme-light .login-new-field input::placeholder {
-            color: rgba(0, 0, 0, 0.35);
+            color: rgba(0, 0, 0, 0.35) !important;
+        }
+
+        :root.theme-light .login-new-field input:-webkit-autofill,
+        :root.theme-light .login-new-field input:-webkit-autofill:hover,
+        :root.theme-light .login-new-field input:-webkit-autofill:focus,
+        :root.theme-light .login-new-field input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+            -webkit-text-fill-color: #1e1b4b !important;
+            transition: background-color 5000s ease-in-out 0s;
         }
 
         :root.theme-light #login-theme-btn {
@@ -739,42 +417,27 @@
 
 <body>
 
-    <!-- ── GİRİŞ EKRANI ARKA PLAN EFEKTLERİ ──────────────────────────────── -->
+    <!-- ── GİRİŞ EKRANI ARKA PLAN EFEKTLERİ (WAVY BACKGROUND) ────────────── -->
     <div class="login-bg" id="login-bg">
-        <div class="login-grid"></div>
-        <div class="login-orb login-orb-1"></div>
-        <div class="login-orb login-orb-2"></div>
-        <div class="login-orb login-orb-3"></div>
-        <div class="login-orb login-orb-4"></div>
-        <div class="login-particles">
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-        </div>
-        <div class="login-line login-line-1"></div>
-        <div class="login-line login-line-2"></div>
-        <div class="login-line login-line-3"></div>
+        <canvas id="wavy-canvas"></canvas>
     </div>
 
     <!-- ── ŞİFRE SIFIRLAMA MODAL ────────────────────────────────────────────── -->
     <div id="reset-overlay" class="reset-overlay hidden">
         <div class="reset-card">
             <button class="reset-close-btn" id="reset-close-btn" title="Kapat">&#10005;</button>
-            <h2>🔑 Şifre Belirle</h2>
-            <p class="reset-hint">İşletme kodunuzu girin ve yeni şifrenizi belirleyin.</p>
+            <h2>🔑 Şifre Değiştir</h2>
+            <p class="reset-hint">Mevcut şifrenizi girin, ardından yeni şifrenizi belirleyin.</p>
             <div class="input-group">
                 <label for="reset-slug">İşletme Kodu</label>
                 <input id="reset-slug" type="text" placeholder="örn: salon-ayse" autocomplete="off"
                     spellcheck="false" />
+            </div>
+
+            <div class="input-group">
+                <label for="reset-current-pw">Mevcut Şifre</label>
+                <input id="reset-current-pw" type="password" placeholder="Mevcut şifreniz"
+                    autocomplete="current-password" />
             </div>
 
             <div class="input-group">
@@ -788,6 +451,38 @@
             </div>
             <button id="reset-submit-btn" class="btn btn-primary btn-full">Şifreyi Güncelle</button>
             <p id="reset-msg" class="login-error hidden"></p>
+        </div>
+    </div>
+
+    <!-- ── HİZMET DÜZENLEME MODAL ────────────────────────────────────────────── -->
+    <div id="edit-svc-overlay" class="reset-overlay hidden">
+        <div class="reset-card">
+            <button class="reset-close-btn" id="edit-svc-close-btn" title="Kapat">&#10005;</button>
+            <h2>✏️ Hizmet Düzenle</h2>
+            <input type="hidden" id="edit-svc-id" />
+
+            <div class="input-group">
+                <label for="edit-svc-name">Hizmet Adı</label>
+                <input id="edit-svc-name" type="text" placeholder="örn: Masaj" autocomplete="off" />
+            </div>
+
+            <div class="input-group">
+                <label for="edit-svc-duration">Süre (dk)</label>
+                <input id="edit-svc-duration" type="number" min="5" step="5" />
+            </div>
+
+            <div class="input-group">
+                <label for="edit-svc-price">Ücret (₺)</label>
+                <input id="edit-svc-price" type="number" min="0" />
+            </div>
+
+            <div class="input-group">
+                <label for="edit-svc-discount">İndirim (₺) Opsiyonel</label>
+                <input id="edit-svc-discount" type="number" min="0" placeholder="Opsiyonel" />
+            </div>
+
+            <button id="edit-svc-submit-btn" class="btn btn-primary btn-full">Kaydet</button>
+            <p id="edit-svc-msg" class="login-error hidden"></p>
         </div>
     </div>
 
@@ -837,6 +532,104 @@
     </div>
 
 
+    <!-- ── ANİME NAVBAR (Mobil) ──────────────────────────────────────────── -->
+    <nav id="anime-navbar" class="anime-navbar hidden">
+        <div class="anime-navbar-pill">
+            <button class="anime-nav-item active" data-tab="today">
+                <div class="anime-mascot">
+                    <div class="mascot-face">
+                        <div class="mascot-eye left"></div>
+                        <div class="mascot-eye right"></div>
+                        <div class="mascot-cheek left"></div>
+                        <div class="mascot-cheek right"></div>
+                        <div class="mascot-mouth"></div>
+                    </div>
+                    <div class="mascot-tail"></div>
+                </div>
+                <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg></span>
+                <span class="anime-nav-label">Bugün</span>
+                <div class="anime-active-glow"></div>
+            </button>
+            <button class="anime-nav-item" data-tab="all">
+                <div class="anime-mascot">
+                    <div class="mascot-face">
+                        <div class="mascot-eye left"></div>
+                        <div class="mascot-eye right"></div>
+                        <div class="mascot-cheek left"></div>
+                        <div class="mascot-cheek right"></div>
+                        <div class="mascot-mouth"></div>
+                    </div>
+                    <div class="mascot-tail"></div>
+                </div>
+                <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6" />
+                        <line x1="8" y1="12" x2="21" y2="12" />
+                        <line x1="8" y1="18" x2="21" y2="18" />
+                        <line x1="3" y1="6" x2="3.01" y2="6" />
+                        <line x1="3" y1="12" x2="3.01" y2="12" />
+                        <line x1="3" y1="18" x2="3.01" y2="18" />
+                    </svg></span>
+                <span class="anime-nav-label">Tümü</span>
+                <div class="anime-active-glow"></div>
+            </button>
+            <button class="anime-nav-item" data-tab="new">
+                <div class="anime-mascot">
+                    <div class="mascot-face">
+                        <div class="mascot-eye left"></div>
+                        <div class="mascot-eye right"></div>
+                        <div class="mascot-cheek left"></div>
+                        <div class="mascot-cheek right"></div>
+                        <div class="mascot-mouth"></div>
+                    </div>
+                    <div class="mascot-tail"></div>
+                </div>
+                <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="16" />
+                        <line x1="8" y1="12" x2="16" y2="12" />
+                    </svg></span>
+                <span class="anime-nav-label">Yeni</span>
+                <div class="anime-active-glow"></div>
+            </button>
+            <button class="anime-nav-item" data-tab="settings">
+                <div class="anime-mascot">
+                    <div class="mascot-face">
+                        <div class="mascot-eye left"></div>
+                        <div class="mascot-eye right"></div>
+                        <div class="mascot-cheek left"></div>
+                        <div class="mascot-cheek right"></div>
+                        <div class="mascot-mouth"></div>
+                    </div>
+                    <div class="mascot-tail"></div>
+                </div>
+                <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                    </svg></span>
+                <span class="anime-nav-label">Denetim</span>
+                <div class="anime-active-glow"></div>
+            </button>
+        </div>
+    </nav>
+    <button id="mobile-theme-toggle" class="theme-btn-float" title="Temayı Değiştir">
+        <span id="mobile-theme-icon">🌙</span>
+    </button>
+
+
     <!-- ── ANA DASHBOARD ────────────────────────────────────────────────── -->
     <div id="app" class="app hidden">
 
@@ -853,7 +646,7 @@
                 <button class="nav-item" data-tab="new" id="nav-new"><span class="nav-icon">&#9632;</span><span>Yeni
                         Randevu</span></button>
                 <button class="nav-item" data-tab="settings" id="nav-settings"><span
-                        class="nav-icon">&#9632;</span><span>Ayarlar</span></button>
+                        class="nav-icon">&#9632;</span><span>Denetim</span></button>
             </nav>
             <div class="sidebar-footer">
                 <div class="sidebar-footer-top">
@@ -964,7 +757,8 @@
                         </div>
                         <div class="form-row">
                             <div class="input-group"><label for="f-date">Tarih</label><input type="date" id="f-date"
-                                    required /></div>
+                                    required />
+                            </div>
                             <div class="input-group">
                                 <label for="f-time">Saat</label>
                                 <select id="f-time" required>
@@ -986,78 +780,132 @@
 
             <!-- TAB: AYARLAR -->
             <section id="tab-settings" class="tab-content hidden">
-
-                <div class="form-card">
-                    <h3>İşletme Bilgileri</h3>
-                    <div id="settings-info" class="settings-info">
-                        <div class="loading-state">Yükleniyor...</div>
-                    </div>
-                </div>
-
-                <div class="form-card" style="margin-top:1.5rem">
-                    <h3>Müşteri Form Linki</h3>
-                    <p class="form-hint">Bu linki müşterilerinizle paylaşın:</p>
-                    <div class="webhook-box">
-                        <code id="booking-url"></code>
-                        <button class="btn btn-ghost btn-sm" id="copy-booking-btn">Kopyala</button>
-                    </div>
-                </div>
-
-                <div class="form-card" style="margin-top:1.5rem">
-                    <h3>Hizmetler</h3>
-                    <p class="form-hint">Sunduğunuz hizmetleri ekleyin — müşteri form üzerinden bunları seçecek.</p>
-                    <div class="svc-add-row">
-                        <div class="input-group"><label>Hizmet Adı</label><input type="text" id="svc-name"
-                                placeholder="örn: Masaj, Konsültasyon..." /></div>
-                        <div class="input-group"><label>Süre (dk)</label><input type="number" id="svc-duration"
-                                placeholder="60" min="5" step="5" /></div>
-                        <div class="input-group"><label>Ücret (₺)</label><input type="number" id="svc-price"
-                                placeholder="0" min="0" /></div>
-                        <button class="btn btn-primary" id="add-svc-btn">+ Ekle</button>
-                    </div>
-                    <p id="svc-msg" class="form-message hidden"></p>
-                    <div id="services-list" class="services-list">
-                        <div class="loading-state">Henüz hizmet eklenmemiş.</div>
-                    </div>
-                </div>
-
-                <div class="form-card" style="margin-top:1.5rem">
-                    <h3>Çalışanlar (Ekip)</h3>
-                    <p class="form-hint">Müşterilerin seçebilmesi için personellerinizi ekleyin.</p>
-                    <div class="svc-add-row" style="grid-template-columns: 1fr auto;">
-                        <div class="input-group">
-                            <label>Personel Adı</label>
-                            <input type="text" id="staff-name" placeholder="örn: Ayşe, Ahmet..." />
+                <div class="settings-split-layout">
+                    <div class="settings-left">
+                        <div class="form-card">
+                            <h3>İşletme Bilgileri</h3>
+                            <div id="settings-info" class="settings-info">
+                                <div class="loading-state">Yükleniyor...</div>
+                            </div>
                         </div>
-                        <button class="btn btn-primary" id="add-staff-btn" style="margin-top: 22px;">+ Ekle</button>
+
+                        <div class="form-card" style="margin-top:1.5rem">
+                            <h3>Müşteri Form Linki</h3>
+                            <p class="form-hint">Bu linki müşterilerinizle paylaşın:</p>
+                            <div class="webhook-box">
+                                <code id="booking-url"></code>
+                                <button class="btn btn-ghost btn-sm" id="copy-booking-btn">Kopyala</button>
+                            </div>
+                        </div>
+
+                        <div class="form-card" style="margin-top:1.5rem">
+                            <h3>Hizmetler</h3>
+                            <p class="form-hint">Sunduğunuz hizmetleri ekleyin — müşteri form üzerinden bunları seçecek.
+                            </p>
+                            <div class="svc-add-row" id="service-add-row">
+                                <div class="input-group"><label>Hizmet Adı</label><input type="text" id="svc-name"
+                                        placeholder="örn: Masaj, Konsültasyon..." /></div>
+                                <div class="input-group"><label>Süre (dk)</label><input type="number" id="svc-duration"
+                                        placeholder="60" min="5" step="5" /></div>
+                                <div class="input-group"><label>Ücret (₺)</label><input type="number" id="svc-price"
+                                        placeholder="0" min="0" /></div>
+                                <div class="input-group"><label>İndirim (₺)</label><input type="number"
+                                        id="svc-discount" placeholder="Opsiyonel" min="0" /></div>
+                                <button class="btn btn-primary" id="add-svc-btn">+ Ekle</button>
+                            </div>
+                            <p id="svc-msg" class="form-message hidden"></p>
+                            <div id="services-list" class="services-list">
+                                <div class="loading-state">Henüz hizmet eklenmemiş.</div>
+                            </div>
+                        </div>
+
+                        <div class="form-card" style="margin-top:1.5rem">
+                            <h3>Çalışanlar (Ekip)</h3>
+                            <p class="form-hint">Müşterilerin seçebilmesi için personellerinizi ekleyin.</p>
+                            <div class="svc-add-row" id="staff-add-row">
+                                <div class="input-group">
+                                    <label>Personel Adı</label>
+                                    <input type="text" id="staff-name" placeholder="örn: Ayşe, Ahmet..." />
+                                </div>
+                                <button class="btn btn-primary" id="add-staff-btn">+ Ekle</button>
+                            </div>
+                            <p id="staff-msg" class="form-message hidden"></p>
+                            <div id="staff-list" class="services-list" style="margin-top: 1rem;">
+                                <div class="loading-state">Henüz personel eklenmemiş.</div>
+                            </div>
+                        </div>
+
+                        <div class="form-card" style="margin-top:1.5rem">
+                            <h3>Saat Yönetimi</h3>
+                            <p class="form-hint">Kapatmak istediğiniz saate tıklayın — kırmızı = kapalı.</p>
+                            <div class="form-row" style="margin-bottom:1.25rem;">
+                                <div class="input-group">
+                                    <label>Tarih</label>
+                                    <input type="date" id="block-date" />
+                                </div>
+                                <div class="input-group">
+                                    <label>Personel</label>
+                                    <select id="block-staff">
+                                        <option value="">Tümü için kapat (Farketmez dahil)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="block-grid" class="block-grid">
+                                <div class="loading-state">Tarih seçin...</div>
+                            </div>
+                        </div>
                     </div>
-                    <p id="staff-msg" class="form-message hidden"></p>
-                    <div id="staff-list" class="services-list" style="margin-top: 1rem;">
-                        <div class="loading-state">Henüz personel eklenmemiş.</div>
+
+                    <div class="settings-right dashboard-container">
+                        <div class="bento-grid">
+                            <!-- Card 1: Revenue -->
+                            <div class="bento-card span-2" id="bento-revenue">
+                                <div class="bento-gradient g-blue"></div>
+                                <div class="bento-content">
+                                    <h3>Toplam Kazanç</h3>
+                                    <p class="bento-value">₺0</p>
+                                    <p class="bento-subtitle">Tüm zamanların onaylanan geliri</p>
+                                </div>
+                            </div>
+                            <!-- Card 2: Today's Load -->
+                            <div class="bento-card" id="bento-load">
+                                <div class="bento-gradient g-cyan"></div>
+                                <div class="bento-content">
+                                    <h3>Randevu Doluluğu</h3>
+                                    <p class="bento-value">0%</p>
+                                    <p class="bento-subtitle">Mevcut doluluk</p>
+                                </div>
+                            </div>
+                            <!-- Card 3: Satisfaction -->
+                            <div class="bento-card" id="bento-satisfaction">
+                                <div class="bento-gradient g-purple"></div>
+                                <div class="bento-content">
+                                    <h3>Memnuniyet</h3>
+                                    <p class="bento-value">4.9/5</p>
+                                    <p class="bento-subtitle">Müşteri puanı</p>
+                                </div>
+                            </div>
+                            <!-- Card 4: New Customers -->
+                            <div class="bento-card span-2" id="bento-new-customers">
+                                <div class="bento-gradient g-green"></div>
+                                <div class="bento-content">
+                                    <h3>Yeni Müşteriler</h3>
+                                    <p class="bento-value">0</p>
+                                    <p class="bento-subtitle">Bugünkü keşifler</p>
+                                </div>
+                            </div>
+                            <!-- Card 5: Cancellation Rate -->
+                            <div class="bento-card span-3" id="bento-cancellation">
+                                <div class="bento-gradient g-orange"></div>
+                                <div class="bento-content">
+                                    <h3>İptal Oranı</h3>
+                                    <p class="bento-value">0%</p>
+                                    <p class="bento-subtitle">Haftalık kayıp analizi</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <div class="form-card" style="margin-top:1.5rem;margin-bottom:2rem">
-                    <h3>Saat Yönetimi</h3>
-                    <p class="form-hint">Kapatmak istediğiniz saate tıklayın — kırmızı = kapalı. Müşteri o saate
-                        belirlediğiniz personel için randevu alamaz.</p>
-                    <div class="form-row" style="margin-bottom:1.25rem;">
-                        <div class="input-group">
-                            <label>Tarih</label>
-                            <input type="date" id="block-date" />
-                        </div>
-                        <div class="input-group">
-                            <label>Personel</label>
-                            <select id="block-staff">
-                                <option value="">Tümü için kapat (Farketmez dahil)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div id="block-grid" class="block-grid">
-                        <div class="loading-state">Tarih seçin...</div>
-                    </div>
-                </div>
-
             </section>
 
         </main>
@@ -1086,7 +934,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/tr.js"></script>
-    <script src="app.js?v=4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="app.js?v=8"></script>
 </body>
 
 </html>

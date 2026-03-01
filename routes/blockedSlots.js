@@ -1,6 +1,7 @@
 ﻿const express = require('express');
 const router = express.Router();
 const supabase = require('../lib/supabase');
+const { authenticateTenant } = require('../middleware/auth');
 
 // GET /api/blocked-slots/:tenantId?date=YYYY-MM-DD&staff_id=xyz
 router.get('/:tenantId', async (req, res) => {
@@ -24,19 +25,16 @@ router.get('/:tenantId', async (req, res) => {
     return res.json({ blocked: data });
 });
 
-// POST /api/blocked-slots  — saati bloke et
-router.post('/', async (req, res) => {
-    const { tenant_id, staff_id, blocked_date, blocked_time } = req.body;
-    if (!tenant_id || !blocked_date || !blocked_time) {
-        return res.status(400).json({ error: 'tenant_id, blocked_date, blocked_time zorunludur.' });
+// POST /api/blocked-slots — saati bloke et (Admin)
+router.post('/', authenticateTenant, async (req, res) => {
+    const { staff_id, blocked_date, blocked_time } = req.body;
+    if (!blocked_date || !blocked_time) {
+        return res.status(400).json({ error: 'Tarih ve saat zorunludur.' });
     }
-
-    // staff_id undefined veya boşsa null yap
-    const finalStaffId = staff_id || null;
 
     const { data, error } = await supabase
         .from('blocked_slots')
-        .insert([{ tenant_id, staff_id: finalStaffId, blocked_date, blocked_time }])
+        .insert([{ tenant_id: req.tenantId, staff_id: staff_id || null, blocked_date, blocked_time }])
         .select().single();
 
     if (error) {
@@ -46,22 +44,19 @@ router.post('/', async (req, res) => {
     return res.status(201).json({ slot: data });
 });
 
-// DELETE /api/blocked-slots — blokeyi kaldır
-router.delete('/', async (req, res) => {
-    const { tenant_id, staff_id, blocked_date, blocked_time } = req.body;
-
-    // Eğer staff_id varsa onu kullan, yoksa null olanı sil
-    const finalStaffId = staff_id || null;
+// DELETE /api/blocked-slots — blokeyi kaldır (Admin)
+router.delete('/', authenticateTenant, async (req, res) => {
+    const { staff_id, blocked_date, blocked_time } = req.body;
 
     let query = supabase
         .from('blocked_slots')
         .delete()
-        .eq('tenant_id', tenant_id)
+        .eq('tenant_id', req.tenantId)
         .eq('blocked_date', blocked_date)
         .eq('blocked_time', blocked_time);
 
-    if (finalStaffId) {
-        query = query.eq('staff_id', finalStaffId);
+    if (staff_id) {
+        query = query.eq('staff_id', staff_id);
     } else {
         query = query.is('staff_id', null);
     }
