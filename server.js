@@ -17,6 +17,14 @@ const { sseHandler } = require('./lib/sse');
 const supabase = require('./lib/supabase');
 const { loginSchema } = require('./lib/validation');
 
+// ── ENV CHECK ───────────────────────────────────────────────────────────────
+const REQUIRED_ENV = ['JWT_SECRET', 'SUPABASE_URL', 'SUPABASE_SERVICE_KEY'];
+const missing = REQUIRED_ENV.filter(k => !process.env[k]);
+if (missing.length > 0) {
+    console.error(`\n[CRITICAL] Eksik ortam değişkenleri: ${missing.join(', ')}`);
+    console.error('Lütfen .env dosyasını veya deploy ayarlarını kontrol edin.\n');
+}
+
 const app = express();
 
 // ── SECURITY MIDDLEWARE ──────────────────────────────────────────────────────
