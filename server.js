@@ -1,4 +1,4 @@
-﻿require('dotenv').config();
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -14,16 +14,21 @@ const servicesRouter = require('./routes/services');
 const blockedSlotsRouter = require('./routes/blockedSlots');
 const staffRouter = require('./routes/staff');
 const serviceExtrasRouter = require('./routes/serviceExtras');
+const waitlistRouter = require('./routes/waitlist');
+const customersRouter = require('./routes/customers');
+const reportsRouter = require('./routes/reports');
 const { sseHandler } = require('./lib/sse');
 const supabase = require('./lib/supabase');
 const { loginSchema } = require('./lib/validation');
 
 // ── ENV CHECK ───────────────────────────────────────────────────────────────
-const REQUIRED_ENV = ['JWT_SECRET', 'SUPABASE_URL', 'SUPABASE_SERVICE_KEY'];
+const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY'];
 const missing = REQUIRED_ENV.filter(k => !process.env[k]);
 if (missing.length > 0) {
     console.error(`\n[CRITICAL] Eksik ortam değişkenleri: ${missing.join(', ')}`);
-    console.error('Lütfen .env dosyasını veya deploy ayarlarını kontrol edin.\n');
+}
+if (!process.env.JWT_SECRET) {
+    console.log('[INFO] JWT_SECRET ayarlanmamış, varsayılan güvenli anahtar kullanılıyor.');
 }
 
 const app = express();
@@ -186,6 +191,9 @@ app.use('/api/services', servicesRouter);
 app.use('/api/blocked-slots', blockedSlotsRouter);
 app.use('/api/staff', staffRouter);
 app.use('/api/service-extras', serviceExtrasRouter);
+app.use('/api/waitlist', waitlistRouter);
+app.use('/api/customers', customersRouter);
+app.use('/api/reports', reportsRouter);
 
 // SPA fallback
 app.get('*', (req, res) => {

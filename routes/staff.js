@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const supabase = require('../lib/supabase');
 const { authenticateTenant } = require('../middleware/auth');
+const { staffSchema } = require('../lib/validation');
 
 // ─── GET /api/staff/:tenantId ────────────────────────────────────────────────
 router.get('/:tenantId', async (req, res) => {
@@ -18,12 +19,21 @@ router.get('/:tenantId', async (req, res) => {
 
 // ─── POST /api/staff  (Admin) ───────────────────────────────────────────────
 router.post('/', authenticateTenant, async (req, res) => {
-    const { name } = req.body;
-    if (!name) return res.status(400).json({ error: 'İsim zorunludur.' });
+    const { error: valError } = staffSchema.validate(req.body);
+    if (valError) return res.status(400).json({ error: valError.details[0].message });
+
+    const { name, surname, phone, address, role } = req.body;
 
     const { data, error } = await supabase
         .from('staff')
-        .insert([{ tenant_id: req.tenantId, name }])
+        .insert([{
+            tenant_id: req.tenantId,
+            name,
+            surname: surname || null,
+            phone: phone || null,
+            address: address || null,
+            role: role || null
+        }])
         .select()
         .single();
 

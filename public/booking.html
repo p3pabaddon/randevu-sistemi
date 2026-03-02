@@ -8,8 +8,11 @@
     <meta name="description" content="Online randevu oluşturun." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="bento-calendar.css?v=1">
+    <link rel="stylesheet" href="expand-map.css?v=1">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
     <style>
         /* ── RESET & BASE ──────────────────────────────────────────────────── */
@@ -489,6 +492,20 @@
             border: 1px dashed rgba(255, 255, 255, 0.1);
             border-radius: var(--radius-sm);
             display: none;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .extras-container.show {
+            display: block;
+            animation: extrasFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes extrasFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         :root.theme-light .extras-container {
@@ -614,10 +631,6 @@
         /* ── DATE PICKER WRAPPER ────────────────────────────────────────── */
         .date-wrapper {
             position: relative;
-        }
-
-        .date-wrapper input[type="date"] {
-            cursor: pointer;
         }
 
         /* ── SUBMIT BUTTON ───────────────────────────────────────────────── */
@@ -863,6 +876,14 @@
                 padding: 1.5rem 1.25rem;
             }
         }
+
+        .map-content {
+            pointer-events: none;
+        }
+
+        .map-content>* {
+            pointer-events: auto;
+        }
     </style>
 </head>
 
@@ -948,9 +969,21 @@
         <!-- ── ADIM 2: Tarih & Saat ───────────────────────────────────────── -->
         <div id="step-2" style="display:none">
             <div class="section-title">Tarih Seçin</div>
-            <div class="field-group date-wrapper">
-                <input type="date" id="f-date" />
+
+            <div class="bento-calendar-card">
+                <div class="calendar-header">
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn" onclick="changeMonth(-1)">❮</button>
+                        <div class="calendar-month-year" id="calendar-month-year">Mart 2026</div>
+                        <button class="calendar-nav-btn" onclick="changeMonth(1)">❯</button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- JS will populate -->
+                </div>
             </div>
+
+            <input type="hidden" id="f-date" />
 
             <div class="section-title" style="margin-top:1.25rem">Saat Seçin</div>
             <div class="time-grid" id="time-grid"></div>
@@ -998,11 +1031,81 @@
 
         <!-- ── BAŞARILI EKRAN ─────────────────────────────────────────────── -->
         <div class="success-screen" id="success-screen">
-            <div class="success-icon">✓</div>
-            <h2 class="success-title">Randevunuz Alındı!</h2>
-            <p class="success-sub">Size kısa süre içinde bildirim gönderilecektir.</p>
-            <div class="success-details" id="success-details"></div>
-            <button class="new-booking-btn" onclick="resetForm()">Yeni Randevu Al</button>
+            <div class="success-icon" style="width:60px; height:60px; margin-bottom:1rem; font-size:1.5rem;">✓</div>
+            <h2 class="success-title" style="font-size:1.1rem; margin-bottom:0.25rem;">Randevunuz Alındı!</h2>
+            <p class="success-sub" style="font-size:0.75rem;">Size kısa süre içinde bildirim gönderilecektir.</p>
+            <div class="success-details" id="success-details" style="margin:1rem 0; padding:0.8rem 1rem; gap:0.4rem;">
+            </div>
+
+            <!-- ── EXPANDABLE MAP MODULE ── -->
+            <div class="map-container" id="map-container">
+                <p class="map-label">İşletme Konumu</p>
+                <div class="map-wrapper" id="map-wrapper">
+                    <div class="map-bg-gradient"></div>
+                    <div class="map-grid-pattern">
+                        <svg width="100%" height="100%">
+                            <defs>
+                                <pattern id="map-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.5" />
+                                </pattern>
+                            </defs>
+                            <rect width="100%" height="100%" fill="url(#map-grid)" />
+                        </svg>
+                    </div>
+
+                    <div class="map-visuals">
+                        <svg class="map-svg" preserveAspectRatio="none">
+                            <line x1="0%" y1="35%" x2="100%" y2="35%" class="map-road" stroke-width="4" />
+                            <line x1="0%" y1="65%" x2="100%" y2="65%" class="map-road" stroke-width="4" />
+                            <line x1="30%" y1="0%" x2="30%" y2="100%" class="map-road" stroke-width="3" />
+                            <line x1="70%" y1="0%" x2="70%" y2="100%" class="map-road" stroke-width="3" />
+                        </svg>
+                        <div class="map-building" style="top:40%; left:10%; width:15%; height:20%;"></div>
+                        <div class="map-building" style="top:15%; left:35%; width:12%; height:15%;"></div>
+                        <div class="map-building" style="top:70%; left:75%; width:18%; height:18%;"></div>
+
+                        <div class="map-marker-container">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" class="map-marker">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+                                    fill="#34D399" />
+                                <circle cx="12" cy="9" r="2.5" fill="white" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="map-content">
+                        <div class="map-header">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="map-icon-svg">
+                                <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+                                <line x1="9" x2="9" y1="3" y2="18" />
+                                <line x1="15" x2="15" y1="6" y2="21" />
+                            </svg>
+                            <div class="map-status">
+                                <div class="map-status-dot"></div><span>LIVE</span>
+                            </div>
+                        </div>
+                        <div class="map-footer">
+                            <h3 class="map-location-name" id="map-location-name">Salon Ayşe</h3>
+                            <p class="map-coordinates" id="map-coords">İstanbul, Avcılar</p>
+                            <div class="map-underline"></div>
+
+                            <!-- Google Maps Button -->
+                            <div id="map-link-btn"
+                                style="margin-top: 0.8rem; display: none; opacity: 0; transition: all 0.3s ease; position: relative; z-index: 100;">
+                                <button class="new-booking-btn"
+                                    style="width: 100%; font-size: 0.7rem; padding: 0.4rem; background: var(--map-emerald); border: none; color: #000; pointer-events: auto;"
+                                    onclick="event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=Avcılar+İstanbul', '_blank')">
+                                    Yol Tarifi Al ↗
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="map-hint">Genişletmek için tıkla</p>
+            </div>
+
+            <button class="new-booking-btn" onclick="resetForm()" style="margin-top:1.5rem;">Yeni Randevu Al</button>
         </div>
 
     </div>
@@ -1041,7 +1144,16 @@
                 if (!res.ok) throw new Error('İşletme bulunamadı.');
                 const data = await res.json();
                 tenant = data.tenant;
-                services = data.tenant.services || [];
+
+                // YENİ: Süresi dolmuş kampanyaları booking ekranında da sıfırla
+                const now = new Date();
+                services = (data.tenant.services || []).map(svc => {
+                    if (svc.campaign_ends_at && new Date(svc.campaign_ends_at) <= now) {
+                        return { ...svc, discounted_price: null, campaign_label: null };
+                    }
+                    return svc;
+                });
+
                 document.getElementById('biz-name').textContent = tenant.name;
                 document.getElementById('biz-tagline').textContent = tenant.address || 'Online Randevu';
                 document.getElementById('footer-biz').textContent = tenant.name;
@@ -1088,7 +1200,6 @@
             const extrasList = document.getElementById('extras-list');
 
             if (selectedService && selectedService.service_extras && selectedService.service_extras.length > 0) {
-                extrasContainer.style.display = 'block';
                 extrasList.innerHTML = selectedService.service_extras.map(ex => `
                     <div class="extra-item" id="extra-${ex.id}" onclick="toggleExtra('${ex.id}')">
                         <div class="extra-info">
@@ -1098,9 +1209,14 @@
                         ${ex.price ? `<span class="extra-price">+${Number(ex.price).toLocaleString('tr-TR')} ₺</span>` : ''}
                     </div>
                 `).join('');
+                extrasContainer.classList.add('show');
             } else {
-                extrasContainer.style.display = 'none';
-                extrasList.innerHTML = '';
+                extrasContainer.classList.remove('show');
+                setTimeout(() => {
+                    if (!extrasContainer.classList.contains('show')) {
+                        extrasList.innerHTML = '';
+                    }
+                }, 500);
             }
         }
 
@@ -1141,16 +1257,72 @@
         }
 
         /* ─── DATE & TIME ─────────────────────────────────────────────────── */
+        /* ─── BENTO CALENDAR LOGIC ────────────────────────────────────────── */
+        let calendarDate = new Date(); // Takvimde görüntülenen ay
+
         function setupDate() {
-            const d = document.getElementById('f-date');
-            d.min = TODAY;
-            d.value = TODAY;
-            form.date = TODAY;
-            d.addEventListener('change', () => { form.date = d.value; fetchAvailabilityAndRender(); });
+            renderCalendar();
             fetchAvailabilityAndRender();
         }
 
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthYearLabel = document.getElementById('calendar-month-year');
+
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+
+            const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+            monthYearLabel.textContent = `${monthNames[month]} ${year}`;
+
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const dayNames = ["PZT", "SAL", "ÇAR", "PER", "CUM", "CTS", "PAZ"];
+            // JS getDay() 0=Pazar, 1=Pazartesi. TR takvimi için 0=Pazartesi yapalım.
+            const firstDayShifted = (firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1);
+
+            let html = dayNames.map(d => `<div class="calendar-day-name">${d}</div>`).join('');
+
+            // Boş günler
+            for (let i = 0; i < firstDayShifted; i++) {
+                html += `<div class="calendar-day empty"></div>`;
+            }
+
+            // Ayın günleri
+            const todayObj = new Date();
+            todayObj.setHours(0, 0, 0, 0);
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dateStr = `${year}-${pad(month + 1)}-${pad(i)}`;
+                const loopDate = new Date(year, month, i);
+                const isPast = loopDate < todayObj;
+                const isSelected = form.date === dateStr;
+
+                html += `
+                    <div class="calendar-day ${isPast ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" 
+                         ${!isPast ? `onclick="selectCalendarDate('${dateStr}')"` : ''}>
+                        ${i}
+                    </div>`;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function selectCalendarDate(dateStr) {
+            form.date = dateStr;
+            document.getElementById('f-date').value = dateStr;
+            renderCalendar();
+            fetchAvailabilityAndRender();
+        }
+
+        function changeMonth(delta) {
+            calendarDate.setMonth(calendarDate.getMonth() + delta);
+            renderCalendar();
+        }
+
         async function fetchAvailabilityAndRender() {
+            if (!form.date) return;
             // Fetch appointments and blocked slots for the selected date
             try {
                 const r1 = await fetch(`${API}/appointments/${tenant.id}?date=${form.date}`);
@@ -1253,6 +1425,14 @@
             if (!form.firstname || !form.lastname || !form.phone) {
                 return showMsg('msg-1', 'Ad, soyad ve telefon zorunludur.', 'error');
             }
+
+            // Telefon Format Kontrolü (5xx xxx xxxx - Tam 10 hane)
+            const cleanPhone = form.phone.replace(/\D/g, '');
+            if (cleanPhone.length !== 10 || !cleanPhone.startsWith('5')) {
+                return showMsg('msg-1', 'Lütfen geçerli bir telefon numarası giriniz (5xx xxx xxxx).', 'error');
+            }
+            form.phone = cleanPhone; // Backend'e temiz hali gitsin (appointments.js zaten +90 ekliyor)
+
             if (!form.serviceId) {
                 return showMsg('msg-1', 'Lütfen bir hizmet seçin.', 'error');
             }
@@ -1376,6 +1556,8 @@
                 document.getElementById('step-3').style.display = 'none';
                 document.getElementById('success-screen').classList.add('show');
                 document.querySelector('.steps').style.display = 'none';
+                initExpandMap();
+                playNotificationSound();
             } catch (err) {
                 showMsg('msg-3', err.message, 'error');
             } finally {
@@ -1395,10 +1577,74 @@
             renderServices();
             document.getElementById('success-screen').classList.remove('show');
             document.querySelector('.steps').style.display = '';
+
+            // Map reset
+            const wrapper = document.getElementById('map-wrapper');
+            if (wrapper) wrapper.classList.remove('expanded');
+
             goStep(1);
         }
 
+        /* ─── MAP LOGIC ───────────────────────────────────────────────────── */
+        function initExpandMap() {
+            const container = document.getElementById('map-container');
+            const wrapper = document.getElementById('map-wrapper');
+            const locationName = document.getElementById('map-location-name');
+            const coordsLabel = document.getElementById('map-coords');
+
+            if (!container || !wrapper) return;
+
+            // Update with tenant info
+            if (tenant) {
+                locationName.textContent = tenant.name;
+                // coordsLabel could be updated if database had it
+            }
+
+            // Click to Expand
+            wrapper.onclick = (e) => {
+                e.stopPropagation();
+                const isExpanded = wrapper.classList.toggle('expanded');
+
+                // Show/Hide Google Maps Button
+                const btn = document.getElementById('map-link-btn');
+                if (btn) {
+                    if (isExpanded) {
+                        btn.style.display = 'block';
+                        setTimeout(() => { btn.style.opacity = '1'; }, 50);
+                    } else {
+                        btn.style.opacity = '0';
+                        setTimeout(() => { btn.style.display = 'none'; }, 300);
+                    }
+                }
+            };
+
+            // 3D Tilt Effect
+            container.onmousemove = (e) => {
+                if (wrapper.classList.contains('expanded')) {
+                    wrapper.style.transform = '';
+                    return;
+                }
+                const rect = wrapper.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+
+                const factor = 15;
+                const rotateX = -y / factor;
+                const rotateY = x / factor;
+
+                wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            };
+
+            container.onmouseleave = () => {
+                wrapper.style.transform = 'rotateX(0deg) rotateY(0deg)';
+            };
+        }
+
         /* ─── UTILS ───────────────────────────────────────────────────────── */
+        const localDateStr = (date = new Date()) => {
+            const offset = date.getTimezoneOffset() * 60000;
+            return new Date(date.getTime() - offset).toISOString().slice(0, 10);
+        };
         const pad = n => String(n).padStart(2, '0');
         const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         const showMsg = (id, txt, type) => { const el = document.getElementById(id); el.textContent = txt; el.className = 'msg ' + type; };
@@ -1489,7 +1735,59 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             initWavyBackground();
+
+            // Telefon Input Formatlayıcı (5xx xxx xxxx)
+            const phoneInput = document.getElementById('f-phone');
+            if (phoneInput) {
+                phoneInput.setAttribute('maxlength', '15'); // 555 555 5555 formatı için
+                phoneInput.addEventListener('input', (e) => {
+                    let val = e.target.value.replace(/\D/g, '');
+                    if (val.length > 10) val = val.slice(0, 10);
+
+                    let formatted = '';
+                    if (val.length > 0) formatted += val.substring(0, 3);
+                    if (val.length > 3) formatted += ' ' + val.substring(3, 6);
+                    if (val.length > 6) formatted += ' ' + val.substring(6, 8);
+                    if (val.length > 8) formatted += ' ' + val.substring(8, 10);
+
+                    e.target.value = formatted;
+                });
+            }
         });
+
+        // ── SES ──────────────────────────────────────────────────────────────
+        let _audioCtx = null;
+        function _unlockAudio() {
+            if (_audioCtx) return;
+            try {
+                _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (_audioCtx.state === 'suspended') _audioCtx.resume();
+            } catch (_) { }
+        }
+        ['click', 'keydown', 'touchstart', 'mousedown'].forEach(ev => {
+            document.addEventListener(ev, _unlockAudio, { once: false });
+        });
+
+        function playNotificationSound() {
+            try {
+                if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (_audioCtx.state === 'suspended') _audioCtx.resume();
+                const ctx = _audioCtx;
+                const notes = [523.25, 659.25, 783.99];
+                notes.forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.13);
+                    gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.13);
+                    gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + i * 0.13 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.13 + 0.55);
+                    osc.start(ctx.currentTime + i * 0.13);
+                    osc.stop(ctx.currentTime + i * 0.13 + 0.6);
+                });
+            } catch (e) { console.warn('[Sound] Çalınamadı:', e.message); }
+        }
 
         init();
     </script>

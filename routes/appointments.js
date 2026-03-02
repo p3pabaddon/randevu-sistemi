@@ -108,14 +108,22 @@ router.post('/', async (req, res) => {
 
         if (!serviceId && service_name) {
             const { data: svc } = await supabase.from('services').select('id, name').eq('tenant_id', tenantId).ilike('name', `%${service_name}%`).limit(1).single();
-            if (svc) { serviceId = svc.id; serviceName = svc.name; }
+            if (svc) {
+                serviceId = svc.id;
+                serviceName = svc.name;
+            }
+        } else if (serviceId) {
+            const { data: svc } = await supabase.from('services').select('id, name').eq('id', serviceId).single();
+            if (svc) {
+                serviceName = svc.name;
+            }
         }
 
         const { data: appointment, error } = await supabase.from('appointments').insert([{
             tenant_id: tenantId, service_id: serviceId, staff_id: finalStaffId,
             customer_name, customer_phone: normalizedPhone, appointment_date,
             appointment_time: normalizedTime, notes: notes || null, status: 'pending',
-        }]).select().single();
+        }]).select('*, services(name, price, discounted_price, duration_minutes), staff(name), appointment_extras(price_at_booking, service_extras(name, price, duration_minutes))').single();
 
         if (error) {
             if (error.code === '23505') {
@@ -133,15 +141,13 @@ router.post('/', async (req, res) => {
         let extraServicesSummary = '';
         if (payload.extra_ids && payload.extra_ids.length > 0 && serviceId) {
             try {
-                // 1. Ekstraların detaylarını getir (gerçek fiyatı kaydetmek ve mesajda göstermek için)
                 const { data: extrasList } = await supabase
                     .from('service_extras')
                     .select('*')
                     .in('id', payload.extra_ids)
-                    .eq('service_id', serviceId); // Güvenlik: seçilen ekstralar bu ana hizmete ait olmalı
+                    .eq('service_id', serviceId);
 
                 if (extrasList && extrasList.length > 0) {
-                    // 2. appointment_extras tablosuna eşleştirme kayıtlarını oluştur
                     const extraInserts = extrasList.map(ex => ({
                         appointment_id: appointment.id,
                         extra_id: ex.id,
@@ -149,14 +155,15 @@ router.post('/', async (req, res) => {
                     }));
 
                     await supabase.from('appointment_extras').insert(extraInserts);
-
-                    // 3. Mesaj için eklentileri metinleştir
                     const extraNames = extrasList.map(ex => ex.name).join(', ');
                     extraServicesSummary = ` (+ ${extraNames})`;
+
+                    // Ekstralar eklendikten sonra 'appointment' nesnesini tekrar güncellemeye gerek yok 
+                    // çünkü SSE mesajında 'extraServicesSummary' zaten kullanılıyor ve card render'ı tabloyu fetch edecek.
+                    // Ancak Modal için SSE verisinin tam olması isteniyorsa bir kez daha çekmek gerekebilir.
                 }
             } catch (exErr) {
                 console.error('[Extra Services Insert Error]', exErr);
-                // Ekstra eklemede sorun çıksa bile randevu kaydedildi, sürece devam et.
             }
         }
 
@@ -169,8 +176,17 @@ router.post('/', async (req, res) => {
             supabase.from('appointments').update({ notification_sent: true }).eq('id', appointment.id);
         }).catch(err => console.error('[Bildirim] Hata:', err.message));
 
-        broadcast(tenantId, 'new-appointment', { id: appointment.id, customer_name, appointment_time: normalizedTime, appointment_date, service_name: serviceName });
-        return res.status(201).json({ success: true, appointment });
+        // Ekstralar dahil TAM veriyi çek (extras insert edildikten sonra)
+        // insert anında çekilen veri appointment_extras içermez!
+        const { data: fullAppt } = await supabase
+            .from('appointments')
+            .select('*, services(name, price, discounted_price, duration_minutes), staff(name), appointment_extras(price_at_booking, service_extras(name, price, duration_minutes))')
+            .eq('id', appointment.id)
+            .single();
+
+        broadcast(tenantId, 'new-appointment', fullAppt || appointment);
+
+        return res.status(201).json({ success: true, appointment: fullAppt || appointment });
     } catch (err) {
         console.error('[POST /appointments]', err);
         return res.status(500).json({ error: 'Sunucu hatası.' });
