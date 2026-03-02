@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
 router.get('/:slug', async (req, res) => {
     const { data, error } = await supabase
         .from('tenants')
-        .select('id, name, slug, phone, email, address, whatsapp_number, services(*)')
+        .select('id, name, slug, phone, email, address, whatsapp_number, services(*, service_extras(*))')
         .eq('slug', req.params.slug)
         .single();
     if (error) return res.status(404).json({ error: 'İşletme bulunamadı.' });

@@ -894,19 +894,48 @@ function renderServicesList() {
         el.innerHTML = '<div class="loading-state">Henüz hizmet eklenmemiş.</div>';
         return;
     }
-    el.innerHTML = state.services.map(s => `
-    <div class="service-row" data-svc-id="${s.id}">
-      <strong>${esc(s.name)}</strong>
-      <span class="svc-meta" style="display:flex;align-items:center;gap:0.3rem;white-space:nowrap;line-height:1;margin-top:0.2rem;">
-        ${s.duration_minutes ? `<span>${s.duration_minutes} dk</span>` : ''}
-        <span style="display:inline-flex;align-items:center;white-space:nowrap;">
-          ${s.price != null ? `<span style="${s.discounted_price ? 'text-decoration:line-through;opacity:0.6;margin-right:0.4rem;font-size:0.75rem;' : 'font-size:0.85rem;'}">${Number(s.price).toLocaleString('tr-TR')} ₺</span>` : ''}
-          ${s.discounted_price != null ? `<span style="color:var(--accent2);font-weight:900;font-size:0.95rem;">${Number(s.discounted_price).toLocaleString('tr-TR')} ₺</span>` : ''}
-        </span>
-      </span>
-      <button class="svc-del-btn" style="color:var(--accent);border-color:var(--accent);margin-right:0.3rem" data-action="edit-svc" data-id="${s.id}">Düzenle</button>
-      <button class="svc-del-btn" data-action="delete-svc" data-id="${s.id}">Sil</button>
-    </div>`).join('');
+    el.innerHTML = state.services.map(s => {
+        // YENİ: Ekstraları sırala ve HTML'e dök
+        const extras = s.service_extras || [];
+        let extrasHtml = '';
+        if (extras.length > 0) {
+            extrasHtml = `<div class="extra-services-container">
+                <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.3rem;">Ek Hizmetler:</div>
+                ${extras.map(ex => `
+                    <div class="extra-svc-item" data-id="${ex.id}">
+                        <div>
+                            <strong>${esc(ex.name)}</strong>
+                            ${ex.duration_minutes ? ` <span style="opacity:0.7">(${ex.duration_minutes} dk)</span>` : ''}
+                            ${ex.price ? ` <span style="color:var(--accent); font-weight:600; margin-left:0.3rem">+${Number(ex.price).toLocaleString('tr-TR')} ₺</span>` : ''}
+                        </div>
+                        <button class="svc-del-btn" style="color:var(--red); border-color:var(--red); padding:0.15rem 0.4rem; font-size:0.65rem;" data-action="delete-extra" data-id="${ex.id}">Sil</button>
+                    </div>
+                `).join('')}
+            </div>`;
+        }
+
+        return `
+    <div class="service-row" data-svc-id="${s.id}" style="display:block; padding-bottom:0.75rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+              <strong>${esc(s.name)}</strong>
+              <span class="svc-meta" style="display:flex;align-items:center;gap:0.3rem;white-space:nowrap;line-height:1;margin-top:0.2rem;">
+                ${s.duration_minutes ? `<span>${s.duration_minutes} dk</span>` : ''}
+                <span style="display:inline-flex;align-items:center;white-space:nowrap;">
+                  ${s.price != null ? `<span style="${s.discounted_price ? 'text-decoration:line-through;opacity:0.6;margin-right:0.4rem;font-size:0.75rem;' : 'font-size:0.85rem;'}">${Number(s.price).toLocaleString('tr-TR')} ₺</span>` : ''}
+                  ${s.discounted_price != null ? `<span style="color:var(--accent2);font-weight:900;font-size:0.95rem;">${Number(s.discounted_price).toLocaleString('tr-TR')} ₺</span>` : ''}
+                </span>
+              </span>
+          </div>
+          <div>
+              <button class="svc-del-btn" style="color:var(--accent);border-color:var(--accent);margin-right:0.3rem" data-action="edit-svc" data-id="${s.id}">Düzenle</button>
+              <button class="svc-del-btn" data-action="delete-svc" data-id="${s.id}">Sil</button>
+          </div>
+      </div>
+      ${extrasHtml}
+      <button class="btn-add-extra" data-action="open-extra-modal" data-parent-id="${s.id}">+ Ek Hizmet (Upsell) Ekle</button>
+    </div>`
+    }).join('');
 }
 
 // ── SETTINGS: STAFF ──────────────────────────────────────────────────────────
@@ -955,6 +984,62 @@ function renderStaffList() {
 // Edit Service Modal Handlers
 $('edit-svc-close-btn').addEventListener('click', () => {
     $('edit-svc-overlay').classList.add('hidden');
+});
+
+// YENİ: Ek Hizmet Modal Kapatma
+$('add-extra-close-btn').addEventListener('click', () => {
+    $('add-extra-svc-overlay').classList.add('hidden');
+});
+
+// YENİ: Ek Hizmet Kaydetme (POST)
+$('add-extra-submit-btn').addEventListener('click', async () => {
+    const parentId = $('add-extra-parent-id').value;
+    const name = $('extra-svc-name').value.trim();
+    const durationStr = $('extra-svc-duration').value;
+    const priceStr = $('extra-svc-price').value;
+
+    if (!name) {
+        $('add-extra-msg').textContent = 'Ek hizmet adı boş olamaz.';
+        $('add-extra-msg').classList.remove('hidden');
+        return;
+    }
+
+    const duration = durationStr ? parseInt(durationStr) : 0;
+    const price = priceStr !== '' ? parseFloat(priceStr) : 0;
+
+    $('add-extra-submit-btn').disabled = true;
+    $('add-extra-msg').classList.add('hidden');
+
+    try {
+        const res = await fetch(`${API_BASE}/service-extras`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                tenant_id: state.tenantId,
+                service_id: parentId,
+                name,
+                duration_minutes: duration,
+                price
+            }),
+        });
+        const json = await handleResponse(res);
+
+        // Local state'i güncelle
+        const parentService = state.services.find(s => s.id === parentId);
+        if (parentService) {
+            if (!parentService.service_extras) parentService.service_extras = [];
+            parentService.service_extras.push(json.extra);
+        }
+
+        $('add-extra-svc-overlay').classList.add('hidden');
+        renderServicesList();
+        showSvcMsg(`"${name}" eklendi.`, false);
+    } catch (e) {
+        $('add-extra-msg').textContent = e.message;
+        $('add-extra-msg').classList.remove('hidden');
+    } finally {
+        $('add-extra-submit-btn').disabled = false;
+    }
 });
 
 $('edit-svc-submit-btn').addEventListener('click', async () => {
@@ -1075,8 +1160,53 @@ document.addEventListener('click', async (e) => {
             } catch (err) {
                 showStaffMsg(err.message, true);
             } finally {
-                btnStaff.disabled = false;
-                btnStaff.textContent = 'Sil';
+                if (btnStaff) { btnStaff.disabled = false; btnStaff.textContent = 'Sil'; }
+            }
+        }
+        return;
+    }
+
+    // YENİ: Ek Hizmet Ekle Modalını Aç
+    const btnOpenExtra = e.target.closest('[data-action="open-extra-modal"]');
+    if (btnOpenExtra) {
+        e.preventDefault(); e.stopPropagation();
+        const parentId = btnOpenExtra.dataset.parentId;
+        const parentService = state.services.find(s => s.id === parentId);
+
+        $('add-extra-parent-id').value = parentId;
+        $('extra-svc-name').value = '';
+        $('extra-svc-duration').value = '';
+        $('extra-svc-price').value = '';
+        $('add-extra-msg').classList.add('hidden');
+        $('add-extra-subtitle').textContent = `"${parentService.name}" hizmetine özel ekstra.`;
+
+        $('add-extra-svc-overlay').classList.remove('hidden');
+        return;
+    }
+
+    // YENİ: Ek Hizmet Silme
+    const btnDelExtra = e.target.closest('[data-action="delete-extra"]');
+    if (btnDelExtra) {
+        e.preventDefault(); e.stopPropagation();
+        const extraId = btnDelExtra.dataset.id;
+        if (btnDelExtra.textContent === 'Sil') {
+            btnDelExtra.textContent = '?';
+            setTimeout(() => { if (btnDelExtra) btnDelExtra.textContent = 'Sil'; }, 2000);
+        } else {
+            try {
+                btnDelExtra.textContent = '...';
+                const res = await fetch(`${API_BASE}/service-extras/${extraId}`, { method: 'DELETE' });
+                await handleResponse(res);
+                // Local state'i güncelle (İlgili servisin altından çıkar)
+                state.services.forEach(s => {
+                    if (s.service_extras) {
+                        s.service_extras = s.service_extras.filter(ex => ex.id !== extraId);
+                    }
+                });
+                renderServicesList();
+                showSvcMsg('Ek hizmet silindi.', false);
+            } catch (err) {
+                showSvcMsg(err.message, true);
             }
         }
         return;

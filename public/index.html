@@ -458,6 +458,51 @@
                 transform: scale(1.05);
             }
         }
+
+        /* Ek Hizmetler Listesi CSS */
+        .extra-services-container {
+            margin-top: 0.75rem;
+            padding-left: 1rem;
+            border-left: 2px solid rgba(255, 255, 255, 0.05);
+        }
+
+        :root.theme-light .extra-services-container {
+            border-left-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .extra-svc-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0.75rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        :root.theme-light .extra-svc-item {
+            background: rgba(0, 0, 0, 0.02);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-add-extra {
+            margin-top: 0.25rem;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.7rem;
+            border: 1px dashed var(--accent);
+            color: var(--accent);
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-add-extra:hover {
+            background: var(--accent-glow);
+            border-style: solid;
+        }
     </style>
 </head>
 
@@ -529,6 +574,35 @@
 
             <button id="edit-svc-submit-btn" class="btn btn-primary btn-full">Kaydet</button>
             <p id="edit-svc-msg" class="login-error hidden"></p>
+        </div>
+    </div>
+
+    <!-- ── EK HİZMET (UPSELL) EKLEME MODAL ────────────────────────────────────── -->
+    <div id="add-extra-svc-overlay" class="reset-overlay hidden">
+        <div class="reset-card">
+            <button class="reset-close-btn" id="add-extra-close-btn" title="Kapat">&#10005;</button>
+            <h2>✨ Ek Hizmet Ekle</h2>
+            <p class="reset-hint" id="add-extra-subtitle">Masaj hizmetine özel ekstra ekleyin.</p>
+            <input type="hidden" id="add-extra-parent-id" />
+
+            <div class="input-group">
+                <label for="extra-svc-name">Ek Hizmet Adı</label>
+                <input id="extra-svc-name" type="text" placeholder="örn: Kafa Masajı" autocomplete="off" />
+            </div>
+
+            <div class="input-group">
+                <label for="extra-svc-duration">Süre (dk)</label>
+                <input id="extra-svc-duration" type="number" min="0" step="5"
+                    placeholder="0 (İsteğe bağlı, süreyi uzatır)" />
+            </div>
+
+            <div class="input-group">
+                <label for="extra-svc-price">Ek Ücret (₺)</label>
+                <input id="extra-svc-price" type="number" min="0" placeholder="0" />
+            </div>
+
+            <button id="add-extra-submit-btn" class="btn btn-primary btn-full">+ Ekle</button>
+            <p id="add-extra-msg" class="login-error hidden"></p>
         </div>
     </div>
 

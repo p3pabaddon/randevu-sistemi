@@ -129,8 +129,39 @@ router.post('/', async (req, res) => {
             tenant = t;
         }
 
+        // --- HİZMET EKSTRALARINI (UPSELL) KAYDET ---
+        let extraServicesSummary = '';
+        if (payload.extra_ids && payload.extra_ids.length > 0 && serviceId) {
+            try {
+                // 1. Ekstraların detaylarını getir (gerçek fiyatı kaydetmek ve mesajda göstermek için)
+                const { data: extrasList } = await supabase
+                    .from('service_extras')
+                    .select('*')
+                    .in('id', payload.extra_ids)
+                    .eq('service_id', serviceId); // Güvenlik: seçilen ekstralar bu ana hizmete ait olmalı
+
+                if (extrasList && extrasList.length > 0) {
+                    // 2. appointment_extras tablosuna eşleştirme kayıtlarını oluştur
+                    const extraInserts = extrasList.map(ex => ({
+                        appointment_id: appointment.id,
+                        extra_id: ex.id,
+                        price_at_booking: ex.price
+                    }));
+
+                    await supabase.from('appointment_extras').insert(extraInserts);
+
+                    // 3. Mesaj için eklentileri metinleştir
+                    const extraNames = extrasList.map(ex => ex.name).join(', ');
+                    extraServicesSummary = ` (+ ${extraNames})`;
+                }
+            } catch (exErr) {
+                console.error('[Extra Services Insert Error]', exErr);
+                // Ekstra eklemede sorun çıksa bile randevu kaydedildi, sürece devam et.
+            }
+        }
+
         const message = buildConfirmationMessage({
-            customerName: customer_name, serviceName, date: appointment_date, time: appointment_time,
+            customerName: customer_name, serviceName: serviceName + extraServicesSummary, date: appointment_date, time: appointment_time,
             businessName: tenant?.name || 'İşletme', businessPhone: tenant?.phone || '',
         });
 
@@ -156,7 +187,7 @@ router.get('/:tenantId', authenticateTenant, async (req, res) => {
 
         let query = supabase
             .from('appointments')
-            .select('*, services(name, price, discounted_price, duration_minutes), staff(name)')
+            .select('*, services(name, price, discounted_price, duration_minutes), staff(name), appointment_extras(price_at_booking, service_extras(name, price, duration_minutes))')
             .eq('tenant_id', tenantId)
             .order('appointment_date', { ascending: true })
             .order('appointment_time', { ascending: true });

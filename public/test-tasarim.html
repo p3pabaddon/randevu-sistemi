@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Takvim Tasarım Testi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* Test için sayfa arka planını koyu yapıyoruz */
+        body {
+            background-color: #0f1015;
+            /* Sitenin karanlık temasına uygun */
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        /* --- BURADAN AŞAĞISI VERDİĞİM KOD --- */
+
+        /* Kapsayıcı Alan */
+        .appointment-visual-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 50px 20px;
+            background: transparent;
+            perspective: 1000px;
+        }
+
+        /* Glassmorphism Takvim Kartı */
+        .calendar-3d-card {
+            width: 280px;
+            background: rgba(30, 30, 40, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 28px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transform: rotateY(-5deg) rotateX(5deg);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Etkileşimli Hover (Üzerine Gelme) Efekti */
+        .calendar-3d-card:hover {
+            transform: translateY(-15px) rotateY(0deg) rotateX(0deg);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(111, 66, 193, 0.4);
+            border-color: rgba(111, 66, 193, 0.5);
+        }
+
+        /* Kart Üst Bilgisi */
+        .calendar-header {
+            background: linear-gradient(135deg, #8A2387, #E94057, #F27121);
+            padding: 24px;
+            text-align: center;
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .calendar-header .month {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 3px;
+            margin-bottom: 2px;
+        }
+
+        .calendar-header .year {
+            font-size: 1.1rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        /* Kart Gövdesi */
+        .calendar-body {
+            padding: 40px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .calendar-body .day-name {
+            font-size: 1.2rem;
+            color: #a0a5b1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .calendar-body .day-number {
+            font-size: 5rem;
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(to bottom, #ffffff, #a0a5b1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 5px 15px rgba(255, 255, 255, 0.1));
+        }
+
+        /* Canlı Durum Rozeti & Animasyonu */
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(46, 213, 115, 0.1);
+            color: #2ed573;
+            border: 1px solid rgba(46, 213, 115, 0.3);
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .status-badge .dot {
+            width: 8px;
+            height: 8px;
+            background-color: #2ed573;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #2ed573;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(46, 213, 115, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(46, 213, 115, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(46, 213, 115, 0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="appointment-visual-container">
+        <div class="calendar-3d-card">
+            <div class="calendar-header">
+                <span class="month">MART</span>
+                <span class="year">2026</span>
+            </div>
+            <div class="calendar-body">
+                <div class="day-name">Pazartesi</div>
+                <div class="day-number">02</div>
+                <div class="status-badge">
+                    <span class="dot"></span>
+                    Randevular Açık
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -481,6 +481,80 @@
             white-space: nowrap;
         }
 
+        /* ── EXTRAS (EK HİZMETLER) ───────────────────────────────────────── */
+        .extras-container {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            display: none;
+        }
+
+        :root.theme-light .extras-container {
+            background: rgba(0, 0, 0, 0.02);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .extras-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--accent);
+        }
+
+        .extra-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6rem 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        :root.theme-light .extra-item {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .extra-item:hover {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        :root.theme-light .extra-item:hover {
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .extra-item.selected {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .extra-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .extra-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .extra-desc {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 0.2rem;
+        }
+
+        .extra-price {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
         /* ── TIME SLOTS ──────────────────────────────────────────────────── */
         .time-grid {
             display: grid;
@@ -846,6 +920,12 @@
                 </div>
             </div>
 
+            <!-- YENİ: Ek Hizmetler Konteyneri -->
+            <div id="extras-container" class="extras-container">
+                <div class="extras-title">✨ İsteğe Bağlı Ek Hizmetler (Upsell)</div>
+                <div id="extras-list"></div>
+            </div>
+
             <div class="field-group" style="margin-top:1.5rem">
                 <div class="section-title">Personel Seçin</div>
                 <div class="service-grid" id="staff-grid">
@@ -858,6 +938,11 @@
             <button class="submit-btn" id="next-btn-1" onclick="goStep2()">
                 Devam — Tarih &amp; Saat
             </button>
+            <div
+                style="text-align:center; margin-top:1rem; color:var(--muted); font-size:0.75rem; font-weight:600; font-family:'Montserrat', sans-serif;">
+                <span style="color:var(--accent); font-size:1rem; vertical-align:middle; margin-right:4px;">✦</span>
+                Ödemeniz randevu sonrası işletmede alınacaktır.
+            </div>
         </div>
 
         <!-- ── ADIM 2: Tarih & Saat ───────────────────────────────────────── -->
@@ -902,6 +987,13 @@
                     Randevuyu Oluştur
                 </button>
             </div>
+
+            <div
+                style="text-align:center; margin-top:1.5rem; color:var(--muted); font-size:0.78rem; font-weight:600; font-family:'Montserrat', sans-serif; background:rgba(255,255,255,0.02); padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border-light);">
+                <div style="color:var(--accent); margin-bottom:4px; font-size:1.1rem;">💳</div>
+                Sistem üzerinden <b>ön ödeme alınmamaktadır.</b><br>
+                Ödemenizi hizmet bitiminde, işletmede güvenle yapabilirsiniz.
+            </div>
         </div>
 
         <!-- ── BAŞARILI EKRAN ─────────────────────────────────────────────── -->
@@ -931,6 +1023,7 @@
             serviceId: null, serviceName: '',
             staffId: '', staffName: 'Farketmez',
             date: '', time: '', notes: '',
+            extras: [], // YENİ: Seçili ek hizmetlerin ID'leri
         };
 
         let tenant = null;
@@ -963,7 +1056,6 @@
             }
         }
 
-        /* ─── SERVICES ────────────────────────────────────────────────────── */
         function renderServices() {
             const grid = document.getElementById('service-grid');
             if (!services.length) {
@@ -988,6 +1080,41 @@
             document.getElementById('svc-' + id)?.classList.add('selected');
             form.serviceId = id;
             form.serviceName = name;
+            form.extras = []; // Servis değişince sıfırla
+
+            // Hizmetin extlaları var mı kontrol et
+            const selectedService = services.find(s => s.id === id);
+            const extrasContainer = document.getElementById('extras-container');
+            const extrasList = document.getElementById('extras-list');
+
+            if (selectedService && selectedService.service_extras && selectedService.service_extras.length > 0) {
+                extrasContainer.style.display = 'block';
+                extrasList.innerHTML = selectedService.service_extras.map(ex => `
+                    <div class="extra-item" id="extra-${ex.id}" onclick="toggleExtra('${ex.id}')">
+                        <div class="extra-info">
+                            <span class="extra-name">${esc(ex.name)}</span>
+                            <span class="extra-desc">${ex.duration_minutes ? `${ex.duration_minutes} dk` : ''}</span>
+                        </div>
+                        ${ex.price ? `<span class="extra-price">+${Number(ex.price).toLocaleString('tr-TR')} ₺</span>` : ''}
+                    </div>
+                `).join('');
+            } else {
+                extrasContainer.style.display = 'none';
+                extrasList.innerHTML = '';
+            }
+        }
+
+        function toggleExtra(id) {
+            const el = document.getElementById('extra-' + id);
+            if (!el) return;
+
+            if (form.extras.includes(id)) {
+                form.extras = form.extras.filter(x => x !== id);
+                el.classList.remove('selected');
+            } else {
+                form.extras.push(id);
+                el.classList.add('selected');
+            }
         }
 
         function renderStaff() {
@@ -1162,6 +1289,37 @@
             const fullName = form.firstname + ' ' + form.lastname;
             const [y, m, d] = form.date.split('-');
             const dateStr = d + '.' + m + '.' + y;
+
+            // Fiyat Hesaplama
+            const selectedService = services.find(s => s.id === form.serviceId);
+            let totalPrice = 0;
+            let extrasHtml = '';
+
+            if (selectedService) {
+                totalPrice += selectedService.discounted_price ? Number(selectedService.discounted_price) : Number(selectedService.price || 0);
+
+                // Seçili ekstraları bul
+                const selExtras = [];
+                if (selectedService.service_extras) {
+                    selectedService.service_extras.forEach(ex => {
+                        if (form.extras.includes(ex.id)) {
+                            selExtras.push(ex);
+                            totalPrice += Number(ex.price || 0);
+                        }
+                    });
+                }
+
+                if (selExtras.length > 0) {
+                    extrasHtml = `<div class="success-row" style="margin-top:0.4rem; padding-top:0.4rem; border-top:1px dashed rgba(255,255,255,0.1);"><span style="color:var(--accent);">Ek Hizmetler:</span></div>`;
+                    extrasHtml += selExtras.map(ex => `
+                        <div class="success-row" style="font-size:0.75rem;">
+                            <span>— ${esc(ex.name)}</span>
+                            <span>${ex.price ? `+${Number(ex.price).toLocaleString('tr-TR')} ₺` : 'Ücretsiz'}</span>
+                        </div>
+                    `).join('');
+                }
+            }
+
             document.getElementById('summary-box').innerHTML = `
         <div class="success-row"><span>Müşteri</span><span>${esc(fullName)}</span></div>
         <div class="success-row"><span>Telefon</span><span>${esc(form.phone)}</span></div>
@@ -1169,7 +1327,12 @@
         <div class="success-row"><span>Personel</span><span>${esc(form.staffName)}</span></div>
         <div class="success-row"><span>Tarih</span><span>${dateStr}</span></div>
         <div class="success-row"><span>Saat</span><span>${form.time}</span></div>
-        ${form.notes ? `<div class="success-row"><span>Not</span><span>${esc(form.notes)}</span></div>` : ''}
+        ${extrasHtml}
+        <div class="success-row" style="margin-top:0.6rem; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.1); font-size:0.95rem; color:var(--accent);">
+            <span><b>Toplam Tutar</b></span>
+            <span><b>${totalPrice.toLocaleString('tr-TR')} ₺</b></span>
+        </div>
+        ${form.notes ? `<div class="success-row" style="margin-top:0.5rem"><span>Not</span><span>${esc(form.notes)}</span></div>` : ''}
       `;
         }
 
@@ -1190,6 +1353,7 @@
                         customer_name: form.firstname + ' ' + form.lastname,
                         customer_phone: form.phone,
                         service_id: form.serviceId,
+                        extra_ids: form.extras.length > 0 ? form.extras : undefined,
                         appointment_date: form.date,
                         appointment_time: form.time,
                         notes: form.notes || null,
@@ -1202,7 +1366,7 @@
                 const [y, m, d] = form.date.split('-');
                 const dateStr = d + '.' + m + '.' + y;
                 document.getElementById('success-details').innerHTML = `
-          <div class="success-row"><span>Hizmet</span><span>${esc(form.serviceName)}</span></div>
+          <div class="success-row"><span>Hizmet</span><span>${esc(form.serviceName)}${form.extras.length > 0 ? ` (+${form.extras.length} Ek)` : ''}</span></div>
           <div class="success-row"><span>Personel</span><span>${esc(form.staffName)}</span></div>
           <div class="success-row"><span>Tarih</span><span>${dateStr}</span></div>
           <div class="success-row"><span>Saat</span><span>${form.time}</span></div>

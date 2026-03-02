@@ -13,6 +13,7 @@ const tenantsRouter = require('./routes/tenants');
 const servicesRouter = require('./routes/services');
 const blockedSlotsRouter = require('./routes/blockedSlots');
 const staffRouter = require('./routes/staff');
+const serviceExtrasRouter = require('./routes/serviceExtras');
 const { sseHandler } = require('./lib/sse');
 const supabase = require('./lib/supabase');
 const { loginSchema } = require('./lib/validation');
@@ -68,7 +69,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 
         const { data: tenant, error } = await supabase
             .from('tenants')
-            .select('*, services(*)')
+            .select('*, services(*, service_extras(*))')
             .eq('slug', slug.trim().toLowerCase())
             .single();
 
@@ -184,6 +185,7 @@ app.use('/api/tenants', tenantsRouter);
 app.use('/api/services', servicesRouter);
 app.use('/api/blocked-slots', blockedSlotsRouter);
 app.use('/api/staff', staffRouter);
+app.use('/api/service-extras', serviceExtrasRouter);
 
 // SPA fallback
 app.get('*', (req, res) => {
