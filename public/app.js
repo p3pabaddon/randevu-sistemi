@@ -995,39 +995,39 @@ function openModal(a) {
 
     let extrasListHtml = '';
     if (a.appointment_extras && a.appointment_extras.length > 0) {
-        extrasListHtml = `<div style="margin-top:0.5rem; padding-left:0.5rem; border-left:2px solid var(--accent); opacity:0.9;">`;
+        extrasListHtml = `<div style="margin-top:0.6rem; padding-left:0.8rem; border-left:3px solid var(--accent); opacity:0.9; width:100%; display:flex; flex-direction:column; gap:0.4rem;">`;
         a.appointment_extras.forEach(ex => {
             const exPrice = Number(ex.price_at_booking || 0);
             totalModalPrice += exPrice;
-            extrasListHtml += `<div style="font-size:0.75rem; color:var(--text-muted); display:flex; justify-content:space-between; margin-bottom:0.2rem;">
+            extrasListHtml += `<div style="font-size:0.82rem; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center;">
                 <span>• ${esc(ex.service_extras?.name || 'Bilinmeyen Ek Hizmet')}</span>
-                <span>+${exPrice.toLocaleString('tr-TR')} ₺</span>
+                <span style="white-space:nowrap; font-weight:600; color:var(--text-primary);">+${exPrice.toLocaleString('tr-TR')} ₺</span>
             </div>`;
         });
         extrasListHtml += `</div>`;
     }
 
-    let modalPriceHtml = `${totalModalPrice.toLocaleString('tr-TR')} ₺`;
+    let modalPriceHtml = `<span style="white-space:nowrap;">${totalModalPrice.toLocaleString('tr-TR')} ₺</span>`;
     if (discountedPrice != null && originalPrice != null) {
-        modalPriceHtml = `<span style="text-decoration:line-through; opacity:0.5; font-size:0.9rem; margin-right:0.5rem;">${Number(originalPrice).toLocaleString('tr-TR')} ₺</span> ` + modalPriceHtml;
+        modalPriceHtml = `<span style="text-decoration:line-through; opacity:0.5; font-size:0.9rem; margin-right:0.5rem; white-space:nowrap;">${Number(originalPrice).toLocaleString('tr-TR')} ₺</span> ` + modalPriceHtml;
     }
 
     modalBody.innerHTML = `
-    <div class="modal-row"><label>Müşteri</label><span>${esc(a.customer_name)}</span></div>
-    <div class="modal-row"><label>Telefon</label><span>${esc(a.customer_phone)}</span></div>
-    <div class="modal-row" style="flex-direction:column; align-items:flex-start; gap:0.2rem;">
-        <label>Hizmet</label>
-        <div style="width:100%; display:flex; justify-content:space-between; font-weight:700;">
+    <div class="modal-field"><label>Müşteri</label><span>${esc(a.customer_name)}</span></div>
+    <div class="modal-field"><label>Telefon</label><span>${esc(a.customer_phone)}</span></div>
+    <div class="modal-field" style="grid-column: 1 / -1; display:flex; flex-direction:column; gap:0.2rem; margin-bottom:0.2rem;">
+        <label>Hizmet ve Ekstralar</label>
+        <div style="width:100%; display:flex; justify-content:space-between; font-weight:700; font-size:1.05rem;">
             <span>${esc(svc)}</span>
         </div>
         ${extrasListHtml}
     </div>
-    <div class="modal-row"><label>Personel</label><span>${esc(staff)}</span></div>
-    <div class="modal-row"><label>Tarih</label><span>${formatDate(a.appointment_date)}</span></div>
-    <div class="modal-row"><label>Saat</label><span>${a.appointment_time?.slice(0, 5)}</span></div>
-    <div class="modal-row" style="align-items:center;"><label>Ücret</label><span style="font-weight:800; color:var(--accent); font-size:1.1rem;">${modalPriceHtml}</span></div>
-    <div class="modal-row"><label>Durum</label><span class="status-badge ${a.status}">${statusLabel(a.status)}</span></div>
-    ${a.notes ? `<div class="modal-row"><label>Not</label><span>${esc(a.notes)}</span></div>` : ''}
+    <div class="modal-field"><label>Personel</label><span>${esc(staff)}</span></div>
+    <div class="modal-field"><label>Tarih</label><span>${formatDate(a.appointment_date)}</span></div>
+    <div class="modal-field"><label>Saat</label><span>${a.appointment_time?.slice(0, 5)}</span></div>
+    <div class="modal-field"><label>Ücret</label><div style="font-weight:800; color:var(--accent); font-size:1.15rem; display:flex; flex-wrap:wrap; align-items:center; gap:0.3rem;">${modalPriceHtml}</div></div>
+    <div class="modal-field"><label>Durum</label><div><span class="status-badge ${a.status}">${statusLabel(a.status)}</span></div></div>
+    ${a.notes ? `<div class="modal-field" style="grid-column: 1 / -1;"><label>Not</label><span>${esc(a.notes)}</span></div>` : ''}
   `;
     modal.classList.remove('hidden');
 }
@@ -1832,14 +1832,11 @@ function _connectSSE() {
     es.addEventListener('new-appointment', (e) => {
         try {
             const data = JSON.parse(e.data);
-            playNotificationSound();
-            showToast(`${data.customer_name} — ${data.appointment_time?.slice(0, 5)}`);
+            addNotification(data); // Ses, Toast ve UI güncellemesi artık bunun içinde
 
             if (state.activeTab === 'today') loadToday();
             else if (state.activeTab === 'all') loadAll();
             else if (state.activeTab === 'settings') loadToday(); // Stats ve State güncelleme
-
-            addNotification(data);
 
             // Eğer Saat Yönetimi altındaysa ve aynı gün seçiliyse gridi yenile
             if (state.activeTab === 'settings') {
@@ -1871,10 +1868,15 @@ function _connectSSE() {
     // (SSE açıkken de güvence amaçlı çalışır)
     setInterval(async () => {
         const data = await fetchAppointments({ date: today() });
+        const oldAppointments = state.appointments || [];
         state.appointments = data; // State senkronizasyonu
-        if (_prevApptCount !== null && data.length > _prevApptCount) {
-            playNotificationSound();
-            showToast(`${data.length - _prevApptCount} yeni randevu!`);
+
+        if (_prevApptCount !== null) {
+            // Sadece gerçekten "yeni" eklenenleri id'sine bakarak bul
+            const newAppts = data.filter(a => !oldAppointments.find(oa => oa.id === a.id));
+            if (newAppts.length > 0) {
+                newAppts.forEach(nA => addNotification(nA));
+            }
         }
         _prevApptCount = data.length;
         if (state.activeTab === 'today') { renderAppointments('today-appointments', data); updateStats(data); }
@@ -1922,10 +1924,12 @@ function showToast(msg, opts = {}) {
     }
 
     document.body.appendChild(toast);
-    requestAnimationFrame(() => {
-        toast.style.opacity = '1';
-        toast.style.transform = 'translateY(0) scale(1)';
-    });
+
+    // Force a reflow so the initial state is applied immediately before transitioning
+    void toast.offsetWidth;
+
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0) scale(1)';
     clearTimeout(toast._timer);
     toast._timer = setTimeout(() => {
         toast.style.opacity = '0';
@@ -2187,9 +2191,12 @@ function initNotifications() {
 }
 
 function addNotification(data) {
+    // Aynı id'li bildirim varsa mükerrer eklemeyi önle
+    if (data.id && state.notifications.some(n => n.rawData && n.rawData.id === data.id)) return;
+
     const initials = data.customer_name ? data.customer_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'YR';
     const noti = {
-        id: Date.now().toString(),
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
         initials: initials,
         customer_name: data.customer_name || 'Yeni Müşteri',
         service_name: data.services?.name || data.service_name || 'Randevu',
@@ -2202,7 +2209,10 @@ function addNotification(data) {
     if (state.notifications.length > 50) state.notifications.pop();
 
     updateNotiBadges();
-    playNotificationSound(); // Sesi çal
+    renderNotifications(); // Arayüzü anında güncelle
+
+    playNotificationSound(); // Sesi tam bildirim eklendiğinde çal
+    showToast(`${noti.customer_name} — ${data.appointment_time?.slice(0, 5)}`);
 
     if (window.lucide) lucide.createIcons();
 }

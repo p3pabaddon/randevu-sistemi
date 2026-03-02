@@ -945,20 +945,31 @@ textarea {
     flex: 1;
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-end;
+    align-items: center;
     gap: 1rem;
     padding-top: 1.4rem;
+    /* Align with calendar grid, accounting for Tarih Seçin label */
 }
 
 .filter-actions {
     display: flex;
+    align-items: center;
     gap: 0.5rem;
+    margin-bottom: 0;
 }
 
 .filters-bar input,
 .filters-bar select {
     width: auto;
     min-width: 140px;
+    height: 42px;
+}
+
+.filters-bar .btn {
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* ── FORM CARD ───────────────────────────────────────────────────────────── */
@@ -991,6 +1002,10 @@ textarea {
 
 .input-group {
     margin-bottom: 1rem;
+}
+
+.input-group.inline {
+    margin-bottom: 0;
 }
 
 .form-actions {

@@ -92,22 +92,42 @@
     transform: translateY(-50%) translateX(0);
 }
 
-/* Light Theme overrides */
+/* Light Theme overrides (Sidebar remains dark in light theme) */
 html.theme-light .dock {
-    background: rgba(0, 0, 0, 0.03);
-    border-color: rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
 }
 
 html.theme-light .dock-item {
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+html.theme-light .dock-item .dock-icon svg {
+    stroke: rgba(255, 255, 255, 0.85) !important;
 }
 
 html.theme-light .dock-item:hover {
-    background: rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff !important;
+}
+
+html.theme-light .dock-item:hover .dock-icon svg {
+    stroke: #fff !important;
+}
+
+html.theme-light .dock-item.active {
+    background: var(--accent) !important;
+    color: #fff !important;
+    box-shadow: 0 0 20px rgba(201, 168, 76, 0.5) !important;
+}
+
+html.theme-light .dock-item.active .dock-icon svg {
+    stroke: #fff !important;
 }
 
 html.theme-light .dock-label {
-    background: #fff;
-    color: #333;
-    border-color: rgba(0, 0, 0, 0.1);
+    background: #1c2640;
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.1);
 }
