@@ -19,7 +19,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 });
 
 async function runMigration() {
-    const sqlPath = path.join(__dirname, 'supabase', 'migrations', 'ek_hizmetler.sql');
+    const sqlPath = path.join(__dirname, 'supabase', 'migrations', 'deleted_appointments.sql');
     const sql = fs.readFileSync(sqlPath, 'utf8');
 
     try {

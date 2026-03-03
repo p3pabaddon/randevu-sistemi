@@ -579,7 +579,7 @@ const tabMap = {
     crm: { nav: 'nav-crm', section: 'tab-crm', title: 'Müşteri Yönetimi' },
     services: { nav: 'nav-services', section: 'tab-services', title: 'Hizmetler' },
     reports: { nav: 'nav-reports', section: 'tab-reports', title: 'Personel Performansı' },
-    campaigns: { nav: 'nav-campaigns', section: 'tab-campaigns', title: 'Kampanya & İndirim Yönetimi' },
+    campaigns: { nav: 'nav-campaigns', section: 'tab-campaigns', title: 'Silinen Randevular (Son 24 Saat)' },
 };
 
 function initTabs() {
@@ -634,13 +634,25 @@ function switchTab(key) {
     if (key === 'crm') loadCRM();
     if (key === 'services') loadServices();
     if (key === 'reports') loadReports('all');
-    if (key === 'campaigns') loadCampaigns();
+    if (key === 'campaigns') loadDeletedAppointments();
 }
 
 // ── LOAD SERVICES ─────────────────────────────────────────────────────────────
-$('services-refresh-btn').addEventListener('click', loadServices);
+async function fetchServices() {
+    try {
+        const res = await fetch(`${API_BASE}/services/${state.tenantId}`, { credentials: 'include' });
+        const json = await handleResponse(res, true);
+        state.services = json.services || [];
+        populateServiceDropdown();
+        renderServicesList();
+    } catch (e) {
+        console.error('Fetch services error:', e);
+    }
+}
+
+$('services-refresh-btn').addEventListener('click', fetchServices);
 async function loadServices() {
-    renderServicesList();
+    await fetchServices();
 
     const btn = $('add-svc-btn');
     if (btn && !btn.dataset.initialized) {
@@ -1359,6 +1371,11 @@ function renderServicesList() {
               <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.4rem;">
                   <strong>${esc(s.name)}</strong>
                   ${s.body_area ? `<span style="font-size:0.65rem; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); padding:0.15rem 0.4rem; border-radius:4px; color:var(--text-primary); font-weight:600;">${esc(s.body_area)}</span>` : ''}
+                  ${s.discounted_price ? `<span style="font-size:0.65rem; background:var(--accent2); color:white; padding:0.15rem 0.4rem; border-radius:4px; font-weight:800;">%${Math.round((1 - s.discounted_price / s.price) * 100)} İNDİRİM</span>` : ''}
+              </div>
+              <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.25rem;">
+                ${s.campaign_label ? `<span style="font-size:0.7rem; color:var(--accent); font-weight:600;">🏷️ ${esc(s.campaign_label)}</span>` : ''}
+                ${s.campaign_ends_at ? `<span style="font-size:0.65rem; color:var(--text-muted);">⌛ ${new Date(s.campaign_ends_at).toLocaleDateString('tr-TR')}</span>` : ''}
               </div>
               ${s.description ? `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem; line-height:1.4; max-width:95%;">${esc(s.description)}</div>` : ''}
               <span class="svc-meta" style="display:flex;align-items:center;gap:0.3rem;white-space:nowrap;line-height:1;margin-top:0.35rem;">
@@ -1369,9 +1386,12 @@ function renderServicesList() {
                 </span>
               </span>
           </div>
-          <div>
-              <button class="svc-del-btn" style="color:var(--accent);border-color:var(--accent);margin-right:0.3rem" data-action="edit-svc" data-id="${s.id}">Düzenle</button>
-              <button class="svc-del-btn" data-action="delete-svc" data-id="${s.id}">Sil</button>
+          <div style="display:flex; flex-direction:column; gap:0.3rem;">
+              <div style="display:flex; gap:0.3rem;">
+                  <button class="svc-del-btn" style="color:var(--accent);border-color:var(--accent);" data-action="edit-svc" data-id="${s.id}">Düzenle</button>
+                  <button class="svc-del-btn" style="color:var(--green);border-color:var(--green);" data-action="manage-campaign" data-id="${s.id}">Kampanya</button>
+                  <button class="svc-del-btn" data-action="delete-svc" data-id="${s.id}">Sil</button>
+              </div>
           </div>
       </div>
       ${extrasHtml}
@@ -1629,6 +1649,18 @@ document.addEventListener('click', async (e) => {
         $('edit-svc-msg').classList.add('hidden');
 
         $('edit-svc-overlay').classList.remove('hidden');
+        return;
+    }
+
+    // YENİ: Kampanya yönetimi (Modal Açma)
+    const btnManageCampaign = e.target.closest('[data-action="manage-campaign"]');
+    if (btnManageCampaign) {
+        e.preventDefault(); e.stopPropagation();
+        const id = btnManageCampaign.dataset.id;
+        const svc = state.services.find(s => s.id === id);
+        if (!svc) return;
+
+        openCampaignEdit(svc);
         return;
     }
 
@@ -2618,23 +2650,59 @@ async function openStaffDetail(staffId, staffName) {
     }
 }
 
-// ── KAMPANYA & İNDİRİM YÖNETİMİ ──────────────────────────────────────────────
-let _campaignSvcId = null;
-
-async function loadCampaigns() {
-    const el = $('campaigns-list');
+// ── SİLİNEN RANDEVULAR ──────────────────────────────────────────────────────
+async function loadDeletedAppointments() {
+    const el = $('deleted-appointments-list');
     if (!el) return;
     el.innerHTML = '<div class="loading-state">Yükleniyor...</div>';
     try {
-        const res = await fetch(`${API_BASE}/services/${state.tenantId}`, { credentials: 'include' });
+        const res = await fetch(`${API_BASE}/appointments/${state.tenantId}?show_deleted=true`, { credentials: 'include' });
         const json = await handleResponse(res, true);
-        renderCampaigns(json.services || []);
-        $('campaigns-refresh-btn')?.addEventListener('click', loadCampaigns);
+        renderDeletedAppointments(json.appointments || []);
+        $('deleted-refresh-btn')?.addEventListener('click', loadDeletedAppointments);
     } catch (e) {
         el.innerHTML = `<div class="loading-state" style="color:var(--red)">Hata: ${e.message}</div>`;
-        // Muhtemelen campaign_label kolonları yok
-        $('campaigns-sql-warning')?.classList.remove('hidden');
     }
+}
+
+function renderDeletedAppointments(list) {
+    const el = $('deleted-appointments-list');
+    if (!list.length) {
+        el.innerHTML = '<div class="loading-state">Son 24 saat içinde silinmiş randevu bulunmuyor.</div>';
+        return;
+    }
+
+    el.innerHTML = list.map(a => {
+        const deletedAt = new Date(a.deleted_at);
+        const now = new Date();
+        const diffMs = (24 * 60 * 60 * 1000) - (now - deletedAt);
+        const hoursLeft = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60)));
+        const minsLeft = Math.max(0, Math.floor((diffMs / (1000 * 60)) % 60));
+
+        return `
+        <div class="appointment-card deleted" style="border-left: 4px solid var(--red);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
+                <div>
+                    <div style="font-weight:700;">${esc(a.customer_name)}</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted);">${esc(a.customer_phone)}</div>
+                </div>
+                <span style="font-size:0.65rem; background:rgba(239,68,68,0.1); color:var(--red); padding:0.2rem 0.5rem; border-radius:4px; font-weight:700;">SİLİNDİ</span>
+            </div>
+            <div style="font-size:0.82rem; margin-bottom:0.75rem;">
+                📅 ${formatDate(a.appointment_date)} • 🕐 ${a.appointment_time?.slice(0, 5)} • 💇 ${esc(a.services?.name || '—')}
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-muted); display:flex; align-items:center; gap:0.4rem;">
+                <i data-lucide="clock" style="width:12px; height:12px;"></i>
+                Kalıcı olarak silinmesine <strong>${hoursLeft}s ${minsLeft}dk</strong> kaldı.
+            </div>
+        </div>`;
+    }).join('');
+    if (window.lucide) lucide.createIcons();
+}
+
+async function loadCampaigns() {
+    // This function is now deprecated, but we keep it to avoid breakage if called elsewhere.
+    // Campaign logic is merged into services tab.
 }
 
 function renderCampaigns(services) {
@@ -2760,7 +2828,7 @@ async function saveCampaign() {
         }
         setTimeout(() => {
             $('campaign-edit-overlay').classList.add('hidden');
-            loadCampaigns();
+            fetchServices();
         }, 1200);
     } catch (e) {
         msg.textContent = '❌ Hata: ' + e.message;
@@ -2780,7 +2848,7 @@ async function clearCampaign() {
             });
             await handleResponse(res, true);
             $('campaign-edit-overlay').classList.add('hidden');
-            loadCampaigns();
+            fetchServices();
         } catch (e) { alert('Hata: ' + e.message); }
     });
 }

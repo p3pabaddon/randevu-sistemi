@@ -199,7 +199,7 @@ router.get('/:tenantId', authenticateTenant, async (req, res) => {
         const { tenantId } = req.params;
         if (tenantId !== req.tenantId) return res.status(403).json({ error: 'Bu verilere erişim izniniz yok.' });
 
-        const { date, status, staff_id } = req.query;
+        const { date, status, staff_id, show_deleted } = req.query;
 
         let query = supabase
             .from('appointments')
@@ -207,6 +207,13 @@ router.get('/:tenantId', authenticateTenant, async (req, res) => {
             .eq('tenant_id', tenantId)
             .order('appointment_date', { ascending: true })
             .order('appointment_time', { ascending: true });
+
+        if (show_deleted === 'true') {
+            const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+            query = query.not('deleted_at', 'is', null).gte('deleted_at', twentyFourHoursAgo);
+        } else {
+            query = query.is('deleted_at', null);
+        }
 
         if (date) query = query.eq('appointment_date', date);
         if (status) query = query.eq('status', status);
@@ -295,7 +302,14 @@ router.delete('/:id', authenticateTenant, async (req, res) => {
         if (fetchErr || !existing) return res.status(404).json({ error: 'Randevu bulunamadı.' });
         if (existing.tenant_id !== req.tenantId) return res.status(403).json({ error: 'Bu randevuyu silme yetkiniz yok.' });
 
-        const { error } = await supabase.from('appointments').delete().eq('id', id);
+        // Soft delete: status = cancelled ve deleted_at = now()
+        const { error } = await supabase
+            .from('appointments')
+            .update({
+                status: 'cancelled',
+                deleted_at: new Date().toISOString()
+            })
+            .eq('id', id);
         if (error) throw error;
         return res.json({ success: true });
     } catch (err) {

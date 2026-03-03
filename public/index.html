@@ -899,10 +899,10 @@
                 <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                         stroke-linejoin="round">
-                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-                        <line x1="7" y1="7" x2="7.01" y2="7" />
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                     </svg></span>
-                <span class="anime-nav-label">Kampanya</span>
+                <span class="anime-nav-label">Silinenler</span>
                 <div class="anime-active-glow"></div>
             </button>
             <button class="anime-nav-item" data-tab="reports">
@@ -1017,12 +1017,12 @@
                         </div>
                     </button>
                     <button class="dock-item" data-tab="campaigns" id="nav-campaigns">
-                        <div class="dock-label">Kampanyalar</div>
+                        <div class="dock-label">Silinen Randevular</div>
                         <div class="dock-icon">
                             <svg viewBox="0 0 24 24">
+                                <polyline points="3 6 5 6 21 6" />
                                 <path
-                                    d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-                                <line x1="7" y1="7" x2="7.01" y2="7" />
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                             </svg>
                         </div>
                     </button>
@@ -1498,24 +1498,16 @@
                 </div>
             </section>
 
-            <!-- TAB: KAMPANYALAR -->
+            <!-- TAB: SİLİNEN RANDEVULAR -->
             <section id="tab-campaigns" class="tab-content hidden">
                 <div class="section-header">
-                    <h3>🎟️ Kampanya & İndirim Yönetimi</h3>
-                    <button class="btn btn-secondary" id="campaigns-refresh-btn">Yenile</button>
+                    <h3>🗑️ Silinen Randevular (Son 24 Saat)</h3>
+                    <button class="btn btn-secondary" id="deleted-refresh-btn">Yenile</button>
                 </div>
-                <p class="form-hint" style="margin-bottom:1.25rem;">Hizmetlere geçici indirim kurun — booking sayfasında
-                    otomatik rozet ve indirimli fiyat görünür.</p>
+                <p class="form-hint" style="margin-bottom:1.25rem;">Silinen randevular 24 saat boyunca burada saklanır,
+                    ardından sistemden kalıcı olarak temizlenir.</p>
 
-                <!-- SQL uyarısı -->
-                <div id="campaigns-sql-warning" class="hidden"
-                    style="padding:0.85rem 1rem; background:#f59e0b22; border:1px solid #f59e0b66; border-radius:var(--radius-sm); margin-bottom:1.25rem; font-size:0.82rem; color:var(--text-primary);">
-                    ⚠️ Bu özellik için Supabase'de 2 kolon gerekiyor. <br>
-                    <code
-                        style="font-size:0.75rem; opacity:0.8;">alter table services add column if not exists campaign_label text;<br>alter table services add column if not exists campaign_ends_at timestamptz;</code>
-                </div>
-
-                <div id="campaigns-list" class="appointments-grid">
+                <div id="deleted-appointments-list" class="appointments-grid">
                     <div class="loading-state">Yükleniyor...</div>
                 </div>
 
