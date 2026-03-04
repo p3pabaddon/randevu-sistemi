@@ -457,7 +457,7 @@ if (resetOverlay) resetOverlay.addEventListener('click', (e) => { if (e.target =
 function closeResetModal() {
     resetOverlay.classList.add('hidden');
     // Alanları temizle
-    ['reset-slug', 'reset-current-pw', 'reset-new-pw', 'reset-confirm-pw'].forEach(id => {
+    ['reset-slug', 'reset-recovery-pin', 'reset-new-pw', 'reset-confirm-pw'].forEach(id => {
         const el = $(id); if (el) el.value = '';
     });
     setResetMsg('', null);
@@ -475,19 +475,19 @@ function setResetMsg(msg, isErr) {
 if (resetSubmitBtn) resetSubmitBtn.addEventListener('click', doResetPassword);
 
 // Enter tuşu ile gönder
-['reset-slug', 'reset-current-pw', 'reset-new-pw', 'reset-confirm-pw'].forEach(id => {
+['reset-slug', 'reset-recovery-pin', 'reset-new-pw', 'reset-confirm-pw'].forEach(id => {
     const el = $(id);
     if (el) el.addEventListener('keydown', (e) => { if (e.key === 'Enter') doResetPassword(); });
 });
 
 async function doResetPassword() {
     const slug = ($('reset-slug')?.value || '').trim().toLowerCase();
-    const currentPassword = $('reset-current-pw')?.value || '';
+    const recoveryPin = ($('reset-recovery-pin')?.value || '').trim().toUpperCase();
     const newPassword = $('reset-new-pw')?.value || '';
     const confirmPassword = $('reset-confirm-pw')?.value || '';
 
     if (!slug) return setResetMsg('İşletme kodu boş olamaz.', true);
-    if (!currentPassword) return setResetMsg('Mevcut şifre boş olamaz.', true);
+    if (!recoveryPin) return setResetMsg('Kurtarma Kodu (PIN) gerekli.', true);
     if (newPassword.length < 4) return setResetMsg('Yeni şifre en az 4 karakter olmalıdır.', true);
     if (newPassword !== confirmPassword) return setResetMsg('Yeni şifreler eşleşmiyor.', true);
 
@@ -499,7 +499,7 @@ async function doResetPassword() {
         const res = await fetch(`${API_BASE}/auth/reset-password`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ slug, currentPassword, newPassword }),
+            body: JSON.stringify({ slug, recoveryPin, newPassword }),
         });
         await handleResponse(res, true);
         setResetMsg('✅ Şifre başarıyla güncellendi! Şimdi giriş yapabilirsiniz.', false);
@@ -1291,7 +1291,14 @@ function populateSettings() {
         <div class="settings-item"><label>TELEFON</label><strong>${esc(state.tenant.phone || '-')}</strong></div>
         <div class="settings-item"><label>SLUG</label><code>${esc(state.tenant.slug)}</code></div>
         <div class="settings-item"><label>E-POSTA</label><strong>${esc(state.tenant.email || '-')}</strong></div>
-        <div class="settings-item full-width"><label>ADRES</label><strong>${esc(state.tenant.address || '-')}</strong></div>
+        <div class="settings-item"><label>KURTARMA KODU (PIN)</label>
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+                <code style="font-size:1.1rem; color:var(--accent); font-weight:800; letter-spacing:0.1em;">${state.tenant.recovery_pin || 'YOK'}</code>
+                <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${state.tenant.recovery_pin || ''}'); this.textContent='KOPYALANDI'; setTimeout(()=>this.textContent='KOPYALA', 2000)" style="font-size:0.65rem; padding:0.2rem 0.5rem;">KOPYALA</button>
+            </div>
+            <p style="font-size:0.6rem; color:var(--text-muted); margin-top:0.2rem;">Şifrenizi unutursanız bu kodu kullanın. Lütfen güvenli bir yere kaydedin.</p>
+        </div>
+        <div class="settings-item"><label>ADRES</label><strong>${esc(state.tenant.address || '-')}</strong></div>
       </div>
       <div class="settings-footer">
           <button id="logout-btn-card" class="btn-logout-mobile" onclick="window.logout()">Hesaptan Çıkış Yap</button>
@@ -1434,6 +1441,8 @@ function initMirrorQR() {
         }
     };
 }
+
+
 
 function showSvcMsg(msg, isErr) {
     const el = $('svc-msg');

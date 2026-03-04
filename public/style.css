@@ -749,6 +749,8 @@ textarea {
     background: var(--accent);
 }
 
+
+
 .appointment-card.past {
     opacity: 0.45;
 }

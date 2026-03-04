@@ -19,6 +19,10 @@ function stripPassword(obj) {
     return safe;
 }
 
+function generateRecoveryPin() {
+    return Math.random().toString(36).substring(2, 10).toUpperCase();
+}
+
 // ─── GET /api/tenants ─────────────────────────────────────────────────────────
 // Genel liste (Dashboard'da bazen gerekebilir)
 router.get('/', async (req, res) => {
@@ -46,10 +50,11 @@ router.post('/', registerLimiter, async (req, res) => {
     if (!name || !slug || !password) return res.status(400).json({ error: 'Eksik bilgi.' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const recoveryPin = generateRecoveryPin();
 
     const { data, error } = await supabase
         .from('tenants')
-        .insert([{ name, slug, phone, email, address, whatsapp_number, password: hashedPassword }])
+        .insert([{ name, slug, phone, email, address, whatsapp_number, password: hashedPassword, recovery_pin: recoveryPin }])
         .select()
         .single();
 

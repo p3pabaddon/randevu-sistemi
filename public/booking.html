@@ -130,6 +130,8 @@
             scroll-behavior: smooth;
         }
 
+
+
         body {
             font-family: 'Montserrat', sans-serif;
             background: var(--bg);
@@ -1050,6 +1052,7 @@
 </head>
 
 <body>
+
     <!-- Tema Butonu -->
     <button id="theme-btn" onclick="toggleBookingTheme()" title="Temayı Değiştir">
         <span id="theme-btn-icon">🌙</span>
@@ -1099,7 +1102,8 @@
             <div class="field-group" style="margin-top:1.5rem">
                 <div class="section-title">Hizmet Seçin</div>
                 <div class="service-grid" id="service-grid">
-                    <div style="color:var(--muted);font-size:0.8rem;grid-column:1/-1;padding:1rem 0">Yükleniyor...</div>
+                    <div style="color:var(--muted);font-size:0.8rem;grid-column:1/-1;padding:1rem 0">Yükleniyor...
+                    </div>
                 </div>
             </div>
 
@@ -1112,7 +1116,8 @@
             <div class="field-group" style="margin-top:1.5rem">
                 <div class="section-title">Personel Seçin</div>
                 <div class="service-grid" id="staff-grid">
-                    <div style="color:var(--muted);font-size:0.8rem;grid-column:1/-1;padding:1rem 0">Yükleniyor...</div>
+                    <div style="color:var(--muted);font-size:0.8rem;grid-column:1/-1;padding:1rem 0">Yükleniyor...
+                    </div>
                 </div>
             </div>
 
@@ -1277,7 +1282,8 @@
                 <p class="map-hint">Genişletmek için tıkla</p>
             </div>
 
-            <button class="new-booking-btn" onclick="resetForm()" style="margin-top:1.5rem;">Yeni Randevu Al</button>
+            <button class="new-booking-btn" onclick="resetForm()" style="margin-top:1.5rem;">Yeni Randevu
+                Al</button>
         </div>
 
     </div>
@@ -1290,7 +1296,8 @@
                 <button class="kvkk-modal-close" onclick="closeKvkkModal()">&times;</button>
             </div>
             <div class="kvkk-modal-body">
-                <p>Değerli Ziyaretçimiz, işletmemiz olarak kişisel verilerinizin güvenliğine önem veriyoruz. 6698 sayılı
+                <p>Değerli Ziyaretçimiz, işletmemiz olarak kişisel verilerinizin güvenliğine önem veriyoruz. 6698
+                    sayılı
                     Kişisel Verilerin Korunması Kanunu (KVKK) uyarınca, verilerinizin nasıl işlendiği hakkında sizi
                     bilgilendirmek isteriz.</p>
 
@@ -1375,6 +1382,9 @@
                 document.getElementById('biz-tagline').textContent = tenant.address || 'Online Randevu';
                 document.getElementById('footer-biz').textContent = tenant.name;
                 document.title = `Randevu Al — ${tenant.name}`;
+
+
+
                 try { const r = await fetch(`${API}/staff/${tenant.id}`); staff = (await r.json()).staff || []; } catch (e) { }
                 renderServices();
                 renderStaff();
@@ -2065,6 +2075,8 @@
             document.getElementById('kvkk-modal').classList.add('show');
             document.body.style.overflow = 'hidden';
         }
+
+
 
         function closeKvkkModal() {
             document.getElementById('kvkk-modal').classList.remove('show');

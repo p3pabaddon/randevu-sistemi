@@ -148,32 +148,24 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 // ── AUTH — Şifre Sıfırlama (Mevcut şifre doğrulaması gerekli) ───────────────
 app.post('/api/auth/reset-password', resetLimiter, async (req, res) => {
     try {
-        const { slug, currentPassword, newPassword } = req.body || {};
+        const { slug, recoveryPin, newPassword } = req.body || {};
         if (!slug) return res.status(400).json({ error: 'İşletme kodu gerekli.' });
-        if (!currentPassword) return res.status(400).json({ error: 'Mevcut şifre gerekli.' });
+        if (!recoveryPin) return res.status(400).json({ error: 'Kurtarma Kodu (PIN) gerekli.' });
         if (!newPassword || newPassword.length < 4) return res.status(400).json({ error: 'Yeni şifre en az 4 karakter olmalıdır.' });
 
         const { data: tenant, error } = await supabase
             .from('tenants')
-            .select('id, slug, password')
+            .select('id, slug, password, recovery_pin')
             .eq('slug', slug.trim().toLowerCase())
             .single();
 
         if (error || !tenant) {
-            return res.status(404).json({ error: 'Geçersiz işletme kodu veya şifre.' });
+            return res.status(404).json({ error: 'Geçersiz işletme kodu.' });
         }
 
-        // Mevcut şifreyi doğrula
-        const isHashed = tenant.password?.startsWith('$2a$') || tenant.password?.startsWith('$2b$');
-        let isMatch = false;
-        if (isHashed) {
-            isMatch = await bcrypt.compare(currentPassword, tenant.password);
-        } else {
-            isMatch = (currentPassword === tenant.password);
-        }
-
-        if (!isMatch) {
-            return res.status(401).json({ error: 'Mevcut şifre hatalı.' });
+        // Kurtarma Kodu (PIN) Kontrolü
+        if (!tenant.recovery_pin || recoveryPin.trim().toUpperCase() !== tenant.recovery_pin.trim().toUpperCase()) {
+            return res.status(401).json({ error: 'Kurtarma kodu hatalı.' });
         }
 
         // Yeni şifreyi hashle

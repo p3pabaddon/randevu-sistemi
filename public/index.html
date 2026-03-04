@@ -639,7 +639,7 @@
         <div class="reset-card">
             <button class="reset-close-btn" id="reset-close-btn" title="Kapat">&#10005;</button>
             <h2>🔑 Şifre Değiştir</h2>
-            <p class="reset-hint">Mevcut şifrenizi girin, ardından yeni şifrenizi belirleyin.</p>
+            <p class="reset-hint">Şifrenizi sıfırlamak için 8 haneli kurtarma kodunuzu (PIN) girin.</p>
             <div class="input-group">
                 <label for="reset-slug">İşletme Kodu</label>
                 <input id="reset-slug" type="text" placeholder="örn: salon-ayse" autocomplete="off"
@@ -647,9 +647,8 @@
             </div>
 
             <div class="input-group">
-                <label for="reset-current-pw">Mevcut Şifre</label>
-                <input id="reset-current-pw" type="password" placeholder="Mevcut şifreniz"
-                    autocomplete="current-password" />
+                <label for="reset-recovery-pin">Kurtarma Kodu (PIN)</label>
+                <input id="reset-recovery-pin" type="text" placeholder="8 haneli PIN kodu" autocomplete="off" />
             </div>
 
             <div class="input-group">
@@ -1414,6 +1413,8 @@
                                 <div class="loading-state">Henüz personel eklenmemiş.</div>
                             </div>
                         </div>
+
+
                     </div>
                 </div>
             </section>
