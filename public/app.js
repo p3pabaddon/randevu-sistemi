@@ -905,11 +905,11 @@ function buildCard(a) {
 
     // Mirror QR Dinamik İndirim Kontrolü
     let appliedMirrorDiscount = 0;
-    if (a.notes && a.notes.startsWith('[MIRROR-QR-')) {
-        const match = a.notes.match(/^\[MIRROR-QR-(\d+)\]\s*(.*)$/);
+    if (a.notes && a.notes.includes('[MIRROR-QR-')) {
+        const match = a.notes.match(/\[MIRROR-QR-(\d+)\]/);
         if (match) {
             appliedMirrorDiscount = parseInt(match[1], 10) / 100;
-            a.notes = match[2]; // notu temizle
+            a.notes = a.notes.replace(/\[MIRROR-QR-\d+\]\s*/g, '').trim();
         }
     }
 
@@ -1034,11 +1034,11 @@ function openModal(a) {
 
     // Mirror QR Dinamik İndirim Kontrolü (Modal)
     let appliedMirrorDiscount = 0;
-    if (a.notes && a.notes.startsWith('[MIRROR-QR-')) {
-        const match = a.notes.match(/^\[MIRROR-QR-(\d+)\]\s*(.*)$/);
+    if (a.notes && a.notes.includes('[MIRROR-QR-')) {
+        const match = a.notes.match(/\[MIRROR-QR-(\d+)\]/);
         if (match) {
             appliedMirrorDiscount = parseInt(match[1], 10) / 100;
-            a.notes = match[2];
+            a.notes = a.notes.replace(/\[MIRROR-QR-\d+\]\s*/g, '').trim();
         }
     }
 
