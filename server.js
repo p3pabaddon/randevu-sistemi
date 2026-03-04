@@ -210,5 +210,36 @@ app.get('*', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`\n  Appointment Booking Server (Hardened)\n  → http://localhost:${PORT}\n`);
+
+    // ── OTOMATİK TEMİZLEYİCİ — Süresi Dolmuş Randevular ──────────────────────
+    // Randevu tarihinden 2 gün geçmiş kayıtları kalıcı olarak siler.
+    // Her saat çalışır.
+    async function cleanupExpiredAppointments() {
+        try {
+            const twoDaysAgo = new Date();
+            twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+            const cutoff = twoDaysAgo.toISOString().split('T')[0]; // YYYY-MM-DD
+
+            const { data, error } = await supabase
+                .from('appointments')
+                .delete()
+                .lt('appointment_date', cutoff)
+                .select('id');
+
+            if (error) {
+                console.error('[CLEANUP] Randevu silme hatası:', error.message);
+            } else if (data && data.length > 0) {
+                console.log(`[CLEANUP] ${data.length} süresi dolmuş randevu silindi. (< ${cutoff})`);
+            }
+        } catch (err) {
+            console.error('[CLEANUP] Beklenmedik hata:', err.message);
+        }
+    }
+
+    // İlk çalıştırma — server ayağa kalkar kalkmaz
+    cleanupExpiredAppointments();
+
+    // Sonrasında her saat tekrar çalıştır
+    setInterval(cleanupExpiredAppointments, 60 * 60 * 1000);
 });
 

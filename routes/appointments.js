@@ -287,6 +287,41 @@ router.patch('/:id/status', authenticateTenant, async (req, res) => {
     }
 });
 
+// ─── PATCH /api/appointments/:id/restore ────────────────────────────────────
+router.patch('/:id/restore', authenticateTenant, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // deleted_at filtresi olmadan direkt tenant kontrolü yaparak güncelle
+        const { data, error } = await supabase
+            .from('appointments')
+            .update({ deleted_at: null, status: 'pending' })
+            .eq('id', id)
+            .eq('tenant_id', req.tenantId)  // tenant güvenlik kontrolü update'e gömüldü
+            .select('customer_name')
+            .single();
+
+        if (error) {
+            console.error('[RESTORE] Supabase error:', error);
+            // Unique constraint ihlali (aynı slot zaten dolu)
+            if (error.code === '23505') {
+                return res.status(409).json({ error: 'Bu tarih ve saatte zaten aktif bir randevu var. Önce onu iptal edin.' });
+            }
+            throw error;
+        }
+
+        if (!data) {
+            return res.status(404).json({ error: 'Randevu bulunamadı veya bu işlem için yetkiniz yok.' });
+        }
+
+        return res.json({ success: true, message: `"${data.customer_name}" randevusu geri getirildi.` });
+    } catch (err) {
+        console.error('[PATCH /appointments/restore]', err);
+        return res.status(500).json({ error: err.message });
+    }
+});
+
+
 // ─── DELETE /api/appointments/:id ───────────────────────────────────────────
 router.delete('/:id', authenticateTenant, async (req, res) => {
     try {
