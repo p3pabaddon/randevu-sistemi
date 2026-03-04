@@ -33,6 +33,9 @@ if (!process.env.JWT_SECRET) {
 
 const app = express();
 
+// Trust reverse proxy for rate limiting (e.g., Render, Heroku)
+app.set('trust proxy', 1);
+
 // ── SECURITY MIDDLEWARE ──────────────────────────────────────────────────────
 app.use(helmet({
     contentSecurityPolicy: false, // SPA and CDN scripts support
