@@ -1322,6 +1322,87 @@ function populateSettings() {
     }
 
     loadBlockGrid(todayStr);
+    initMirrorQR();
+}
+
+function initMirrorQR() {
+    const qrContainer = $('qr-code');
+    if (!qrContainer) return;
+
+    const t = state.tenant;
+    const bizNameEl = $('qr-biz-name');
+    if (bizNameEl) bizNameEl.textContent = t.name;
+
+    const inputs = ['qr-discount-input', 'qr-header-input', 'qr-footer-input'];
+
+    function updateQR() {
+        const discount = $('qr-discount-input').value || '10';
+        const header = $('qr-header-input').value || 'HIZLI RANDEVU & İNDİRİM';
+        const footer = $('qr-footer-input').value || 'Kodu Okut, Sıra Bekleme!';
+
+        // Update Previews
+        $('qr-header-preview').textContent = `${header.split('&')[0]} & %${discount} İNDİRİM`;
+        $('qr-footer-preview').textContent = footer;
+
+        // Generate URL
+        const params = new URLSearchParams({
+            tenant: t.slug,
+            promo: 'qr',
+            d: discount,
+            h: header,
+            f: footer
+        });
+        const bookingUrl = `${window.location.origin}/booking.html?${params.toString()}`;
+
+        // Clear and Generate
+        qrContainer.innerHTML = '';
+        new QRCode(qrContainer, {
+            text: bookingUrl,
+            width: 256,
+            height: 256,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
+
+    inputs.forEach(id => $(id)?.addEventListener('input', updateQR));
+    updateQR(); // Initial render
+
+    // Buttons
+    $('print-qr-btn').onclick = () => {
+        const printArea = $('qr-printable-area').innerHTML;
+        const win = window.open('', '_blank');
+        win.document.write(`
+            <html>
+                <head>
+                    <title>Mirror QR - ${t.name}</title>
+                    <style>
+                        body { margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: 'Montserrat', sans-serif; }
+                        #printable { width: 100%; max-width: 500px; text-align: center; border: 2px solid #eee; padding: 40px; border-radius: 40px; }
+                        img { max-width: 100%; height: auto; margin: 20px 0; }
+                    </style>
+                </head>
+                <body>
+                    <div id="printable">${printArea}</div>
+                    <script>
+                        setTimeout(() => { window.print(); window.close(); }, 500);
+                    </script>
+                </body>
+            </html>
+        `);
+        win.document.close();
+    };
+
+    $('download-qr-btn').onclick = () => {
+        const canvas = qrContainer.querySelector('canvas');
+        if (canvas) {
+            const link = document.createElement('a');
+            link.download = `QR_${t.slug}_Mirror.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    };
 }
 
 function showSvcMsg(msg, isErr) {
@@ -1738,35 +1819,6 @@ document.addEventListener('click', async (e) => {
             }
         }
         return;
-    }
-
-    // Personel ekleme
-    const btnAddStaff = e.target.closest('#add-staff-btn');
-    if (btnAddStaff) {
-        e.preventDefault(); e.stopPropagation();
-        const nameInput = $('staff-name');
-        const name = nameInput.value.trim();
-        if (!name) return showStaffMsg('Personel adı boş olamaz.', true);
-        btnAddStaff.disabled = true;
-        try {
-            const res = await fetch(`${API_BASE}/staff`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tenant_id: state.tenantId, name })
-            });
-
-            const json = await res.json();
-            if (!res.ok) throw new Error(json.error || 'Ekleme başarısız');
-
-            nameInput.value = '';
-            await fetchStaff();
-            renderStaffList();
-            showStaffMsg(`"${name}" eklendi.`, false);
-        } catch (err) {
-            showStaffMsg(err.message, true);
-        } finally {
-            btnAddStaff.disabled = false;
-        }
     }
 });
 

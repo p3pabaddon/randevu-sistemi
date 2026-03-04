@@ -1457,10 +1457,14 @@
               <span class="svc-detail">Herhangi biri</span>
             </div>`;
             if (staff.length) {
-                html += staff.map(s => `
-                <div class="service-card" id="stf-${s.id}" onclick="selectStaff('${s.id}','${esc(s.name)}')">
-                  <span class="svc-name-label">${esc(s.name)}</span>
-                </div>`).join('');
+                html += staff.map(s => {
+                    const fullName = esc(s.name) + (s.surname ? ' ' + esc(s.surname) : '');
+                    return `
+                    <div class="service-card" id="stf-${s.id}" onclick="selectStaff('${s.id}','${fullName.replace(/'/g, "\\'")}')">
+                        <span class="svc-name-label">${fullName}</span>
+                        ${s.role ? `<span class="svc-detail">${esc(s.role)}</span>` : ''}
+                    </div>`;
+                }).join('');
             }
             grid.innerHTML = html;
         }
@@ -1732,8 +1736,9 @@
         ${extrasHtml}
         <div class="success-row" style="margin-top:0.6rem; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.1); font-size:0.95rem; color:var(--accent);">
             <span><b>Toplam Tutar</b></span>
-            <span><b>${totalPrice.toLocaleString('tr-TR')} ₺</b></span>
+            <span><b>${form.promoApplied ? (totalPrice * (1 - (form.discountRate || 0.1))).toLocaleString('tr-TR') : totalPrice.toLocaleString('tr-TR')} ₺</b></span>
         </div>
+        ${form.promoApplied ? `<div style="text-align:right; font-size:0.7rem; color:var(--green); margin-top:2px;">✨ Mirror QR: %${Math.round((form.discountRate || 0.1) * 100)} İndirim Uygulandı</div>` : ''}
         ${form.notes ? `<div class="success-row" style="margin-top:0.5rem"><span>Not</span><span>${esc(form.notes)}</span></div>` : ''}
       `;
         }
@@ -1975,7 +1980,30 @@
                     e.target.value = formatted;
                 });
             }
+
+            checkQRDiscount();
         });
+
+        function checkQRDiscount() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const promo = urlParams.get('promo');
+
+            if (promo === 'qr' || promo === 'qr10') {
+                const used = localStorage.getItem('qr_discount_used');
+                if (used) {
+                    alert('Bu QR indiriminden daha önce faydalandınız. Sizi standart fiyatlara yönlendiriyoruz.');
+                    return;
+                }
+
+                const discount = parseInt(urlParams.get('d')) || 10;
+                const header = urlParams.get('h') || 'Mirror QR İndirimi';
+
+                form.promoApplied = true;
+                form.discountRate = discount / 100;
+                localStorage.setItem('qr_discount_used', 'true');
+                showMsg('msg-1', `✨ ${header}: %${discount} İndirim Kazandınız!`, 'success');
+            }
+        }
 
         // ── SES ──────────────────────────────────────────────────────────────
         let _audioCtx = null;

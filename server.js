@@ -40,14 +40,26 @@ app.use(helmet({
 app.use(cookieParser());
 
 // Global API Rate Limit: Saniyede çok fazla isteği engellemek için
-const globalLimiter = (req, res, next) => next();
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 dakika
+    max: 500, // IP başına 500 istek
+    message: { error: 'Çok fazla istek attınız, lütfen biraz bekleyin.' }
+});
 app.use('/api/', globalLimiter);
 
-// Auth Rate Limit: Daha sıkı (Giriş denemeleri için)
-const authLimiter = (req, res, next) => next();
+// Auth Rate Limit: Daha sıkı (Giriş denemeleri için brute-force koruması)
+const authLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 saat
+    max: 10, // IP başına 10 deneme
+    message: { error: 'Çok fazla giriş denemesi. Lütfen bir saat sonra tekrar deneyin.' }
+});
 
 // Reset Password Rate Limit
-const resetLimiter = (req, res, next) => next();
+const resetLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    message: { error: 'Çok fazla şifre sıfırlama denemesi.' }
+});
 
 // CORS — sadece izin verilen originler
 const allowedOrigins = process.env.ALLOWED_ORIGINS
