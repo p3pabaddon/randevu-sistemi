@@ -1738,7 +1738,7 @@
             <span><b>Toplam Tutar</b></span>
             <span><b>${form.promoApplied ? (totalPrice * (1 - (form.discountRate || 0.1))).toLocaleString('tr-TR') : totalPrice.toLocaleString('tr-TR')} ₺</b></span>
         </div>
-        ${form.promoApplied ? `<div style="text-align:right; font-size:0.7rem; color:var(--green); margin-top:2px;">✨ Mirror QR: %${Math.round((form.discountRate || 0.1) * 100)} İndirim Uygulandı</div>` : ''}
+        ${form.promoApplied ? `<div style="text-align:right; font-size:0.7rem; color:var(--green); margin-top:2px;">✨ %${Math.round((form.discountRate || 0.1) * 100)} İndirim Uygulandı</div>` : ''}
         ${form.notes ? `<div class="success-row" style="margin-top:0.5rem"><span>Not</span><span>${esc(form.notes)}</span></div>` : ''}
       `;
         }
@@ -1751,6 +1751,12 @@
             hideMsg('msg-3');
 
             try {
+                let finalNotes = form.notes || '';
+                if (form.promoApplied) {
+                    const discountPercent = Math.round((form.discountRate || 0.1) * 100);
+                    finalNotes = `[MIRROR-QR-${discountPercent}] ` + finalNotes;
+                }
+
                 const res = await fetch(`${API}/appointments`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1763,7 +1769,7 @@
                         extra_ids: form.extras.length > 0 ? form.extras : undefined,
                         appointment_date: form.date,
                         appointment_time: form.time,
-                        notes: form.notes || null,
+                        notes: finalNotes || null,
                     }),
                 });
                 const json = await res.json();
@@ -1785,6 +1791,11 @@
                 document.querySelector('.steps').style.display = 'none';
                 initExpandMap();
                 playNotificationSound();
+
+                // İndirim kullanıldıysa başarılı randevudan SONRA token'ı kaydet
+                if (form.promoApplied && form.campaignKey) {
+                    localStorage.setItem(form.campaignKey, 'true');
+                }
             } catch (err) {
                 showMsg('msg-3', err.message, 'error');
             } finally {
@@ -1987,20 +1998,27 @@
         function checkQRDiscount() {
             const urlParams = new URLSearchParams(window.location.search);
             const promo = urlParams.get('promo');
+            const tenantSlug = urlParams.get('tenant');
 
             if (promo === 'qr' || promo === 'qr10') {
-                const used = localStorage.getItem('qr_discount_used');
-                if (used) {
-                    alert('Bu QR indiriminden daha önce faydalandınız. Sizi standart fiyatlara yönlendiriyoruz.');
-                    return;
-                }
-
                 const discount = parseInt(urlParams.get('d')) || 10;
                 const header = urlParams.get('h') || 'Mirror QR İndirimi';
 
+                // Benzersiz kampanya anahtarı: İşletme, İndirim oranı ve Başlık
+                const campaignKey = `qr_used_${tenantSlug}_${discount}_${encodeURIComponent(header)}`;
+
+                const used = localStorage.getItem(campaignKey);
+                // Geriye dönük uyumluluk için eski anahtarı da kontrol et (sadece yeni kampanyaları bloklamamak için bunu silebiliriz ama kalsın)
+                // const legacyUsed = localStorage.getItem('qr_discount_used'); 
+
+                if (used /* || legacyUsed */) {
+                    alert('Bu kampanyadan ("' + header + '") daha önce faydalandınız. Sizi standart fiyatlara yönlendiriyoruz.');
+                    return;
+                }
+
                 form.promoApplied = true;
                 form.discountRate = discount / 100;
-                localStorage.setItem('qr_discount_used', 'true');
+                form.campaignKey = campaignKey; // Başarılı randevuda kaydetmek üzere sakla
                 showMsg('msg-1', `✨ ${header}: %${discount} İndirim Kazandınız!`, 'success');
             }
         }

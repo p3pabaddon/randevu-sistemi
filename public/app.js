@@ -903,12 +903,25 @@ function buildCard(a) {
         });
     }
 
+    // Mirror QR Dinamik İndirim Kontrolü
+    let appliedMirrorDiscount = 0;
+    if (a.notes && a.notes.startsWith('[MIRROR-QR-')) {
+        const match = a.notes.match(/^\[MIRROR-QR-(\d+)\]\s*(.*)$/);
+        if (match) {
+            appliedMirrorDiscount = parseInt(match[1], 10) / 100;
+            a.notes = match[2]; // notu temizle
+        }
+    }
+
     let priceHtml = '';
     if (originalPrice != null || (a.appointment_extras && a.appointment_extras.length > 0)) {
         priceHtml += `<span style="font-size:1.1rem;display:inline-flex;align-items:center;white-space:nowrap;gap:0.4rem;">`;
 
-        // Eğer indirim varsa orijinal fiyatı üstü çizili göster (Sadece ana hizmet için)
-        if (discountedPrice != null && originalPrice != null) {
+        if (appliedMirrorDiscount > 0) {
+            const oldTotal = totalPrice;
+            totalPrice = oldTotal * (1 - appliedMirrorDiscount);
+            priceHtml += `<span style="text-decoration:line-through;opacity:0.5; font-size:0.9rem;">${Number(oldTotal).toLocaleString('tr-TR')} ₺</span>`;
+        } else if (discountedPrice != null && originalPrice != null) {
             priceHtml += `<span style="text-decoration:line-through;opacity:0.5; font-size:0.9rem;">${Number(originalPrice).toLocaleString('tr-TR')} ₺</span>`;
         }
 
@@ -1019,9 +1032,26 @@ function openModal(a) {
         extrasListHtml += `</div>`;
     }
 
-    let modalPriceHtml = `<span style="white-space:nowrap;">${totalModalPrice.toLocaleString('tr-TR')} ₺</span>`;
-    if (discountedPrice != null && originalPrice != null) {
-        modalPriceHtml = `<span style="text-decoration:line-through; opacity:0.5; font-size:0.9rem; margin-right:0.5rem; white-space:nowrap;">${Number(originalPrice).toLocaleString('tr-TR')} ₺</span> ` + modalPriceHtml;
+    // Mirror QR Dinamik İndirim Kontrolü (Modal)
+    let appliedMirrorDiscount = 0;
+    if (a.notes && a.notes.startsWith('[MIRROR-QR-')) {
+        const match = a.notes.match(/^\[MIRROR-QR-(\d+)\]\s*(.*)$/);
+        if (match) {
+            appliedMirrorDiscount = parseInt(match[1], 10) / 100;
+            a.notes = match[2];
+        }
+    }
+
+    let modalPriceHtml = '';
+    if (appliedMirrorDiscount > 0) {
+        const oldTotal = totalModalPrice;
+        totalModalPrice = oldTotal * (1 - appliedMirrorDiscount);
+        modalPriceHtml = `<span style="text-decoration:line-through; opacity:0.5; font-size:0.9rem; margin-right:0.5rem; white-space:nowrap;">${Number(oldTotal).toLocaleString('tr-TR')} ₺</span> <span style="white-space:nowrap;">${totalModalPrice.toLocaleString('tr-TR')} ₺</span>`;
+    } else {
+        modalPriceHtml = `<span style="white-space:nowrap;">${totalModalPrice.toLocaleString('tr-TR')} ₺</span>`;
+        if (discountedPrice != null && originalPrice != null) {
+            modalPriceHtml = `<span style="text-decoration:line-through; opacity:0.5; font-size:0.9rem; margin-right:0.5rem; white-space:nowrap;">${Number(originalPrice).toLocaleString('tr-TR')} ₺</span> ` + modalPriceHtml;
+        }
     }
 
     modalBody.innerHTML = `
