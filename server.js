@@ -74,8 +74,6 @@ app.use(cors({
     credentials: true,
 }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
 // SSE — anlık bildirim akışı
 app.get('/api/sse/:tenantId', sseHandler);
 
@@ -202,7 +200,19 @@ app.use('/api/waitlist', waitlistRouter);
 app.use('/api/customers', customersRouter);
 app.use('/api/reports', reportsRouter);
 
-// SPA fallback
+// Birleştirilmiş Yapı: Landing Page ve App
+// 1. Orijinal App (public/app) - /app yolundan servis edilir
+app.use('/app', express.static(path.join(__dirname, 'public', 'app')));
+
+// 2. Landing Page (public root) - / yolundan servis edilir
+app.use(express.static(path.join(__dirname, 'public')));
+
+// 3. /app isteği gelince index.html'i döndür
+app.get('/app', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'app', 'index.html'));
+});
+
+// SPA fallback - Tüm diğer yollar landing page'e gider
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
