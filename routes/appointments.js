@@ -3,6 +3,7 @@ const router = express.Router();
 const supabase = require('../lib/supabase');
 const { sendWhatsApp, buildConfirmationMessage, buildExpiredMessage, buildCancellationMessage } = require('../services/whatsapp');
 const { broadcast } = require('../lib/sse');
+const { notifyWaitlist } = require('../services/waitlistService');
 const { authenticateTenant } = require('../middleware/auth');
 const { appointmentSchema } = require('../lib/validation');
 
@@ -278,6 +279,10 @@ router.patch('/:id/status', authenticateTenant, async (req, res) => {
 
             sendWhatsApp(existing.customer_phone, message)
                 .catch((err) => console.error('[İptal Bildirimi] Hata:', err.message));
+
+            // YEDEK LİSTESİ OTOMASYONU: Yer açıldı bildirimi gönder
+            notifyWaitlist(existing.tenant_id, existing.appointment_date, existing.appointment_time)
+                .catch((err) => console.error('[Waitlist Notify Error]', err.message));
         }
 
         return res.json({ success: true, appointment: data });
@@ -330,7 +335,7 @@ router.delete('/:id', authenticateTenant, async (req, res) => {
         // Sahiplik kontrolü: bu randevu bu tenant'a mı ait?
         const { data: existing, error: fetchErr } = await supabase
             .from('appointments')
-            .select('tenant_id')
+            .select('tenant_id, appointment_date, appointment_time')
             .eq('id', id)
             .single();
 
@@ -346,6 +351,11 @@ router.delete('/:id', authenticateTenant, async (req, res) => {
             })
             .eq('id', id);
         if (error) throw error;
+
+        // YEDEK LİSTESİ OTOMASYONU: Yer açıldı bildirimi gönder (Soft-delete durumunda)
+        notifyWaitlist(existing.tenant_id, existing.appointment_date, existing.appointment_time)
+            .catch((err) => console.error('[Waitlist Notify Error - Delete]', err.message));
+
         return res.json({ success: true });
     } catch (err) {
         return res.status(500).json({ error: err.message });

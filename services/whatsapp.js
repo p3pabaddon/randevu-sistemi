@@ -105,4 +105,20 @@ function buildCancellationMessage({ customerName, serviceName, date, time, busin
     );
 }
 
-module.exports = { sendWhatsApp, sendSMS, buildConfirmationMessage, buildExpiredMessage, buildCancellationMessage };
+/**
+ * Yedek listesi için yer açıldı mesajı
+ */
+function buildWaitlistAvailableMessage({ customerName, serviceName, date, time, businessName, businessPhone }) {
+    return (
+        `Müjde ${customerName}! 🥳\n\n` +
+        `${businessName} işletmesinde beklediğiniz randevu saati için yer açıldı!\n\n` +
+        `📅 Tarih: ${date}\n` +
+        `🕐 Saat: ${time}\n` +
+        `✂️ Hizmet: ${serviceName}\n\n` +
+        `Bu randevuyu hemen kapmak için bu mesaja onay verebilir veya bizimle iletişime geçebilirsiniz:\n` +
+        `📞 ${businessPhone}\n\n` +
+        `Acele edin, ilk onay veren randevuyu alır! 🏃‍♂️💨`
+    );
+}
+
+module.exports = { sendWhatsApp, sendSMS, buildConfirmationMessage, buildExpiredMessage, buildCancellationMessage, buildWaitlistAvailableMessage };
