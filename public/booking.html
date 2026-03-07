@@ -1176,7 +1176,7 @@
                     </div>
                 </div>
                 <div class="calendar-grid" id="calendar-grid">
-                    <!-- JS will populate -->
+                    <!-- Waitlist Modal Kaldırıldı -->
                 </div>
             </div>
 
@@ -2106,72 +2106,8 @@
             document.body.style.overflow = '';
         }
 
-        /* ─── WAITLIST LOGIC ─────────────────────────────────────────────── */
         function openWaitlistModal(time) {
-            const modal = document.getElementById('waitlist-modal');
-            const info = document.getElementById('waitlist-info');
-            const [y, m, d] = form.date.split('-');
-            const dateStr = d + '.' + m + '.' + y;
-
-            form.waitlistTime = time;
-            info.innerHTML = `<b>${dateStr}</b> tarihinde saat <b>${time}</b> şu an dolu.<br>Eğer bir iptal olursa WhatsApp üzerinden size haber verebiliriz.`;
-
-            // Formu doldur (zaten girmişse)
-            document.getElementById('w-name').value = (form.firstname && form.lastname) ? (form.firstname + ' ' + form.lastname) : '';
-            document.getElementById('w-phone').value = form.phone || '';
-
-            modal.classList.add('show');
-            document.body.style.overflow = 'hidden';
-            hideMsg('w-msg');
-        }
-
-        function closeWaitlistModal() {
-            document.getElementById('waitlist-modal').classList.remove('show');
-            document.body.style.overflow = '';
-        }
-
-        async function submitWaitlist() {
-            const btn = document.getElementById('w-submit-btn');
-            const name = document.getElementById('w-name').value.trim();
-            let phone = document.getElementById('w-phone').value.trim().replace(/\D/g, '');
-            const notes = document.getElementById('w-notes').value.trim();
-
-            if (!name || !phone) return showMsg('w-msg', 'Ad ve telefon zorunludur.', 'error');
-            if (phone.length !== 10 || !phone.startsWith('5')) return showMsg('w-msg', 'Geçerli bir telefon girin (5xx...).', 'error');
-
-            btn.disabled = true;
-            btn.textContent = 'Ekleniyor...';
-
-            try {
-                const res = await fetch(`${API}/waitlist`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        tenant_id: tenant.id,
-                        customer_name: name,
-                        customer_phone: phone,
-                        requested_date: form.date,
-                        requested_time: form.waitlistTime,
-                        service_id: form.serviceId,
-                        notes: notes
-                    })
-                });
-
-                const json = await res.json();
-                if (!res.ok) throw new Error(json.error || 'Hata oluştu.');
-
-                showMsg('w-msg', 'Başarıyla listeye eklendiniz! Yer açıldığında size haber vereceğiz.', 'success');
-                setTimeout(() => {
-                    closeWaitlistModal();
-                    btn.disabled = false;
-                    btn.textContent = 'Listeye Ekle';
-                }, 2500);
-
-            } catch (err) {
-                showMsg('w-msg', err.message, 'error');
-                btn.disabled = false;
-                btn.textContent = 'Listeye Ekle';
-            }
+            console.log('Waitlist özelliği devre dışı bırakıldı.');
         }
 
         init();
