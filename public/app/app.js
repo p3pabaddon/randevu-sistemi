@@ -580,6 +580,7 @@ const tabMap = {
     services: { nav: 'nav-services', section: 'tab-services', title: 'Hizmetler' },
     reports: { nav: 'nav-reports', section: 'tab-reports', title: 'Personel Performansı' },
     campaigns: { nav: 'nav-campaigns', section: 'tab-campaigns', title: 'Silinen Randevular (Son 24 Saat)' },
+    campaigns: { nav: 'nav-campaigns', section: 'tab-campaigns', title: 'Silinen Randevular (Son 24 Saat)' },
 };
 
 function initTabs() {
@@ -634,6 +635,7 @@ function switchTab(key) {
     if (key === 'crm') loadCRM();
     if (key === 'services') loadServices();
     if (key === 'reports') loadReports('all');
+    if (key === 'campaigns') loadDeletedAppointments();
     if (key === 'campaigns') loadDeletedAppointments();
 }
 
@@ -2970,3 +2972,5 @@ function showConfirm(message, onConfirm, confirmText = 'Evet, Devam Et', cancelT
     overlay.querySelector('#_confirm-ok').onclick = () => { close(); onConfirm(); };
     overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
 }
+
+window.deleteWaitlistEntry = deleteWaitlistEntry;

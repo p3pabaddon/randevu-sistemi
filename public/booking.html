@@ -11,8 +11,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="bento-calendar.css?v=1">
-    <link rel="stylesheet" href="expand-map.css?v=1">
+    <link rel="stylesheet" href="app/bento-calendar.css?v=1">
+    <link rel="stylesheet" href="app/expand-map.css?v=1">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
     <style>
         /* ── RESET & BASE ──────────────────────────────────────────────────── */
@@ -624,8 +624,30 @@
         }
 
         .time-slot.disabled-booked {
-            opacity: 0.25;
-            cursor: not-allowed;
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.15);
+            color: var(--red);
+            opacity: 0.9;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .time-slot.disabled-booked::after {
+            content: 'DOLU';
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--red);
+            color: white;
+            font-size: 0.55rem;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-weight: 800;
+        }
+
+        .time-slot.disabled-booked:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--red);
         }
 
         /* ── DATE PICKER WRAPPER ────────────────────────────────────────── */
@@ -1077,188 +1099,212 @@
             <div class="step-dot" id="s3">3</div>
         </div>
 
-        <!-- Waitlist Modal Kaldırıldı -->
-    </div>
-    </div>
+        <!-- ── ADIM 1: Kişisel Bilgiler + Hizmet ─────────────────────────── -->
+        <div id="step-1">
+            <div class="section-title">Kişisel Bilgiler</div>
 
-    <!-- YENİ: Ek Hizmetler Konteyneri -->
-    <div id="extras-container" class="extras-container">
-        <div class="extras-title">✨ İsteğe Bağlı Ek Hizmetler (Upsell)</div>
-        <div id="extras-list"></div>
-    </div>
-
-    <div class="field-group" style="margin-top:1.5rem">
-        <div class="section-title">Personel Seçin</div>
-        <div class="service-grid" id="staff-grid">
-            <div style="color:var(--muted);font-size:0.8rem;grid-column:1/-1;padding:1rem 0">Yükleniyor...
-            </div>
-        </div>
-    </div>
-
-    <div id="msg-1" class="msg"></div>
-
-    <button class="submit-btn" id="next-btn-1" onclick="goStep2()">
-        Devam — Tarih &amp; Saat
-    </button>
-    <div
-        style="text-align:center; margin-top:1rem; color:var(--muted); font-size:0.75rem; font-weight:600; font-family:'Montserrat', sans-serif;">
-        <span style="color:var(--accent); font-size:1rem; vertical-align:middle; margin-right:4px;">✦</span>
-        Ödemeniz randevu sonrası işletmede alınacaktır.
-    </div>
-
-    <label class="kvkk-container" for="f-kvkk">
-        <input type="checkbox" id="f-kvkk" />
-        <div class="kvkk-checkbox"></div>
-        <div class="kvkk-text">
-            Randevu kaydı oluşturmak için kişisel verilerimin işlenmesine dair <b onclick="openKvkkModal(event)">KVKK
-                Aydınlatma Metni</b>'ni
-            okudum ve onaylıyorum.
-        </div>
-    </label>
-    </div>
-
-    <!-- ── ADIM 2: Tarih & Saat ───────────────────────────────────────── -->
-    <div id="step-2" style="display:none">
-        <div class="section-title">Tarih Seçin</div>
-
-        <div class="bento-calendar-card">
-            <div class="calendar-header">
-                <div class="calendar-nav">
-                    <button class="calendar-nav-btn" onclick="changeMonth(-1)">❮</button>
-                    <div class="calendar-month-year" id="calendar-month-year">Mart 2026</div>
-                    <button class="calendar-nav-btn" onclick="changeMonth(1)">❯</button>
+            <div class="field-row">
+                <div class="field-group">
+                    <label>Ad <span class="req">*</span></label>
+                    <input type="text" id="f-firstname" placeholder="Adınız" autocomplete="given-name" />
+                </div>
+                <div class="field-group">
+                    <label>Soyad <span class="req">*</span></label>
+                    <input type="text" id="f-lastname" placeholder="Soyadınız" autocomplete="family-name" />
                 </div>
             </div>
-            <div class="calendar-grid" id="calendar-grid">
-                <!-- JS will populate -->
+
+            <div class="field-group">
+                <label>Telefon <span class="req">*</span></label>
+                <input type="tel" id="f-phone" placeholder="+90 5xx xxx xx xx" autocomplete="tel" />
+            </div>
+
+            <div class="field-group" style="margin-top:1.5rem">
+                <div class="section-title">Hizmet Seçin</div>
+                <div class="service-grid" id="service-grid">
+                    <div style="color:var(--muted);font-size:0.8rem;grid-column:1/-1;padding:1rem 0">Yükleniyor...
+                    </div>
+                </div>
+            </div>
+
+            <!-- YENİ: Ek Hizmetler Konteyneri -->
+            <div id="extras-container" class="extras-container">
+                <div class="extras-title">✨ İsteğe Bağlı Ek Hizmetler (Upsell)</div>
+                <div id="extras-list"></div>
+            </div>
+
+            <div class="field-group" style="margin-top:1.5rem">
+                <div class="section-title">Personel Seçin</div>
+                <div class="service-grid" id="staff-grid">
+                    <div style="color:var(--muted);font-size:0.8rem;grid-column:1/-1;padding:1rem 0">Yükleniyor...
+                    </div>
+                </div>
+            </div>
+
+            <div id="msg-1" class="msg"></div>
+
+            <button class="submit-btn" id="next-btn-1" onclick="goStep2()">
+                Devam — Tarih &amp; Saat
+            </button>
+            <div
+                style="text-align:center; margin-top:1rem; color:var(--muted); font-size:0.75rem; font-weight:600; font-family:'Montserrat', sans-serif;">
+                <span style="color:var(--accent); font-size:1rem; vertical-align:middle; margin-right:4px;">✦</span>
+                Ödemeniz randevu sonrası işletmede alınacaktır.
+            </div>
+
+            <label class="kvkk-container" for="f-kvkk">
+                <input type="checkbox" id="f-kvkk" />
+                <div class="kvkk-checkbox"></div>
+                <div class="kvkk-text">
+                    Randevu kaydı oluşturmak için kişisel verilerimin işlenmesine dair <b
+                        onclick="openKvkkModal(event)">KVKK Aydınlatma Metni</b>'ni
+                    okudum ve onaylıyorum.
+                </div>
+            </label>
+        </div>
+
+        <!-- ── ADIM 2: Tarih & Saat ───────────────────────────────────────── -->
+        <div id="step-2" style="display:none">
+            <div class="section-title">Tarih Seçin</div>
+
+            <div class="bento-calendar-card">
+                <div class="calendar-header">
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn" onclick="changeMonth(-1)">❮</button>
+                        <div class="calendar-month-year" id="calendar-month-year">Mart 2026</div>
+                        <button class="calendar-nav-btn" onclick="changeMonth(1)">❯</button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- JS will populate -->
+                </div>
+            </div>
+
+            <input type="hidden" id="f-date" />
+
+            <div class="section-title" style="margin-top:1.25rem">Saat Seçin</div>
+            <div class="time-grid" id="time-grid"></div>
+
+            <div class="field-group" style="margin-top:0.5rem">
+                <label>Not (opsiyonel)</label>
+                <textarea id="f-notes" placeholder="Varsa özel notunuz..."></textarea>
+            </div>
+
+            <div id="msg-2" class="msg"></div>
+
+            <div style="display:flex;gap:0.75rem;margin-top:1.25rem">
+                <button class="submit-btn"
+                    style="background:transparent;border:1.5px solid var(--border-light);color:var(--text);font-weight:700;flex:0 0 auto;width:auto;padding:0.85rem 1.25rem"
+                    onclick="goStep(1)">Geri</button>
+                <button class="submit-btn" style="flex:1" id="next-btn-2" onclick="goStep3()">
+                    Randevuyu Onayla
+                </button>
             </div>
         </div>
 
-        <input type="hidden" id="f-date" />
+        <!-- ── ADIM 3: Özet & Gönder ─────────────────────────────────────── -->
+        <div id="step-3" style="display:none">
+            <div class="section-title">Randevu Özeti</div>
+            <div class="success-details" id="summary-box"></div>
 
-        <div class="section-title" style="margin-top:1.25rem">Saat Seçin</div>
-        <div class="time-grid" id="time-grid"></div>
+            <div id="msg-3" class="msg"></div>
 
-        <div class="field-group" style="margin-top:0.5rem">
-            <label>Not (opsiyonel)</label>
-            <textarea id="f-notes" placeholder="Varsa özel notunuz..."></textarea>
+            <div style="display:flex;gap:0.75rem;margin-top:0.5rem">
+                <button class="submit-btn"
+                    style="background:transparent;border:1.5px solid var(--border-light);color:var(--text);font-weight:700;flex:0 0 auto;width:auto;padding:0.85rem 1.25rem"
+                    onclick="goStep(2)">Geri</button>
+                <button class="submit-btn" style="flex:1" id="submit-btn" onclick="submitBooking()">
+                    Randevuyu Oluştur
+                </button>
+            </div>
+
+            <div
+                style="text-align:center; margin-top:1.5rem; color:var(--muted); font-size:0.78rem; font-weight:600; font-family:'Montserrat', sans-serif; background:rgba(255,255,255,0.02); padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border-light);">
+                <div style="color:var(--accent); margin-bottom:4px; font-size:1.1rem;">💳</div>
+                Sistem üzerinden <b>ön ödeme alınmamaktadır.</b><br>
+                Ödemenizi hizmet bitiminde, işletmede güvenle yapabilirsiniz.
+            </div>
         </div>
 
-        <div id="msg-2" class="msg"></div>
+        <!-- ── BAŞARILI EKRAN ─────────────────────────────────────────────── -->
+        <div class="success-screen" id="success-screen">
+            <div class="success-icon" style="width:60px; height:60px; margin-bottom:1rem; font-size:1.5rem;">✓</div>
+            <h2 class="success-title" style="font-size:1.1rem; margin-bottom:0.25rem;">Randevunuz Alındı!</h2>
+            <p class="success-sub" style="font-size:0.75rem;">Size kısa süre içinde bildirim gönderilecektir.</p>
+            <div class="success-details" id="success-details" style="margin:1rem 0; padding:0.8rem 1rem; gap:0.4rem;">
+            </div>
 
-        <div style="display:flex;gap:0.75rem;margin-top:1.25rem">
-            <button class="submit-btn"
-                style="background:transparent;border:1.5px solid var(--border-light);color:var(--text);font-weight:700;flex:0 0 auto;width:auto;padding:0.85rem 1.25rem"
-                onclick="goStep(1)">Geri</button>
-            <button class="submit-btn" style="flex:1" id="next-btn-2" onclick="goStep3()">
-                Randevuyu Onayla
-            </button>
-        </div>
-    </div>
-
-    <!-- ── ADIM 3: Özet & Gönder ─────────────────────────────────────── -->
-    <div id="step-3" style="display:none">
-        <div class="section-title">Randevu Özeti</div>
-        <div class="success-details" id="summary-box"></div>
-
-        <div id="msg-3" class="msg"></div>
-
-        <div style="display:flex;gap:0.75rem;margin-top:0.5rem">
-            <button class="submit-btn"
-                style="background:transparent;border:1.5px solid var(--border-light);color:var(--text);font-weight:700;flex:0 0 auto;width:auto;padding:0.85rem 1.25rem"
-                onclick="goStep(2)">Geri</button>
-            <button class="submit-btn" style="flex:1" id="submit-btn" onclick="submitBooking()">
-                Randevuyu Oluştur
-            </button>
-        </div>
-
-        <div
-            style="text-align:center; margin-top:1.5rem; color:var(--muted); font-size:0.78rem; font-weight:600; font-family:'Montserrat', sans-serif; background:rgba(255,255,255,0.02); padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border-light);">
-            <div style="color:var(--accent); margin-bottom:4px; font-size:1.1rem;">💳</div>
-            Sistem üzerinden <b>ön ödeme alınmamaktadır.</b><br>
-            Ödemenizi hizmet bitiminde, işletmede güvenle yapabilirsiniz.
-        </div>
-    </div>
-
-    <!-- ── BAŞARILI EKRAN ─────────────────────────────────────────────── -->
-    <div class="success-screen" id="success-screen">
-        <div class="success-icon" style="width:60px; height:60px; margin-bottom:1rem; font-size:1.5rem;">✓</div>
-        <h2 class="success-title" style="font-size:1.1rem; margin-bottom:0.25rem;">Randevunuz Alındı!</h2>
-        <p class="success-sub" style="font-size:0.75rem;">Size kısa süre içinde bildirim gönderilecektir.</p>
-        <div class="success-details" id="success-details" style="margin:1rem 0; padding:0.8rem 1rem; gap:0.4rem;">
-        </div>
-
-        <!-- ── EXPANDABLE MAP MODULE ── -->
-        <div class="map-container" id="map-container">
-            <p class="map-label">İşletme Konumu</p>
-            <div class="map-wrapper" id="map-wrapper">
-                <div class="map-bg-gradient"></div>
-                <div class="map-grid-pattern">
-                    <svg width="100%" height="100%">
-                        <defs>
-                            <pattern id="map-grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.5" />
-                            </pattern>
-                        </defs>
-                        <rect width="100%" height="100%" fill="url(#map-grid)" />
-                    </svg>
-                </div>
-
-                <div class="map-visuals">
-                    <svg class="map-svg" preserveAspectRatio="none">
-                        <line x1="0%" y1="35%" x2="100%" y2="35%" class="map-road" stroke-width="4" />
-                        <line x1="0%" y1="65%" x2="100%" y2="65%" class="map-road" stroke-width="4" />
-                        <line x1="30%" y1="0%" x2="30%" y2="100%" class="map-road" stroke-width="3" />
-                        <line x1="70%" y1="0%" x2="70%" y2="100%" class="map-road" stroke-width="3" />
-                    </svg>
-                    <div class="map-building" style="top:40%; left:10%; width:15%; height:20%;"></div>
-                    <div class="map-building" style="top:15%; left:35%; width:12%; height:15%;"></div>
-                    <div class="map-building" style="top:70%; left:75%; width:18%; height:18%;"></div>
-
-                    <div class="map-marker-container">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" class="map-marker">
-                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
-                                fill="#34D399" />
-                            <circle cx="12" cy="9" r="2.5" fill="white" />
+            <!-- ── EXPANDABLE MAP MODULE ── -->
+            <div class="map-container" id="map-container">
+                <p class="map-label">İşletme Konumu</p>
+                <div class="map-wrapper" id="map-wrapper">
+                    <div class="map-bg-gradient"></div>
+                    <div class="map-grid-pattern">
+                        <svg width="100%" height="100%">
+                            <defs>
+                                <pattern id="map-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.5" />
+                                </pattern>
+                            </defs>
+                            <rect width="100%" height="100%" fill="url(#map-grid)" />
                         </svg>
                     </div>
-                </div>
 
-                <div class="map-content">
-                    <div class="map-header">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="map-icon-svg">
-                            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
-                            <line x1="9" x2="9" y1="3" y2="18" />
-                            <line x1="15" x2="15" y1="6" y2="21" />
+                    <div class="map-visuals">
+                        <svg class="map-svg" preserveAspectRatio="none">
+                            <line x1="0%" y1="35%" x2="100%" y2="35%" class="map-road" stroke-width="4" />
+                            <line x1="0%" y1="65%" x2="100%" y2="65%" class="map-road" stroke-width="4" />
+                            <line x1="30%" y1="0%" x2="30%" y2="100%" class="map-road" stroke-width="3" />
+                            <line x1="70%" y1="0%" x2="70%" y2="100%" class="map-road" stroke-width="3" />
                         </svg>
-                        <div class="map-status">
-                            <div class="map-status-dot"></div><span>LIVE</span>
+                        <div class="map-building" style="top:40%; left:10%; width:15%; height:20%;"></div>
+                        <div class="map-building" style="top:15%; left:35%; width:12%; height:15%;"></div>
+                        <div class="map-building" style="top:70%; left:75%; width:18%; height:18%;"></div>
+
+                        <div class="map-marker-container">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" class="map-marker">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+                                    fill="#34D399" />
+                                <circle cx="12" cy="9" r="2.5" fill="white" />
+                            </svg>
                         </div>
                     </div>
-                    <div class="map-footer">
-                        <h3 class="map-location-name" id="map-location-name">Salon Ayşe</h3>
-                        <p class="map-coordinates" id="map-coords">İstanbul, Avcılar</p>
-                        <div class="map-underline"></div>
 
-                        <!-- Google Maps Button -->
-                        <div id="map-link-btn"
-                            style="margin-top: 0.8rem; display: none; opacity: 0; transition: all 0.3s ease; position: relative; z-index: 100;">
-                            <button class="new-booking-btn"
-                                style="width: 100%; font-size: 0.7rem; padding: 0.4rem; background: var(--map-emerald); border: none; color: #000; pointer-events: auto;"
-                                onclick="event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=Avcılar+İstanbul', '_blank')">
-                                Yol Tarifi Al ↗
-                            </button>
+                    <div class="map-content">
+                        <div class="map-header">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="map-icon-svg">
+                                <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+                                <line x1="9" x2="9" y1="3" y2="18" />
+                                <line x1="15" x2="15" y1="6" y2="21" />
+                            </svg>
+                            <div class="map-status">
+                                <div class="map-status-dot"></div><span>LIVE</span>
+                            </div>
+                        </div>
+                        <div class="map-footer">
+                            <h3 class="map-location-name" id="map-location-name">Salon Ayşe</h3>
+                            <p class="map-coordinates" id="map-coords">İstanbul, Avcılar</p>
+                            <div class="map-underline"></div>
+
+                            <!-- Google Maps Button -->
+                            <div id="map-link-btn"
+                                style="margin-top: 0.8rem; display: none; opacity: 0; transition: all 0.3s ease; position: relative; z-index: 100;">
+                                <button class="new-booking-btn"
+                                    style="width: 100%; font-size: 0.7rem; padding: 0.4rem; background: var(--map-emerald); border: none; color: #000; pointer-events: auto;"
+                                    onclick="event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=Avcılar+İstanbul', '_blank')">
+                                    Yol Tarifi Al ↗
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <p class="map-hint">Genişletmek için tıkla</p>
             </div>
-            <p class="map-hint">Genişletmek için tıkla</p>
-        </div>
 
-        <button class="new-booking-btn" onclick="resetForm()" style="margin-top:1.5rem;">Yeni Randevu
-            Al</button>
-    </div>
+            <button class="new-booking-btn" onclick="resetForm()" style="margin-top:1.5rem;">Yeni Randevu
+                Al</button>
+        </div>
 
     </div>
 
@@ -1606,6 +1652,7 @@
                 else if (s.isBlocked) { cssClass = 'disabled-blocked'; }
                 else if (s.isBooked) {
                     cssClass = 'disabled-booked';
+                    onclick = `onclick="openWaitlistModal('${s.val}')"`;
                 }
                 else {
                     cssClass = form.time === s.val ? 'selected' : '';
@@ -2059,7 +2106,73 @@
             document.body.style.overflow = '';
         }
 
-        // Waitlist mantığı kaldırıldı
+        /* ─── WAITLIST LOGIC ─────────────────────────────────────────────── */
+        function openWaitlistModal(time) {
+            const modal = document.getElementById('waitlist-modal');
+            const info = document.getElementById('waitlist-info');
+            const [y, m, d] = form.date.split('-');
+            const dateStr = d + '.' + m + '.' + y;
+
+            form.waitlistTime = time;
+            info.innerHTML = `<b>${dateStr}</b> tarihinde saat <b>${time}</b> şu an dolu.<br>Eğer bir iptal olursa WhatsApp üzerinden size haber verebiliriz.`;
+
+            // Formu doldur (zaten girmişse)
+            document.getElementById('w-name').value = (form.firstname && form.lastname) ? (form.firstname + ' ' + form.lastname) : '';
+            document.getElementById('w-phone').value = form.phone || '';
+
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            hideMsg('w-msg');
+        }
+
+        function closeWaitlistModal() {
+            document.getElementById('waitlist-modal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        async function submitWaitlist() {
+            const btn = document.getElementById('w-submit-btn');
+            const name = document.getElementById('w-name').value.trim();
+            let phone = document.getElementById('w-phone').value.trim().replace(/\D/g, '');
+            const notes = document.getElementById('w-notes').value.trim();
+
+            if (!name || !phone) return showMsg('w-msg', 'Ad ve telefon zorunludur.', 'error');
+            if (phone.length !== 10 || !phone.startsWith('5')) return showMsg('w-msg', 'Geçerli bir telefon girin (5xx...).', 'error');
+
+            btn.disabled = true;
+            btn.textContent = 'Ekleniyor...';
+
+            try {
+                const res = await fetch(`${API}/waitlist`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tenant_id: tenant.id,
+                        customer_name: name,
+                        customer_phone: phone,
+                        requested_date: form.date,
+                        requested_time: form.waitlistTime,
+                        service_id: form.serviceId,
+                        notes: notes
+                    })
+                });
+
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.error || 'Hata oluştu.');
+
+                showMsg('w-msg', 'Başarıyla listeye eklendiniz! Yer açıldığında size haber vereceğiz.', 'success');
+                setTimeout(() => {
+                    closeWaitlistModal();
+                    btn.disabled = false;
+                    btn.textContent = 'Listeye Ekle';
+                }, 2500);
+
+            } catch (err) {
+                showMsg('w-msg', err.message, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Listeye Ekle';
+            }
+        }
 
         init();
     </script>
