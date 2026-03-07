@@ -202,6 +202,11 @@ app.use('/api/reports', reportsRouter);
 
 // Birleştirilmiş Yapı: Landing Page ve App
 
+// 0. Redirect for legacy or specific booking.html links to prevent 404
+app.get('/booking.html', (req, res) => {
+    res.redirect(301, `/app/booking.html${req.url.includes('?') ? '?' + req.url.split('?')[1] : ''}`);
+});
+
 // 1. /app isteği gelirse /app/ olarak yönlendir (Relative path sorunlarını önlemek için)
 app.get('/app', (req, res, next) => {
     if (!req.url.endsWith('/')) {
