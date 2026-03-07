@@ -201,18 +201,27 @@ app.use('/api/customers', customersRouter);
 app.use('/api/reports', reportsRouter);
 
 // Birleştirilmiş Yapı: Landing Page ve App
-// 1. Orijinal App (public/app) - /app yolundan servis edilir
+
+// 1. /app isteği gelirse /app/ olarak yönlendir (Relative path sorunlarını önlemek için)
+app.get('/app', (req, res, next) => {
+    if (!req.url.endsWith('/')) {
+        return res.redirect(301, '/app/');
+    }
+    next();
+});
+
+// 2. Orijinal App (public/app) - /app/ yolundan servis edilir
 app.use('/app', express.static(path.join(__dirname, 'public', 'app')));
 
-// 2. Landing Page (public root) - / yolundan servis edilir
+// 3. Landing Page (public root) - / yolundan servis edilir
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 3. /app isteği gelince index.html'i döndür
-app.get('/app', (req, res) => {
+// 4. /app/ isteği gelince index.html'i döndür
+app.get('/app/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'app', 'index.html'));
 });
 
-// SPA fallback - Tüm diğer yollar landing page'e gider
+// SPA fallback - Tüm diğer yollar landing page'e gider (React Router desteği)
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
