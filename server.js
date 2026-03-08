@@ -16,6 +16,7 @@ const serviceExtrasRouter = require('./routes/serviceExtras');
 const waitlistRouter = require('./routes/waitlist');
 const customersRouter = require('./routes/customers');
 const reportsRouter = require('./routes/reports');
+const aiRouter = require('./routes/ai');
 const { sseHandler } = require('./lib/sse');
 const supabase = require('./lib/supabase');
 const { loginSchema } = require('./lib/validation');
@@ -176,6 +177,7 @@ app.use('/api/service-extras', serviceExtrasRouter);
 app.use('/api/waitlist', waitlistRouter);
 app.use('/api/customers', customersRouter);
 app.use('/api/reports', reportsRouter);
+app.use('/api/ai', aiRouter);
 
 // Birleştirilmiş Yapı: Landing Page ve App
 
