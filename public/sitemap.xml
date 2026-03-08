@@ -2,32 +2,26 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://randevudunyasi.com/</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>2024-03-08</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://randevudunyasi.com/sektor/kuafor-ve-guzellik</loc>
-    <lastmod>2024-03-07</lastmod>
+    <loc>https://randevudunyasi.com/features</loc>
+    <lastmod>2024-03-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://randevudunyasi.com/sektor/saglik-ve-klinik</loc>
-    <lastmod>2024-03-07</lastmod>
+    <loc>https://randevudunyasi.com/solutions</loc>
+    <lastmod>2024-03-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://randevudunyasi.com/sektor/spor-ve-fitness</loc>
-    <lastmod>2024-03-07</lastmod>
+    <loc>https://randevudunyasi.com/pricing</loc>
+    <lastmod>2024-03-08</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://randevudunyasi.com/sektor/danismanlik</loc>
-    <lastmod>2024-03-07</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
 </urlset>
