@@ -8,7 +8,7 @@ const Footer = () => (
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 overflow-hidden">
             <img src="/logo.png" alt="RandevuDunyasi Logo" className="h-full w-full object-cover" />
           </div>
-          <span className="font-bold text-foreground">RandevuDunyasi</span>
+          <span className="font-bold text-foreground">STRUCTLY</span>
         </div>
 
         <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
@@ -20,7 +20,7 @@ const Footer = () => (
       </div>
 
       <div className="mt-8 text-center text-xs text-muted-foreground">
-        © 2025 RandevuDunyasi. Tüm hakları saklıdır.
+        © 2025 STRUCTLY. Tüm hakları saklıdır.
       </div>
     </div>
   </footer>

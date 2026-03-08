@@ -29,7 +29,7 @@ const ReferralSection = () => {
                             </motion.h2>
 
                             <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
-                                Randevu Dünyası'nı başka bir işletme sahibine tavsiye edin, her ikiniz de kazanın. Topluluğumuzu birlikte büyütüyoruz.
+                                STRUCTLY'yi başka bir işletme sahibine tavsiye edin, her ikiniz de kazanın. Topluluğumuzu birlikte büyütüyoruz.
                             </p>
 
                             <div className="space-y-6">
