@@ -26,7 +26,7 @@ const AIAssistant: React.FC = () => {
         try {
             // Production/Dev API URL selection
             const API_URL = window.location.hostname === 'localhost'
-                ? 'http://localhost:3000/api/ai/chat'
+                ? 'http://localhost:2050/api/ai/chat'
                 : 'https://randevu-sistemi.onrender.com/api/ai/chat';
 
             const response = await fetch(API_URL, {
@@ -70,7 +70,7 @@ const AIAssistant: React.FC = () => {
                                     <Bot size={20} />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-sm tracking-tight">Codenza AI Asistan</h4>
+                                    <h4 className="font-bold text-sm tracking-tight">Randevu Dünyası AI Asistan</h4>
                                     <div className="flex items-center gap-1.5">
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                         <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Çevrimiçi</span>
