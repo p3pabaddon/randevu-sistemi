@@ -208,7 +208,7 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 2050;
 app.listen(PORT, () => {
     console.log(`\n  Appointment Booking Server (Hardened)\n  → http://localhost:${PORT}\n`);
 
