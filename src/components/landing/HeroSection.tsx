@@ -44,7 +44,7 @@ const HeroSection = () => {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="max-w-4xl text-center text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-7xl"
           >
-            STRUCTLY: İşletmeniz İçin{" "}
+            Randevu Dünyası: İşletmeniz İçin{" "}
             <span className="gradient-text">Yeni Nesil</span>{" "}
             Online Randevu Sistemi
           </motion.h1>
@@ -107,7 +107,7 @@ const HeroSection = () => {
                     <div className="h-3 w-3 rounded-full bg-green-500/70" />
                   </div>
                   <div className="glass rounded-lg px-4 py-1.5 text-xs text-muted-foreground">
-                    panel.structly.com
+                    panel.randevudunyasi.com
                   </div>
                   <div className="w-16" />
                 </div>

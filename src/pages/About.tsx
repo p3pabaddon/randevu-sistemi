@@ -23,7 +23,7 @@ const About = () => {
                         className="space-y-8 text-lg leading-relaxed"
                     >
                         <p className="text-xl text-muted-foreground italic">
-                            "RandevuDunyasi, işletmelerin dijitalleşme sürecindeki en yakın dostu olma vizyonuyla kurulmuş bir Structly Solutions ürünüdür."
+                            "RandevuDunyasi, işletmelerin dijitalleşme sürecindeki en yakın dostu olma vizyonuyla kurulmuş bir randevu yönetim platformudur."
                         </p>
 
                         <div className="prose prose-invert max-w-none">

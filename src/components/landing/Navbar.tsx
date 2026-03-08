@@ -26,7 +26,7 @@ const Navbar = () => {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 overflow-hidden transition-transform group-hover:scale-105">
             <img src="/logo.png" alt="RandevuDunyasi Logo" className="h-full w-full object-cover" />
           </div>
-          <span className="text-xl font-bold text-foreground tracking-tight">STRUCTLY</span>
+          <span className="text-xl font-bold text-foreground tracking-tight">RandevuDunyasi</span>
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -80,7 +80,7 @@ const Navbar = () => {
             Giriş Yap
           </a>
           <a
-            href="https://api.whatsapp.com/send?phone=905466767595&text=Merhaba,%20STRUCTLY%20online%20randevu%20sistemi%20%C3%A7%C3%B6z%C3%BCm%C3%BCn%C3%BCz%20hakk%C4%B1nda%20teknik%20bilgi%20ve%20kurumsal%20demo%20sunumu%20rica%20ediyoruz.%20%C4%B0%C5%9Fletme%20verimlili%C4%9Fimizi%20art%C4%B1rmak%20ad%C4%B1na%20taraf%C4%B1n%C4%B1zdan%20geri%20d%C3%B6n%C3%BC%C5%9F%20beklemekteyiz."
+            href="https://api.whatsapp.com/send?phone=905466767595&text=Merhaba,%20Randevu%20D%C3%BCnyas%C4%B1%20online%20randevu%20sistemi%20%C3%A7%C3%B6z%C3%BCm%C3%BCn%C3%BCz%20hakk%C4%B1nda%20teknik%20bilgi%20ve%20kurumsal%20demo%20sunumu%20rica%20ediyoruz.%20%C4%B0%C5%9Fletme%20verimlili%C4%9Fimizi%20art%C4%B1rmak%20ad%C4%B1na%20taraf%C4%B1n%C4%B1zdan%20geri%20d%C3%B6n%C3%BC%C5%9F%20beklemekteyiz."
             target="_blank"
             rel="noopener noreferrer"
             className="relative z-[100] rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20"
@@ -129,7 +129,7 @@ const Navbar = () => {
             <Link to="/blog" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground">Blog</Link>
             <a href="/#neden-biz" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground">Neden Biz</a>
             <a href="/app" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground">Giriş Yap</a>
-            <a href="https://api.whatsapp.com/send?phone=905466767595&text=Merhaba,%20STRUCTLY%20online%20randevu%20sistemi%20%C3%A7%C3%B6z%C3%BCm%C3%BCn%C3%BCz%20hakk%C4%B1nda%20teknik%20bilgi%20ve%20kurumsal%20demo%20sunumu%20rica%20ediyoruz.%20%C4%B0%C5%9Fletme%20verimlili%C4%9Fimizi%20art%C4%B1rmak%20ad%C4%B1na%20taraf%C4%B1n%C4%B1zdan%20geri%20d%C3%B6n%C3%BC%C5%9F%20beklemekteyiz." target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)} className="relative z-[100] rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-medium text-primary-foreground">Demo Talep Et</a>
+            <a href="https://api.whatsapp.com/send?phone=905466767595&text=Merhaba,%20Randevu%20D%C3%BCnyas%C4%B1%20online%20randevu%20sistemi%20%C3%A7%C3%B6z%C3%BCm%C3%BCn%C3%BCz%20hakk%C4%B1nda%20teknik%20bilgi%20ve%20kurumsal%20demo%20sunumu%20rica%20ediyoruz.%20%C4%B0%C5%9Fletme%20verimlili%C4%9Fimizi%20art%C4%B1rmak%20ad%C4%B1na%20taraf%C4%B1n%C4%B1zdan%20geri%20d%C3%B6n%C3%BC%C5%9F%20beklemekteyiz." target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)} className="relative z-[100] rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-medium text-primary-foreground">Demo Talep Et</a>
           </div>
         </motion.div>
       )}

@@ -25,7 +25,7 @@ const WhyChooseUsSection = () => {
         >
           <span className="text-sm font-medium text-primary">Avantajlar</span>
           <h2 className="mt-4 text-3xl font-bold text-foreground sm:text-5xl">
-            Neden <span className="gradient-text">STRUCTLY?</span>
+            Neden <span className="gradient-text">RandevuDunyasi?</span>
           </h2>
         </motion.div>
 
