@@ -574,13 +574,12 @@ function initVerticalDock() {
 const tabMap = {
     today: { nav: 'nav-today', section: 'tab-today', title: 'Bugünün Randevuları' },
     all: { nav: 'nav-all', section: 'tab-all', title: 'Tüm Randevular' },
-    new: { nav: 'nav-new', section: 'tab-new', title: 'Yeni Randevu' },
+    new: { nav: 'nav-new', section: 'tab-new', title: 'Kampanyalar' },
     settings: { nav: 'nav-settings', section: 'tab-settings', title: 'Denetim' },
     crm: { nav: 'nav-crm', section: 'tab-crm', title: 'Müşteri Yönetimi' },
     services: { nav: 'nav-services', section: 'tab-services', title: 'Hizmetler' },
     reports: { nav: 'nav-reports', section: 'tab-reports', title: 'Personel Performansı' },
-    campaigns: { nav: 'nav-campaigns', section: 'tab-campaigns', title: 'Silinen Randevular (Son 24 Saat)' },
-    campaigns: { nav: 'nav-campaigns', section: 'tab-campaigns', title: 'Silinen Randevular (Son 24 Saat)' },
+    campaigns: { nav: 'nav-campaigns', section: 'tab-campaigns', title: 'Silinen Randevular' }
 };
 
 function initTabs() {
@@ -634,9 +633,12 @@ function switchTab(key) {
     if (key === 'settings') loadToday();
     if (key === 'crm') loadCRM();
     if (key === 'services') loadServices();
-    if (key === 'reports') loadReports('all');
+    if (key === 'reports') {
+        loadReports('all');
+        updateBentoStats();
+    }
     if (key === 'campaigns') loadDeletedAppointments();
-    if (key === 'campaigns') loadDeletedAppointments();
+    if (key === 'new') loadCampaigns();
 }
 
 // ── LOAD SERVICES ─────────────────────────────────────────────────────────────
@@ -647,6 +649,7 @@ async function fetchServices() {
         state.services = json.services || [];
         populateServiceDropdown();
         renderServicesList();
+        renderCampaigns(state.services);
     } catch (e) {
         console.error('Fetch services error:', e);
     }
@@ -1528,7 +1531,10 @@ function renderServicesList() {
                             ${ex.duration_minutes ? ` <span style="opacity:0.7">(${ex.duration_minutes} dk)</span>` : ''}
                             ${ex.price ? ` <span style="color:var(--accent); font-weight:600; margin-left:0.3rem">+${Number(ex.price).toLocaleString('tr-TR')} ₺</span>` : ''}
                         </div>
-                        <button class="svc-del-btn" style="color:var(--red); border-color:var(--red); padding:0.15rem 0.4rem; font-size:0.65rem;" data-action="delete-extra" data-id="${ex.id}">Sil</button>
+                        <div style="display:flex; gap:0.4rem;">
+                            <button class="svc-del-btn" style="color:var(--accent); border-color:var(--accent); padding:0.15rem 0.4rem; font-size:0.65rem;" data-action="edit-extra" data-id="${ex.id}" data-parent-id="${s.id}">Düzenle</button>
+                            <button class="svc-del-btn" style="color:var(--red); border-color:var(--red); padding:0.15rem 0.4rem; font-size:0.65rem;" data-action="delete-extra" data-id="${ex.id}">Sil</button>
+                        </div>
                     </div>
                 `).join('')}
             </div>`;
@@ -1728,6 +1734,60 @@ $('add-extra-submit-btn').addEventListener('click', async () => {
     }
 });
 
+$('edit-extra-svc-close').addEventListener('click', () => {
+    $('edit-extra-svc-overlay').classList.add('hidden');
+});
+
+$('edit-extra-svc-save-btn').addEventListener('click', async () => {
+    const id = $('edit-extra-svc-id').value;
+    const name = $('edit-extra-svc-name').value.trim();
+    const durationStr = $('edit-extra-svc-dur').value.trim();
+    const priceStr = $('edit-extra-svc-price').value.trim();
+
+    if (!name) {
+        $('edit-extra-svc-msg').textContent = 'Ek hizmet adı boş olamaz.';
+        $('edit-extra-svc-msg').classList.remove('hidden');
+        return;
+    }
+
+    const duration = durationStr ? parseInt(durationStr) : 0;
+    const price = priceStr !== '' ? parseFloat(priceStr) : 0;
+
+    $('edit-extra-svc-save-btn').disabled = true;
+    $('edit-extra-svc-msg').classList.add('hidden');
+
+    try {
+        const res = await fetch(`${API_BASE}/service-extras/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, duration_minutes: duration, price }),
+        });
+        const json = await handleResponse(res);
+
+        // Local state'i güncelle
+        for (let s of state.services) {
+            if (s.service_extras) {
+                const ex = s.service_extras.find(e => e.id === id);
+                if (ex) {
+                    ex.name = json.extra.name;
+                    ex.duration_minutes = json.extra.duration_minutes;
+                    ex.price = json.extra.price;
+                    break;
+                }
+            }
+        }
+
+        $('edit-extra-svc-overlay').classList.add('hidden');
+        renderServicesList();
+        showSvcMsg('Ek hizmet güncellendi.', false);
+    } catch (err) {
+        $('edit-extra-svc-msg').textContent = err.message;
+        $('edit-extra-svc-msg').classList.remove('hidden');
+    } finally {
+        $('edit-extra-svc-save-btn').disabled = false;
+    }
+});
+
 $('edit-svc-submit-btn').addEventListener('click', async () => {
     const id = $('edit-svc-id').value;
     const name = $('edit-svc-name').value.trim();
@@ -1879,6 +1939,27 @@ document.addEventListener('click', async (e) => {
         $('add-extra-subtitle').textContent = `"${parentService.name}" hizmetine özel ekstra.`;
 
         $('add-extra-svc-overlay').classList.remove('hidden');
+        return;
+    }
+
+    // YENİ: Ek Hizmet Düzenleme
+    const btnEditExtra = e.target.closest('[data-action="edit-extra"]');
+    if (btnEditExtra) {
+        e.preventDefault(); e.stopPropagation();
+        const extraId = btnEditExtra.dataset.id;
+        const parentId = btnEditExtra.dataset.parentId;
+        const parentService = state.services.find(s => s.id === parentId);
+        if (!parentService || !parentService.service_extras) return;
+        const ex = parentService.service_extras.find(e => e.id === extraId);
+        if (!ex) return;
+
+        $('edit-extra-svc-id').value = ex.id;
+        $('edit-extra-svc-name').value = ex.name || '';
+        $('edit-extra-svc-dur').value = ex.duration_minutes || 15;
+        $('edit-extra-svc-price').value = ex.price != null ? ex.price : '';
+        $('edit-extra-svc-msg').classList.add('hidden');
+
+        $('edit-extra-svc-overlay').classList.remove('hidden');
         return;
     }
 
@@ -2844,21 +2925,42 @@ function renderDeletedAppointments(list) {
     if (window.lucide) lucide.createIcons();
 }
 
+
+let _campaignSvcId = null;
+let _campaignType = 'service'; // 'service' or 'extra'
+
 async function loadCampaigns() {
-    // This function is now deprecated, but we keep it to avoid breakage if called elsewhere.
-    // Campaign logic is merged into services tab.
+    // Hizmet listesini alıp renderCampaigns'e yolla
+    if (state.services && state.services.length) {
+        renderCampaigns(state.services);
+    } else {
+        await fetchServices();
+        renderCampaigns(state.services);
+    }
 }
 
 function renderCampaigns(services) {
     const el = $('campaigns-list');
+    if (!el) return;
     if (!services.length) {
         el.innerHTML = '<div class="loading-state">Hizmet bulunamadı. Önce Denetim sekmesinden hizmet ekleyin.</div>';
         return;
     }
     const now = new Date();
-    el.innerHTML = services.map(svc => {
-        const hasDiscount = svc.discounted_price != null;
-        const endsAt = svc.campaign_ends_at ? new Date(svc.campaign_ends_at) : null;
+
+    // Flatten services and their extras
+    const allItems = [];
+    services.forEach(s => {
+        allItems.push({ ...s, type: 'service' });
+        (s.service_extras || []).forEach(ex => {
+            allItems.push({ ...ex, type: 'extra', parentName: s.name });
+        });
+    });
+
+    el.innerHTML = allItems.map(item => {
+        const isExtra = item.type === 'extra';
+        const hasDiscount = item.discounted_price != null;
+        const endsAt = item.campaign_ends_at ? new Date(item.campaign_ends_at) : null;
         const isExpired = hasDiscount && endsAt && endsAt <= now;
         const isLive = hasDiscount && (!endsAt || endsAt > now);
 
@@ -2886,20 +2988,23 @@ function renderCampaigns(services) {
         }
 
         return `
-        <div class="appointment-card">
+        <div class="appointment-card" style="${isExtra ? 'border-left: 3px dashed var(--accent); margin-left: 1rem; opacity: 0.9;' : ''}">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.6rem;">
                 <div>
-                    <div style="font-weight:700; font-size:0.95rem;">${esc(svc.name)}</div>
-                    <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">
-                        Normal: <strong>${Number(svc.price).toLocaleString('tr-TR')} ₺</strong>
-                        ${hasDiscount ? ` → İndirimli: <strong style="color:var(--accent);">${Number(svc.discounted_price).toLocaleString('tr-TR')} ₺</strong>` : ''}
+                    <div style="font-weight:700; font-size:0.95rem;">
+                        ${isExtra ? `<span style="font-size:0.7rem; color:var(--accent); display:block; margin-bottom:2px;">✨ Ek Hizmet (${esc(item.parentName)})</span>` : ''}
+                        ${esc(item.name)}
                     </div>
-                    ${svc.campaign_label ? `<div style="font-size:0.78rem; color:var(--accent); margin-top:2px;">🏷️ ${esc(svc.campaign_label)}</div>` : ''}
+                    <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">
+                        Normal: <strong>${Number(item.price).toLocaleString('tr-TR')} ₺</strong>
+                        ${hasDiscount ? ` → İndirimli: <strong style="color:var(--accent);">${Number(item.discounted_price).toLocaleString('tr-TR')} ₺</strong>` : ''}
+                    </div>
+                    ${item.campaign_label ? `<div style="font-size:0.78rem; color:var(--accent); margin-top:2px;">🏷️ ${esc(item.campaign_label)}</div>` : ''}
                     ${endsAt ? `<div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Bitiş: ${endsAt.toLocaleString('tr-TR')}</div>` : ''}
                 </div>
                 ${badge}
             </div>
-            <button onclick="openCampaignEdit(${JSON.stringify(svc).replace(/"/g, '&quot;')})"
+            <button onclick="openCampaignEdit(${JSON.stringify(item).replace(/"/g, '&quot;')})"
                 style="width:100%; padding:0.45rem; background:var(--accent-glow); border:1px solid var(--accent); border-radius:var(--radius-sm); color:var(--accent); font-weight:700; font-size:0.8rem; cursor:pointer;">
                 ${isLive || isExpired ? '✏️ Kampanyayı Düzenle' : '+ Kampanya Kur'}
             </button>
@@ -2909,7 +3014,9 @@ function renderCampaigns(services) {
 
 function openCampaignEdit(svc) {
     _campaignSvcId = svc.id;
-    $('campaign-svc-name').textContent = svc.name + ` (Normal: ${Number(svc.price).toLocaleString('tr-TR')} ₺)`;
+    _campaignType = svc.type || 'service';
+    const labelPrefix = _campaignType === 'extra' ? '✨ ' : '';
+    $('campaign-svc-name').textContent = labelPrefix + svc.name + ` (Normal: ${Number(svc.price).toLocaleString('tr-TR')} ₺)`;
     $('campaign-label-input').value = svc.campaign_label || '';
     $('campaign-price-input').value = svc.discounted_price ?? '';
 
@@ -2943,7 +3050,8 @@ async function saveCampaign() {
     }
 
     try {
-        const res = await fetch(`${API_BASE}/services/${_campaignSvcId}`, {
+        const endpoint = _campaignType === 'extra' ? 'service-extras' : 'services';
+        const res = await fetch(`${API_BASE}/${endpoint}/${_campaignSvcId}`, {
             method: 'PATCH',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -2958,6 +3066,26 @@ async function saveCampaign() {
             throw new Error(err.error || 'İşlem başarısız');
         }
         const json = await res.json();
+
+        // Update local state properly for either extra or main services
+        if (_campaignType === 'extra') {
+            for (let i = 0; i < state.services.length; i++) {
+                const ex = (state.services[i].service_extras || []).find(e => e.id === _campaignSvcId);
+                if (ex) {
+                    ex.discounted_price = Number(price);
+                    ex.campaign_label = label || null;
+                    ex.campaign_ends_at = endsAt ? new Date(endsAt).toISOString() : null;
+                    break;
+                }
+            }
+        } else {
+            const orig = state.services.find(s => s.id === _campaignSvcId);
+            if (orig) {
+                orig.discounted_price = Number(price);
+                orig.campaign_label = label || null;
+                orig.campaign_ends_at = endsAt ? new Date(endsAt).toISOString() : null;
+            }
+        }
 
         if (json.needs_migration) {
             // Kolonlar eksik — sadece indirim kaydedildi
@@ -2984,13 +3112,34 @@ async function saveCampaign() {
 async function clearCampaign() {
     showConfirm('Kampanyayı kaldırmak istediğinizden emin misiniz?', async () => {
         try {
-            const res = await fetch(`${API_BASE}/services/${_campaignSvcId}`, {
+            const endpoint = _campaignType === 'extra' ? 'service-extras' : 'services';
+            const res = await fetch(`${API_BASE}/${endpoint}/${_campaignSvcId}`, {
                 method: 'PATCH',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ discounted_price: null, campaign_label: null, campaign_ends_at: null }),
             });
-            await handleResponse(res, true);
+            const json = await handleResponse(res, true);
+
+            if (_campaignType === 'extra') {
+                for (let i = 0; i < state.services.length; i++) {
+                    const ex = (state.services[i].service_extras || []).find(e => e.id === _campaignSvcId);
+                    if (ex) {
+                        ex.discounted_price = null;
+                        ex.campaign_label = null;
+                        ex.campaign_ends_at = null;
+                        break;
+                    }
+                }
+            } else {
+                const orig = state.services.find(s => s.id === _campaignSvcId);
+                if (orig) {
+                    orig.discounted_price = null;
+                    orig.campaign_label = null;
+                    orig.campaign_ends_at = null;
+                }
+            }
+
             $('campaign-edit-overlay').classList.add('hidden');
             fetchServices();
         } catch (e) { alert('Hata: ' + e.message); }

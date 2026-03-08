@@ -108,3 +108,48 @@
     background: rgba(255, 255, 255, 0.1);
     border-color: #6366f1;
 }
+
+@media (max-width: 768px) {
+    .bento-calendar-card {
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+
+    .calendar-grid {
+        gap: 0.25rem;
+    }
+
+    .calendar-day {
+        font-size: 0.75rem;
+        border-radius: 0.5rem;
+    }
+
+    .calendar-day-name {
+        font-size: 0.6rem;
+    }
+
+    .calendar-month-year {
+        font-size: 0.85rem;
+        min-width: 100px;
+    }
+
+    .calendar-nav-btn {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+/* Optimization for very narrow screens (e.g., 354px) */
+@media (max-width: 400px) {
+    .bento-calendar-card {
+        padding: 0.75rem;
+    }
+
+    .calendar-grid {
+        gap: 0.15rem;
+    }
+
+    .calendar-day {
+        font-size: 0.7rem;
+    }
+}

@@ -8,18 +8,32 @@ const { serviceSchema } = require('../lib/validation');
 router.get('/:tenantId', async (req, res) => {
     const { data, error } = await supabase
         .from('services')
-        .select('*')
+        .select('*, service_extras(*)')
         .eq('tenant_id', req.params.tenantId)
         .order('name');
     if (error) return res.status(500).json({ error: 'Hizmetler alınamadı.' });
 
     // Süresi dolmuş kampanyaları geçici olarak sıfırla (DB değiştirmez, sadece yanıt)
-    const now = new Date();
     const services = (data || []).map(svc => {
-        if (svc.campaign_ends_at && new Date(svc.campaign_ends_at) <= now) {
-            return { ...svc, discounted_price: null, campaign_label: null };
+        let updatedSvc = { ...svc };
+
+        // Ana hizmet kampanyası bittiyse sıfırla
+        if (updatedSvc.campaign_ends_at && new Date(updatedSvc.campaign_ends_at) <= now) {
+            updatedSvc.discounted_price = null;
+            updatedSvc.campaign_label = null;
         }
-        return svc;
+
+        // Ek hizmet kampanyaları bittiyse sıfırla
+        if (updatedSvc.service_extras && updatedSvc.service_extras.length > 0) {
+            updatedSvc.service_extras = updatedSvc.service_extras.map(ex => {
+                if (ex.campaign_ends_at && new Date(ex.campaign_ends_at) <= now) {
+                    return { ...ex, discounted_price: null, campaign_label: null };
+                }
+                return ex;
+            });
+        }
+
+        return updatedSvc;
     });
 
     return res.json({ services });

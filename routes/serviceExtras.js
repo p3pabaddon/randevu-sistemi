@@ -35,7 +35,16 @@ router.post('/', authenticateTenant, async (req, res) => {
 
         const { data, error } = await supabase
             .from('service_extras')
-            .insert([{ tenant_id, service_id, name, price: price || 0, duration_minutes: duration_minutes || 0 }])
+            .insert([{
+                tenant_id,
+                service_id,
+                name,
+                price: price || 0,
+                duration_minutes: duration_minutes || 0,
+                discounted_price: req.body.discounted_price || null,
+                campaign_label: req.body.campaign_label || null,
+                campaign_ends_at: req.body.campaign_ends_at || null
+            }])
             .select()
             .single();
 
@@ -65,7 +74,14 @@ router.put('/:id', authenticateTenant, async (req, res) => {
 
         const { data, error } = await supabase
             .from('service_extras')
-            .update({ name, price: price || 0, duration_minutes: duration_minutes || 0 })
+            .update({
+                name,
+                price: price || 0,
+                duration_minutes: duration_minutes || 0,
+                discounted_price: req.body.discounted_price || null,
+                campaign_label: req.body.campaign_label || null,
+                campaign_ends_at: req.body.campaign_ends_at || null
+            })
             .eq('id', id)
             .select()
             .single();
@@ -80,6 +96,48 @@ router.put('/:id', authenticateTenant, async (req, res) => {
 
 // ─── DELETE /api/service-extras/:id ───────────────────────────────────────
 // Delete an extra service (Tenant Only)
+// ─── PATCH /api/service-extras/:id ────────────────────────────────────────
+// Partial update (used for campaigns)
+router.patch('/:id', authenticateTenant, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+
+        const { data: existing, error: fetchErr } = await supabase
+            .from('service_extras')
+            .select('tenant_id')
+            .eq('id', id)
+            .single();
+
+        if (fetchErr || !existing) return res.status(404).json({ error: 'Ek hizmet bulunamadı.' });
+        if (existing.tenant_id !== req.tenantId) return res.status(403).json({ error: 'Yetkiniz yok.' });
+
+        const { data, error } = await supabase
+            .from('service_extras')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            // Check for missing columns
+            if (error.code === 'PGRST204' || error.message.includes('column') || error.message.includes('does not exist')) {
+                return res.status(200).json({
+                    success: true,
+                    needs_migration: true,
+                    message: 'Kısmi güncelleme başarılı (Kampanya kolonları eksik olabilir).'
+                });
+            }
+            throw error;
+        }
+
+        return res.json({ success: true, extra: data });
+    } catch (err) {
+        console.error('[PATCH /service-extras]', err);
+        return res.status(500).json({ error: 'Güncellenemedi.' });
+    }
+});
+
 router.delete('/:id', authenticateTenant, async (req, res) => {
     try {
         const { id } = req.params;

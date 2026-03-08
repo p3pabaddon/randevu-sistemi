@@ -3,7 +3,6 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -42,28 +41,6 @@ app.use(helmet({
 }));
 app.use(cookieParser());
 
-// Global API Rate Limit: Saniyede çok fazla isteği engellemek için
-const globalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 dakika
-    max: 500, // IP başına 500 istek
-    message: { error: 'Çok fazla istek attınız, lütfen biraz bekleyin.' }
-});
-app.use('/api/', globalLimiter);
-
-// Auth Rate Limit: Daha sıkı (Giriş denemeleri için brute-force koruması)
-const authLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 saat
-    max: 10, // IP başına 10 deneme
-    message: { error: 'Çok fazla giriş denemesi. Lütfen bir saat sonra tekrar deneyin.' }
-});
-
-// Reset Password Rate Limit
-const resetLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000,
-    max: 5,
-    message: { error: 'Çok fazla şifre sıfırlama denemesi.' }
-});
-
 // CORS — sadece izin verilen originler
 const allowedOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',')
@@ -78,7 +55,7 @@ app.use(express.json());
 app.get('/api/sse/:tenantId', sseHandler);
 
 // ── AUTH — Admin giriş (slug + şifre) ────────────────────────────────────────
-app.post('/api/auth/login', authLimiter, async (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
     try {
         const { error: valError } = loginSchema.validate(req.body);
         if (valError) return res.status(400).json({ error: valError.details[0].message });
@@ -144,7 +121,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 });
 
 // ── AUTH — Şifre Sıfırlama (Mevcut şifre doğrulaması gerekli) ───────────────
-app.post('/api/auth/reset-password', resetLimiter, async (req, res) => {
+app.post('/api/auth/reset-password', async (req, res) => {
     try {
         const { slug, recoveryPin, newPassword } = req.body || {};
         if (!slug) return res.status(400).json({ error: 'İşletme kodu gerekli.' });

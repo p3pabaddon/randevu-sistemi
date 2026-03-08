@@ -20,11 +20,12 @@
     <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css" id="fp-dark-theme"
         disabled>
     <!-- Main CSS -->
-    <link rel="stylesheet" href="style.css?v=10">
-    <link rel="stylesheet" href="bento-calendar.css?v=1">
-    <link rel="stylesheet" href="settings.css?v=2" />
-    <link rel="stylesheet" href="dock.css?v=2" />
-    <link rel="stylesheet" href="preloader.css?v=1" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="bento-calendar.css">
+    <link rel="stylesheet" href="settings.css" />
+    <link rel="stylesheet" href="dock.css" />
+    <link rel="stylesheet" href="mobile-fixes.css">
+    <link rel="stylesheet" href="preloader.css" />
     <style>
         /* ══ YENİ LOGIN KART TASARIMI ══════════════════════════════════════ */
 
@@ -835,11 +836,10 @@
                 <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                         stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="16" />
-                        <line x1="8" y1="12" x2="16" y2="12" />
+                        <path d="m3 11 18-5v12L3 14v-3z"></path>
+                        <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>
                     </svg></span>
-                <span class="anime-nav-label">Yeni</span>
+                <span class="anime-nav-label">Kampanya</span>
                 <div class="anime-active-glow"></div>
             </button>
             <button class="anime-nav-item" data-tab="services">
@@ -987,12 +987,11 @@
                         </div>
                     </button>
                     <button class="dock-item" data-tab="new" id="nav-new">
-                        <div class="dock-label">Yeni Randevu</div>
+                        <div class="dock-label">Kampanyalar</div>
                         <div class="dock-icon">
                             <svg viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" />
-                                <line x1="12" y1="8" x2="12" y2="16" />
-                                <line x1="8" y1="12" x2="16" y2="12" />
+                                <path d="m3 11 18-5v12L3 14v-3z"></path>
+                                <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>
                             </svg>
                         </div>
                     </button>
@@ -1019,7 +1018,7 @@
                         </div>
                     </button>
                     <button class="dock-item" data-tab="campaigns" id="nav-campaigns">
-                        <div class="dock-label">Silinen Randevular</div>
+                        <div class="dock-label">Silinenler</div>
                         <div class="dock-icon">
                             <svg viewBox="0 0 24 24">
                                 <polyline points="3 6 5 6 21 6" />
@@ -1155,61 +1154,66 @@
 
             <!-- TAB: YENİ RANDEVU -->
             <section id="tab-new" class="tab-content hidden">
-                <div class="form-card">
-                    <h3>Yeni Randevu Oluştur</h3>
-                    <p class="form-hint">Manuel randevu girişi için bu formu kullanın.</p>
-                    <form id="new-appointment-form" novalidate>
-                        <div class="form-row">
-                            <div class="input-group"><label for="f-name">Ad Soyad</label><input type="text" id="f-name"
-                                    placeholder="Müşteri adı soyadı" required /></div>
-                            <div class="input-group"><label for="f-phone">Telefon</label><input type="tel" id="f-phone"
-                                    placeholder="+905xx xxx xx xx" required /></div>
+                <div class="section-header">
+                    <h3>🎁 Kampanya ve QR Yönetimi</h3>
+                </div>
+                <p class="form-hint" style="margin-bottom:1.5rem;">İşletmeniz ve ek hizmetleriniz (upsell) için indirim
+                    kampanyaları oluşturun ve Mirror QR kodunuzu yönetin.</p>
+
+                <div id="campaigns-list" class="appointments-grid" style="margin-bottom: 2rem;">
+                    <div class="loading-state">Kampanyalar yükleniyor...</div>
+                </div>
+
+                <!-- QR Section Moved Here -->
+                <div class="form-card" id="qr-section">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+                        <h3 style="margin:0;">🪞 Mirror QR (Hızlı Randevu)</h3>
+                        <span class="badge badge-accent" style="font-size:0.65rem;">SATIŞ ODAKLI</span>
+                    </div>
+                    <p class="form-hint" style="margin-bottom:1.5rem;">Bu QR kodu dükkanınıza asın. Müşterileriniz
+                        okuttuğunda belirlediğiniz indirimle randevu alabilir.</p>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">İndirim Oranı (%)</label>
+                            <input type="number" id="qr-discount-input" class="form-input" value="10" min="0" max="100">
                         </div>
-                        <div class="form-row">
-                            <div class="input-group">
-                                <label for="f-service">Hizmet</label>
-                                <select id="f-service">
-                                    <option value="">Seçiniz</option>
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <label for="f-staff">Personel</label>
-                                <select id="f-staff">
-                                    <option value="">Farketmez (Herhangi Biri)</option>
-                                </select>
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label">Üst Yazı (Başlık)</label>
+                            <input type="text" id="qr-header-input" class="form-input" value="HIZLI RANDEVU & İNDİRİM">
                         </div>
-                        <div class="form-row">
-                            <div class="input-group" style="flex: 1;">
-                                <label>Tarih Seçin</label>
-                                <div class="bento-calendar-card" id="cal-new-container">
-                                    <div class="calendar-header">
-                                        <div class="calendar-nav">
-                                            <button type="button" class="calendar-nav-btn" data-action="prev">❮</button>
-                                            <div class="calendar-month-year" id="cal-new-month-year">...</div>
-                                            <button type="button" class="calendar-nav-btn" data-action="next">❯</button>
-                                        </div>
-                                    </div>
-                                    <div class="calendar-grid" id="cal-new-grid"></div>
-                                    <input type="hidden" id="f-date" required />
-                                </div>
-                            </div>
-                            <div class="input-group" style="flex: 0 0 200px;">
-                                <label for="f-time">Saat</label>
-                                <select id="f-time" required>
-                                    <option value="">Seçiniz</option>
-                                </select>
-                            </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label class="form-label">Alt Yazı (Slogan)</label>
+                            <input type="text" id="qr-footer-input" class="form-input" value="Kodu Okut, Sıra Bekleme!">
                         </div>
-                        <div class="input-group">
-                            <label for="f-notes">Notlar</label>
-                            <textarea id="f-notes" rows="3" placeholder="Ek notlar (opsiyonel)"></textarea>
+                    </div>
+
+                    <div id="qr-printable-area"
+                        style="background:white; padding:2rem; border-radius:1.5rem; text-align:center; color:#000; box-shadow:0 10px 30px rgba(0,0,0,0.1); margin-bottom:1.5rem;">
+                        <div id="qr-biz-name"
+                            style="font-weight:800; font-size:1.4rem; margin-bottom:0.1rem; color:#000;">Dükkan Adı
                         </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary" id="create-btn">Randevu Oluştur</button>
-                            <p id="form-message" class="form-message hidden"></p>
-                        </div>
-                    </form>
+                        <div id="qr-header-preview"
+                            style="font-size:0.8rem; margin-bottom:1.5rem; color:#666; font-weight:600; text-transform:uppercase;">
+                            HIZLI RANDEVU & %10 İNDİRİM</div>
+                        <div id="qr-code" style="display:flex; justify-content:center; margin-bottom:1.5rem;"></div>
+                        <div id="qr-footer-preview"
+                            style="font-size:0.75rem; color:#888; border-top:1px dashed #eee; padding-top:1rem; margin-top:1rem;">
+                            Kodu Okut, Sıra Bekleme!</div>
+                    </div>
+
+                    <div style="display:flex; gap:0.75rem;">
+                        <button class="btn btn-primary" id="print-qr-btn" style="flex:1;">
+                            <i data-lucide="printer"
+                                style="width:16px; height:16px; display:inline-block; vertical-align:middle; margin-right:0.5rem;"></i>
+                            Yazdır (A4)
+                        </button>
+                        <button class="btn btn-ghost" id="download-qr-btn" style="flex:1;">
+                            <i data-lucide="download"
+                                style="width:16px; height:16px; display:inline-block; vertical-align:middle; margin-right:0.5rem;"></i>
+                            İndir
+                        </button>
+                    </div>
                 </div>
             </section>
 
@@ -1265,115 +1269,10 @@
                             </div>
                         </div>
 
-                        <div class="form-card" style="margin-top:1.5rem" id="qr-section">
-                            <div
-                                style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
-                                <h3 style="margin:0;">🪞 Mirror QR (Hızlı Randevu)</h3>
-                                <span class="badge badge-accent" style="font-size:0.65rem;">SATIŞ ODAKLI</span>
-                            </div>
-                            <p class="form-hint" style="margin-bottom:1.5rem;">Bu QR kodu dükkanınıza asın.
-                                Müşterileriniz
-                                okuttuğunda belirlediğiniz indirimle randevu alabilir.</p>
-
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
-                                <div class="form-group">
-                                    <label class="form-label">İndirim Oranı (%)</label>
-                                    <input type="number" id="qr-discount-input" class="form-input" value="10" min="0"
-                                        max="100">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Üst Yazı (Başlık)</label>
-                                    <input type="text" id="qr-header-input" class="form-input"
-                                        value="HIZLI RANDEVU & İNDİRİM">
-                                </div>
-                                <div class="form-group" style="grid-column: span 2;">
-                                    <label class="form-label">Alt Yazı (Slogan)</label>
-                                    <input type="text" id="qr-footer-input" class="form-input"
-                                        value="Kodu Okut, Sıra Bekleme!">
-                                </div>
-                            </div>
-
-                            <div id="qr-printable-area"
-                                style="background:white; padding:2rem; border-radius:1.5rem; text-align:center; color:#000; box-shadow:0 10px 30px rgba(0,0,0,0.1); margin-bottom:1.5rem;">
-                                <div id="qr-biz-name"
-                                    style="font-weight:800; font-size:1.4rem; margin-bottom:0.1rem; color:#000;">Dükkan
-                                    Adı
-                                </div>
-                                <div id="qr-header-preview"
-                                    style="font-size:0.8rem; margin-bottom:1.5rem; color:#666; font-weight:600; text-transform:uppercase;">
-                                    HIZLI RANDEVU & %10 İNDİRİM</div>
-                                <div id="qr-code" style="display:flex; justify-content:center; margin-bottom:1.5rem;">
-                                </div>
-                                <div id="qr-footer-preview"
-                                    style="font-size:0.75rem; color:#888; border-top:1px dashed #eee; padding-top:1rem; margin-top:1rem;">
-                                    Kodu Okut, Sıra Bekleme!</div>
-                            </div>
-
-                            <div style="display:flex; gap:0.75rem;">
-                                <button class="btn btn-primary" id="print-qr-btn" style="flex:1;">
-                                    <i data-lucide="printer"
-                                        style="width:16px; height:16px; display:inline-block; vertical-align:middle; margin-right:0.5rem;"></i>
-                                    Yazdır (A4)
-                                </button>
-                                <button class="btn btn-ghost" id="download-qr-btn" style="flex:1;">
-                                    <i data-lucide="download"
-                                        style="width:16px; height:16px; display:inline-block; vertical-align:middle; margin-right:0.5rem;"></i>
-                                    İndir
-                                </button>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="settings-right dashboard-container">
-                        <div class="bento-grid">
-                            <!-- Card 1: Revenue -->
-                            <div class="bento-card span-2" id="bento-revenue">
-                                <div class="bento-gradient g-blue"></div>
-                                <div class="bento-content">
-                                    <h3>Toplam Kazanç</h3>
-                                    <p class="bento-value">₺0</p>
-                                    <p class="bento-subtitle">Tüm zamanların onaylanan geliri</p>
-                                </div>
-                            </div>
-                            <!-- Card 2: Today's Load -->
-                            <div class="bento-card" id="bento-load">
-                                <div class="bento-gradient g-cyan"></div>
-                                <div class="bento-content">
-                                    <h3>Randevu Doluluğu</h3>
-                                    <p class="bento-value">0%</p>
-                                    <p class="bento-subtitle">Mevcut doluluk</p>
-                                </div>
-                            </div>
-                            <!-- Card 3: Satisfaction -->
-                            <div class="bento-card" id="bento-satisfaction">
-                                <div class="bento-gradient g-purple"></div>
-                                <div class="bento-content">
-                                    <h3>Memnuniyet</h3>
-                                    <p class="bento-value">4.9/5</p>
-                                    <p class="bento-subtitle">Müşteri puanı</p>
-                                </div>
-                            </div>
-                            <!-- Card 4: New Customers -->
-                            <div class="bento-card span-2" id="bento-new-customers">
-                                <div class="bento-gradient g-green"></div>
-                                <div class="bento-content">
-                                    <h3>Yeni Müşteriler</h3>
-                                    <p class="bento-value">0</p>
-                                    <p class="bento-subtitle">Bugünkü keşifler</p>
-                                </div>
-                            </div>
-                            <!-- Card 5: Cancellation Rate -->
-                            <div class="bento-card span-3" id="bento-cancellation">
-                                <div class="bento-gradient g-orange"></div>
-                                <div class="bento-content">
-                                    <h3>İptal Oranı</h3>
-                                    <p class="bento-value">0%</p>
-                                    <p class="bento-subtitle">Haftalık kayıp analizi</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-card" style="margin-top:1.5rem">
+                        <div class="form-card">
                             <h3>Çalışanlar (Ekip)</h3>
                             <p class="form-hint">Müşterilerin seçebilmesi için personellerinizi ekleyin.</p>
                             <div class="svc-add-row" id="staff-add-row"
@@ -1461,6 +1360,63 @@
                 <p class="form-hint" style="margin-bottom:1.5rem;">Sunduğunuz hizmetleri detaylı olarak ekleyip yönetin
                     — müşteri randevu formunda bunları görecek.</p>
 
+                <div class="form-card" style="margin-bottom: 2rem; border: 2px solid var(--accent-glow);">
+                    <h3 style="color: var(--accent);">➕ Yeni Randevu Oluştur</h3>
+                    <p class="form-hint">Manuel randevu girişi için bu formu kullanın.</p>
+                    <form id="new-appointment-form" novalidate>
+                        <div class="form-row">
+                            <div class="input-group"><label for="f-name">Ad Soyad</label><input type="text" id="f-name"
+                                    placeholder="Müşteri adı soyadı" required /></div>
+                            <div class="input-group"><label for="f-phone">Telefon</label><input type="tel" id="f-phone"
+                                    placeholder="+905xx xxx xx xx" required /></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="f-service">Hizmet</label>
+                                <select id="f-service">
+                                    <option value="">Seçiniz</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="f-staff">Personel</label>
+                                <select id="f-staff">
+                                    <option value="">Farketmez (Herhangi Biri)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group" style="flex: 1;">
+                                <label>Tarih Seçin</label>
+                                <div class="bento-calendar-card" id="cal-new-container">
+                                    <div class="calendar-header">
+                                        <div class="calendar-nav">
+                                            <button type="button" class="calendar-nav-btn" data-action="prev">❮</button>
+                                            <div class="calendar-month-year" id="cal-new-month-year">...</div>
+                                            <button type="button" class="calendar-nav-btn" data-action="next">❯</button>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-grid" id="cal-new-grid"></div>
+                                    <input type="hidden" id="f-date" required />
+                                </div>
+                            </div>
+                            <div class="input-group" style="flex: 0 0 200px;">
+                                <label for="f-time">Saat</label>
+                                <select id="f-time" required>
+                                    <option value="">Seçiniz</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="f-notes">Notlar</label>
+                            <textarea id="f-notes" rows="3" placeholder="Ek notlar (opsiyonel)"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="create-btn">Randevu Oluştur</button>
+                            <p id="form-message" class="form-message hidden"></p>
+                        </div>
+                    </form>
+                </div>
+
                 <div
                     style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; margin-bottom:1.5rem;">
                     <div style="display:grid; grid-template-columns:1fr; gap:1rem; margin-bottom:1rem;">
@@ -1539,10 +1495,95 @@
                         <p id="extra-svc-msg" class="form-message hidden"></p>
                     </div>
                 </div>
+
+                <!-- Ek Hizmet Düzenleme Modal -->
+                <div id="edit-extra-svc-overlay" class="reset-overlay hidden" style="z-index: 10500;">
+                    <div class="reset-card" style="max-width:400px;">
+                        <button class="reset-close-btn" id="edit-extra-svc-close">✕</button>
+                        <h2 style="margin-bottom:0.25rem;">✏️ Ek Hizmet Düzenle</h2>
+
+                        <input type="hidden" id="edit-extra-svc-id">
+
+                        <div class="input-group" style="margin-bottom:0.85rem;">
+                            <label for="edit-extra-svc-name">Hizmet Adı</label>
+                            <input type="text" id="edit-extra-svc-name"
+                                style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1.25rem;">
+                            <div class="input-group">
+                                <label for="edit-extra-svc-dur">Süre (Dk)</label>
+                                <input type="number" id="edit-extra-svc-dur"
+                                    style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
+                            </div>
+                            <div class="input-group">
+                                <label for="edit-extra-svc-price">Ücret (₺)</label>
+                                <input type="number" id="edit-extra-svc-price"
+                                    style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" id="edit-extra-svc-save-btn" style="width:100%;">Kaydet</button>
+                        <p id="edit-extra-svc-msg" class="form-message hidden"></p>
+                    </div>
+                </div>
             </section>
 
             <!-- TAB: RAPORLAR — PERSONEL PERFORMANSI -->
             <section id="tab-reports" class="tab-content hidden">
+                <div class="section-header">
+                    <h3>📊 Genel İstatistikler ve Personel Raporu</h3>
+                </div>
+
+                <div class="dashboard-container" style="margin-bottom: 2rem;">
+                    <div class="bento-grid">
+                        <!-- Card 1: Revenue -->
+                        <div class="bento-card span-2" id="bento-revenue">
+                            <div class="bento-gradient g-blue"></div>
+                            <div class="bento-content">
+                                <h3>Toplam Kazanç</h3>
+                                <p class="bento-value">₺0</p>
+                                <p class="bento-subtitle">Tüm zamanların onaylanan geliri</p>
+                            </div>
+                        </div>
+                        <!-- Card 2: Today's Load -->
+                        <div class="bento-card" id="bento-load">
+                            <div class="bento-gradient g-cyan"></div>
+                            <div class="bento-content">
+                                <h3>Randevu Doluluğu</h3>
+                                <p class="bento-value">0%</p>
+                                <p class="bento-subtitle">Mevcut doluluk</p>
+                            </div>
+                        </div>
+                        <!-- Card 3: Satisfaction -->
+                        <div class="bento-card" id="bento-satisfaction">
+                            <div class="bento-gradient g-purple"></div>
+                            <div class="bento-content">
+                                <h3>Memnuniyet</h3>
+                                <p class="bento-value">4.9/5</p>
+                                <p class="bento-subtitle">Müşteri puanı</p>
+                            </div>
+                        </div>
+                        <!-- Card 4: New Customers -->
+                        <div class="bento-card span-2" id="bento-new-customers">
+                            <div class="bento-gradient g-green"></div>
+                            <div class="bento-content">
+                                <h3>Yeni Müşteriler</h3>
+                                <p class="bento-value">0</p>
+                                <p class="bento-subtitle">Bugünkü keşifler</p>
+                            </div>
+                        </div>
+                        <!-- Card 5: Cancellation Rate -->
+                        <div class="bento-card span-3" id="bento-cancellation">
+                            <div class="bento-gradient g-orange"></div>
+                            <div class="bento-content">
+                                <h3>İptal Oranı</h3>
+                                <p class="bento-value">0%</p>
+                                <p class="bento-subtitle">Haftalık kayıp analizi</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="section-header">
                     <h3>📊 Personel Performans Raporu</h3>
                 </div>
@@ -1575,38 +1616,38 @@
                     <div class="loading-state">Yükleniyor...</div>
                 </div>
 
-                <!-- Kampanya Düzenleme Modal -->
-                <div id="campaign-edit-overlay" class="reset-overlay hidden" style="z-index:10500;">
-                    <div class="reset-card" style="max-width:440px;">
-                        <button class="reset-close-btn" id="campaign-edit-close">✕</button>
-                        <h2 style="margin-bottom:0.25rem;" id="campaign-svc-name">Hizmet</h2>
-                        <p class="form-hint" style="margin-bottom:1.25rem;">Kampanya süresi dolduğunda booking
-                            sayfasında normal fiyat görünür.</p>
-                        <div class="input-group" style="margin-bottom:0.85rem;">
-                            <label>Kampanya Etiketi</label>
-                            <input type="text" id="campaign-label-input"
-                                placeholder="örn: Bahar İndirimi, Flash Sale..."
-                                style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
-                        </div>
-                        <div class="input-group" style="margin-bottom:0.85rem;">
-                            <label>İndirimli Fiyat (₺)</label>
-                            <input type="number" id="campaign-price-input" min="0" placeholder="0"
-                                style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
-                        </div>
-                        <div class="input-group" style="margin-bottom:1.25rem;">
-                            <label>Kampanya Bitiş Tarihi & Saati</label>
-                            <input type="datetime-local" id="campaign-ends-input"
-                                style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
-                        </div>
-                        <div style="display:flex; gap:0.75rem;">
-                            <button class="btn btn-primary" id="campaign-save-btn" style="flex:1;">💾 Kaydet</button>
-                            <button class="btn btn-ghost" id="campaign-clear-btn"
-                                style="flex:1; border:1px solid var(--red); color:var(--red);">🗑 Kaldır</button>
-                        </div>
-                        <p id="campaign-msg" class="form-message hidden"></p>
-                    </div>
-                </div>
             </section>
+
+            <!-- Kampanya Düzenleme Modal (Global) -->
+            <div id="campaign-edit-overlay" class="reset-overlay hidden" style="z-index:10500;">
+                <div class="reset-card" style="max-width:440px;">
+                    <button class="reset-close-btn" id="campaign-edit-close">✕</button>
+                    <h2 style="margin-bottom:0.25rem;" id="campaign-svc-name">Hizmet</h2>
+                    <p class="form-hint" style="margin-bottom:1.25rem;">Kampanya süresi dolduğunda booking
+                        sayfasında normal fiyat görünür.</p>
+                    <div class="input-group" style="margin-bottom:0.85rem;">
+                        <label>Kampanya Etiketi</label>
+                        <input type="text" id="campaign-label-input" placeholder="örn: Bahar İndirimi, Flash Sale..."
+                            style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
+                    </div>
+                    <div class="input-group" style="margin-bottom:0.85rem;">
+                        <label>İndirimli Fiyat (₺)</label>
+                        <input type="number" id="campaign-price-input" min="0" placeholder="0"
+                            style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
+                    </div>
+                    <div class="input-group" style="margin-bottom:1.25rem;">
+                        <label>Kampanya Bitiş Tarihi & Saati</label>
+                        <input type="datetime-local" id="campaign-ends-input"
+                            style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
+                    </div>
+                    <div style="display:flex; gap:0.75rem;">
+                        <button class="btn btn-primary" id="campaign-save-btn" style="flex:1;">💾 Kaydet</button>
+                        <button class="btn btn-ghost" id="campaign-clear-btn"
+                            style="flex:1; border:1px solid var(--red); color:var(--red);">🗑 Kaldır</button>
+                    </div>
+                    <p id="campaign-msg" class="form-message hidden"></p>
+                </div>
+            </div>
 
         </main>
     </div>

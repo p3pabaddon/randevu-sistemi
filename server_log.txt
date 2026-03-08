@@ -3,3 +3,54 @@
   Appointment Booking Server (Hardened)
   → http://localhost:4000
 
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 1
+[SSE] Ayrıldı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 1
+[WhatsApp-MOCK] Gönderildi (Twilio kapalı) → +905550000000
+[SSE] Ayrıldı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 1
+[Waitlist] Kontrol ediliyor: 42fddab5-e8ac-4313-8943-a124dd76c119 | 2026-03-11 | 09:00:00
+[Waitlist] Uygun kayıt bulunamadı.
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 2
+[SSE] Ayrıldı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 2
+[SSE] Ayrıldı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 2
+[WhatsApp-MOCK] Gönderildi (Twilio kapalı) → +905550000000
+[Waitlist] Kontrol ediliyor: 42fddab5-e8ac-4313-8943-a124dd76c119 | 2026-03-11 | 09:00:00
+[Waitlist] Uygun kayıt bulunamadı.
+[Waitlist] Kontrol ediliyor: 42fddab5-e8ac-4313-8943-a124dd76c119 | 2026-03-11 | 09:00:00
+[Waitlist] Uygun kayıt bulunamadı.
+[Waitlist] Kontrol ediliyor: 42fddab5-e8ac-4313-8943-a124dd76c119 | 2026-03-11 | 09:00:00
+[Waitlist] Uygun kayıt bulunamadı.
+[Waitlist] Kontrol ediliyor: 42fddab5-e8ac-4313-8943-a124dd76c119 | 2026-03-11 | 09:00:00
+[Waitlist] Uygun kayıt bulunamadı.
+[SSE] Ayrıldı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 2
+[Waitlist] Kontrol ediliyor: 42fddab5-e8ac-4313-8943-a124dd76c119 | 2026-03-11 | 09:00:00
+[Waitlist] Uygun kayıt bulunamadı.
+[SSE] Ayrıldı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119
+[SSE] Ayrıldı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 1
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 2
+[SSE] Ayrıldı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 2
+[SSE] Ayrıldı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 2
+[WhatsApp-MOCK] Gönderildi (Twilio kapalı) → +905388743162
+[Waitlist] Kontrol ediliyor: 42fddab5-e8ac-4313-8943-a124dd76c119 | 2026-03-08 | 14:30:00
+[Waitlist] Uygun kayıt bulunamadı.
+[SSE] Ayrıldı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 2
+[Waitlist] Kontrol ediliyor: 42fddab5-e8ac-4313-8943-a124dd76c119 | 2026-03-11 | 09:00:00
+[Waitlist] Uygun kayıt bulunamadı.
+[SSE] Ayrıldı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 2
+[Waitlist] Kontrol ediliyor: 42fddab5-e8ac-4313-8943-a124dd76c119 | 2026-03-08 | 14:30:00
+[Waitlist] Uygun kayıt bulunamadı.
+[SSE] Ayrıldı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 2
+[SSE] Ayrıldı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 2
+[SSE] Ayrıldı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119
+[SSE] Bağlandı → tenant:42fddab5-e8ac-4313-8943-a124dd76c119 | Aktif: 2

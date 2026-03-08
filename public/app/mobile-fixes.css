@@ -1,0 +1,48 @@
+/* ── MOBILE FIXES (354x838 optimization) ────────────────────── */
+
+@media (max-width: 768px) {
+
+    /* Reduce padding in bento cards to prevent value overflow */
+    .bento-content {
+        padding: 1.25rem 1.25rem !important;
+    }
+
+    .bento-value {
+        font-size: 1.75rem !important;
+    }
+
+    /* Reduce general content padding to gain width on small screens */
+    .tab-content {
+        padding: 4.5rem 0.75rem 6rem !important;
+    }
+
+    /* Fix potential overflow in stats row */
+    .stats-row {
+        gap: 0.5rem !important;
+    }
+
+    .stat-card {
+        padding: 0.75rem 0.5rem !important;
+    }
+
+    /* Ensure modals don't overflow horizontally */
+    .reset-card {
+        width: 95% !important;
+        padding: 1.5rem 1rem !important;
+    }
+}
+
+/* Specific optimization for very narrow screens like 354px */
+@media (max-width: 380px) {
+    .bento-value {
+        font-size: 1.5rem !important;
+    }
+
+    .bento-content h3 {
+        font-size: 0.75rem !important;
+    }
+
+    .bento-content {
+        padding: 1rem 1rem !important;
+    }
+}
