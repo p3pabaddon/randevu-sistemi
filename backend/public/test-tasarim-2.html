@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akıllı Randevu Sistemi Görseli</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Animasyon Tanımlamaları */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(1.5deg);
+            }
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 30px rgba(99, 102, 241, 0.2), 0 0 10px rgba(99, 102, 241, 0.1) inset;
+            }
+
+            50% {
+                box-shadow: 0 0 50px rgba(99, 102, 241, 0.4), 0 0 20px rgba(99, 102, 241, 0.2) inset;
+            }
+        }
+
+        @keyframes slide-in-left {
+            from {
+                opacity: 0;
+                transform: translateX(-40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slide-in-bottom {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes pop-in {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Animasyon Sınıfları */
+        .floating-ui {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .glow-card {
+            animation: pulse-glow 4s ease-in-out infinite;
+        }
+
+        .fade-in-left {
+            animation: slide-in-left 0.8s ease-out forwards;
+        }
+
+        .fade-in-bottom {
+            animation: slide-in-bottom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .slot-1 {
+            animation: pop-in 0.5s ease-out 0.6s forwards;
+            opacity: 0;
+        }
+
+        .slot-2 {
+            animation: pop-in 0.5s ease-out 0.8s forwards;
+            opacity: 0;
+        }
+
+        .slot-3 {
+            animation: pop-in 0.5s ease-out 1.0s forwards;
+            opacity: 0;
+        }
+
+        .slot-4 {
+            animation: pop-in 0.5s ease-out 1.2s forwards;
+            opacity: 0;
+        }
+
+        /* Notification Styling JS için değişti */
+        .notification {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        /* Glassmorphism Stil */
+        .glass {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Tıklanabilir Seçenek Stilleri */
+        .time-slot.available:hover:not(.selected) {
+            border-color: rgba(34, 211, 238, 0.6);
+            background-color: rgba(34, 211, 238, 0.08);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .time-slot.selected {
+            cursor: default;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 min-h-screen text-slate-200 flex items-center justify-center p-6 overflow-hidden">
+
+    <main class="max-w-6xl w-full flex flex-col lg:flex-row items-center justify-between gap-16">
+
+        <!-- Sol Taraf - Metin ve Özellikler -->
+        <div class="flex-1 space-y-8 fade-in-left lg:pr-10">
+            <div
+                class="inline-block px-4 py-1.5 rounded-full glass text-indigo-300 text-sm font-semibold tracking-wide uppercase border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+                ✨ Yeni Nesil Rezervasyon
+            </div>
+
+            <h1 class="text-5xl lg:text-6xl font-extrabold leading-tight text-white tracking-tight">
+                Randevularını <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400">Akıllıca
+                    Yönet</span>
+            </h1>
+
+            <p class="text-lg text-slate-400 max-w-lg leading-relaxed">
+                Müşterilerinize modern ve pürüzsüz bir rezervasyon deneyimi sunun. 7/24 kesintisiz çalışan sistemimiz
+                ile zaman kazanın.
+            </p>
+
+            <!-- Özellikler Listesi -->
+            <div class="space-y-5 pt-4">
+                <div class="flex items-center gap-4 text-slate-300 group">
+                    <div
+                        class="w-12 h-12 rounded-full glass flex items-center justify-center text-cyan-400 group-hover:bg-cyan-400/10 transition-colors shadow-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-bold text-white text-lg group-hover:text-cyan-400 transition-colors">7/24
+                            Otomatik Kayıt</div>
+                        <div class="text-sm text-slate-400">Uyurken bile randevu alın.</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 text-slate-300 group">
+                    <div
+                        class="w-12 h-12 rounded-full glass flex items-center justify-center text-indigo-400 group-hover:bg-indigo-400/10 transition-colors shadow-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-bold text-white text-lg group-hover:text-indigo-400 transition-colors">Anında
+                            Bildirimler</div>
+                        <div class="text-sm text-slate-400">SMS ve WhatsApp entegrasyonu.</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 text-slate-300 group">
+                    <div
+                        class="w-12 h-12 rounded-full glass flex items-center justify-center text-rose-400 group-hover:bg-rose-400/10 transition-colors shadow-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-bold text-white text-lg group-hover:text-rose-400 transition-colors">Güvenli
+                            Altyapı</div>
+                        <div class="text-sm text-slate-400">Verileriniz güvende ve yedekli.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Taraf - Dinamik Görsel (Floating Dashboard) -->
+        <div class="flex-1 relative w-full flex justify-center mt-10 lg:mt-0 fade-in-bottom">
+            <div class="floating-ui relative w-full flex justify-center">
+
+                <!-- Arka Planda Renkli Glow Efektleri -->
+                <div
+                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-indigo-600 rounded-full blur-[120px] opacity-40">
+                </div>
+                <div
+                    class="absolute -top-10 -right-10 w-[200px] h-[200px] bg-cyan-500 rounded-full blur-[90px] opacity-30">
+                </div>
+
+                <!-- Ana Dashboard Kartı (Telefon/Uygulama Görünümü) -->
+                <div
+                    class="relative w-full max-w-[360px] glass glow-card rounded-[2.5rem] p-7 shadow-[0_30px_60px_rgba(0,0,0,0.6)] overflow-visible border-slate-700/50">
+
+                    <!-- Üst Header: Profil & Tarih -->
+                    <div class="flex justify-between items-center mb-8 gap-4">
+                        <div>
+                            <div class="text-xs text-indigo-300 font-bold uppercase tracking-wider mb-1">Takvim</div>
+                            <div class="text-2xl font-black text-white flex items-center gap-2">
+                                14 Mart <div
+                                    class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(34,211,238,0.8)]">
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-400 to-indigo-500 p-[2px] shadow-lg shrink-0">
+                            <div
+                                class="w-full h-full bg-slate-900 rounded-full flex items-center justify-center overflow-hidden">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=transparent"
+                                    alt="Avatar" class="w-10 h-10">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Takvim Mini Görünümü (Tasarım Detayı) -->
+                    <div class="flex justify-between mb-8 text-center text-sm">
+                        <div class="text-slate-500">
+                            <div class="mb-1 text-xs">Pzt</div>
+                            <div>12</div>
+                        </div>
+                        <div class="text-slate-500">
+                            <div class="mb-1 text-xs">Sal</div>
+                            <div>13</div>
+                        </div>
+                        <div
+                            class="bg-indigo-500 text-white rounded-xl w-10 py-1.5 shadow-lg shadow-indigo-500/30 transform scale-110">
+                            <div class="mb-1 text-xs font-bold">Çar</div>
+                            <div class="font-bold">14</div>
+                        </div>
+                        <div class="text-slate-500">
+                            <div class="mb-1 text-xs">Per</div>
+                            <div>15</div>
+                        </div>
+                        <div class="text-slate-500">
+                            <div class="mb-1 text-xs">Cum</div>
+                            <div>16</div>
+                        </div>
+                    </div>
+
+                    <!-- Saat Slotları -->
+                    <div class="grid grid-cols-2 gap-3 mb-8">
+                        <div class="time-slot available flex items-center justify-center py-3.5 rounded-xl border border-slate-600/50 bg-slate-800/50 text-slate-300 font-mono text-sm slot-1 transition-all duration-300"
+                            onclick="selectSlot(this, '09:00')">
+                            <span>09:00</span>
+                        </div>
+                        <div class="time-slot available selected flex items-center justify-center py-3.5 rounded-xl border-2 border-cyan-400 bg-cyan-400/10 text-cyan-300 font-mono text-sm font-bold shadow-[0_0_15px_rgba(34,211,238,0.2)] slot-2 relative overflow-hidden transition-all duration-300"
+                            onclick="selectSlot(this, '10:30')">
+                            <div
+                                class="anim-bg absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent -translate-x-full animate-[slide-in-left_2s_infinite]">
+                            </div>
+                            <span>10:30 ✓</span>
+                        </div>
+                        <div class="time-slot available flex items-center justify-center py-3.5 rounded-xl border border-slate-600/50 bg-slate-800/50 text-slate-300 font-mono text-sm slot-3 transition-all duration-300"
+                            onclick="selectSlot(this, '13:00')">
+                            <span>13:00</span>
+                        </div>
+                        <div
+                            class="time-slot flex items-center justify-center py-3.5 rounded-xl border border-rose-500/30 bg-rose-500/5 text-rose-400/40 font-mono text-sm slot-4 line-through opacity-50 relative cursor-not-allowed">
+                            <span>15:00</span>
+                            <div
+                                class="absolute -top-2 -right-2 bg-rose-500 text-white text-[9px] px-1.5 py-0.5 rounded uppercase font-bold">
+                                Dolu</div>
+                        </div>
+                    </div>
+
+                    <!-- Seçili Hizmet Özeti -->
+                    <div class="glass rounded-xl p-4 border border-slate-600/50 relative overflow-hidden group">
+                        <!-- Şık arka plan gradyanı -->
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                        </div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs text-slate-400 font-medium">Seçilen Hizmet</span>
+                            <span class="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded-md">45
+                                Dk</span>
+                        </div>
+                        <div class="text-white font-bold text-lg mb-1">VIP Bakım & Danışmanlık</div>
+                        <div class="text-slate-400 text-sm font-medium">₺750,00</div>
+                    </div>
+
+                    <!-- Onay Bildirimi (Gizli Durumda Başlar) -->
+                    <div id="success-notification"
+                        class="notification absolute -right-8 lg:-right-16 top-[60%] glass rounded-2xl p-4 shadow-[0_20px_40px_rgba(0,0,0,0.5)] border border-slate-600/80 border-l-4 border-l-green-400 flex items-center gap-4 w-72 backdrop-blur-2xl bg-slate-800/80 hover:scale-105 transition-transform z-10">
+                        <div
+                            class="w-12 h-12 rounded-full bg-green-400/20 flex items-center justify-center text-green-400 shadow-[0_0_15px_rgba(74,222,128,0.3)] shrink-0">
+                            <!-- success icon -->
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-sm font-black text-white tracking-wide">Randevu Onaylandı!</div>
+                            <div class="text-xs text-slate-400 mt-0.5 font-medium"><span id="notif-time">10:30</span>
+                                İçin Kayıt Alındı</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Sayfa yüklendiğinde ilk bildirimi gecikmeli olarak göster
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const notif = document.getElementById('success-notification');
+                if (notif) notif.classList.add('show');
+
+                // 3.5 saniye sonra kapat
+                if (!window.notificationTimeout) {
+                    window.notificationTimeout = setTimeout(() => {
+                        if (notif) notif.classList.remove('show');
+                    }, 3500);
+                }
+            }, 2000); // Sayfa açıldıktan 2 saniye sonra otomatik belirir
+        });
+
+        // Tıklanabilir slotları yöneten fonksiyon
+        function selectSlot(element, time) {
+            // Sadece müsait olanlara tıklanabilsin
+            if (!element.classList.contains('available')) return;
+            // Zaten seçiliyse bir şey yapma
+            if (element.classList.contains('selected')) return;
+
+            // 1. Tüm müsait slotları varsayılan görünüme çevir
+            const allAvailable = document.querySelectorAll('.time-slot.available');
+            allAvailable.forEach(slot => {
+                const slotTime = slot.innerText.replace('✓', '').trim();
+                slot.innerHTML = `<span>${slotTime}</span>`;
+
+                // Seçili durum sınıflarını çıkarıp normal sınıfları ekle
+                slot.classList.remove('selected', 'border-2', 'border-cyan-400', 'bg-cyan-400/10', 'text-cyan-300', 'font-bold', 'shadow-[0_0_15px_rgba(34,211,238,0.2)]', 'relative', 'overflow-hidden');
+                slot.classList.add('border', 'border-slate-600/50', 'bg-slate-800/50', 'text-slate-300');
+            });
+
+            // 2. Tıklanan elementi "seçili" duruma getir
+            element.classList.remove('border', 'border-slate-600/50', 'bg-slate-800/50', 'text-slate-300');
+            element.classList.add('selected', 'border-2', 'border-cyan-400', 'bg-cyan-400/10', 'text-cyan-300', 'font-bold', 'shadow-[0_0_15px_rgba(34,211,238,0.2)]', 'relative', 'overflow-hidden');
+
+            // ✅ Tik işaretini ve animasyon katmanını ekle
+            element.innerHTML = `
+                <div class="anim-bg absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent -translate-x-full animate-[slide-in-left_2s_infinite]"></div>
+                <span>${time} ✓</span>
+            `;
+
+            // 3. Bildirimi göster / Güncelle
+            const notification = document.getElementById('success-notification');
+            const notifTime = document.getElementById('notif-time');
+
+            // Saati yaz
+            notifTime.innerText = time;
+
+            // Eski zamanlayıcıyı (bildirimi gizleyen timeout varsa) temizle ki hemen kapanmasın
+            if (window.notificationTimeout) {
+                clearTimeout(window.notificationTimeout);
+            }
+
+            // Bildirimi kapat (animasyonu resetlemek için)
+            notification.classList.remove('show');
+
+            // Çok kısa süre sonra tekrar aç
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 50);
+
+            // Yeni zamanlayıcı oluştur: Açıldıktan 3 saniye sonra geri gizle
+            window.notificationTimeout = setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

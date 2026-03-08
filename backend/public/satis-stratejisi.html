@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Düzen ve Kolaylık Stratejisi</title>
+    <!-- Tailwind CSS (Framer'da embed içindeyken bu linkin başta kalması iyi olur) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: transparent;
+            margin: 0;
+        }
+
+        /* Modern Bento Grid Hover Effectleri */
+        .bento-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bento-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.06), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .bento-card:hover::before {
+            opacity: 1;
+        }
+
+        .bento-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: rgba(99, 102, 241, 0.4);
+            background: rgba(30, 41, 59, 0.6);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.1) inset;
+        }
+
+        /* Gradient Yazılar için */
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 3D Model Dönme Efekti */
+        .spin-slow {
+            animation: spin 15s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        .ring-anim {
+            animation: pulse-ring 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+    </style>
+</head>
+
+<body class="text-slate-200 p-4 lg:p-10 font-sans"
+    style="background: linear-gradient(to bottom right, #020617, #0f172a);">
+
+    <!-- Başlık Kısmı -->
+    <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-indigo-400 font-bold tracking-wider uppercase text-sm mb-3">Sıfır Karmaşa, Tam Düzen</h2>
+        <h3 class="text-4xl lg:text-5xl font-extrabold text-white mb-6">
+            Dijital Karmaşaya <span class="bg-gradient-to-r from-cyan-400 to-indigo-500 text-gradient">Son Verin</span>
+        </h3>
+        <p class="text-slate-400 text-lg">Ödemeler sıcak işletmenizde nakit veya kartla devam etsin. Biz sadece WhatsApp
+            ve defter kargaşasını ortadan kaldırıyor, size zaman kazandırıyoruz.</p>
+    </div>
+
+    <!-- BENTO GRID ALANI -->
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- 1. Büyük Kart (Sol Taraf) - Sıfır No Show (Müşteri Kaybı) -->
+        <div class="bento-card rounded-3xl p-8 lg:col-span-2 group">
+            <div class="flex flex-col lg:flex-row items-center gap-8 h-full">
+                <div class="flex-1 space-y-4">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 mb-6 group-hover:bg-indigo-500/20 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                            </path>
+                        </svg>
+                    </div>
+                    <h4 class="text-2xl font-bold text-white tracking-tight">Kusursuz Takvim Yönetimi</h4>
+                    <p class="text-slate-400 leading-relaxed">Saat 03:00'te gelen "Müsait misiniz?" mesajları, çakışan
+                        randevular, üstü çizilmiş not defterleri... Hepsini unutun. Akıllı sistemimiz programınızı jilet
+                        gibi organize eder.</p>
+
+                    <div class="pt-4 flex items-center gap-3">
+                        <span
+                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-sm font-medium border border-cyan-500/20">
+                            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                            Otomatik Düzen
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Görsel Grafik (Dinamik Bar Grafiği Simülasyonu - Zaman Tasarrufu) -->
+                <div
+                    class="w-full lg:w-64 h-48 bg-slate-900/50 rounded-2xl border border-slate-700/50 p-5 flex flex-col justify-end gap-3 relative overflow-hidden group-hover:border-indigo-500/30 transition-colors">
+                    <div class="absolute top-4 left-5 text-xs text-slate-500 font-bold uppercase tracking-widest">
+                        Kazanılan Zaman</div>
+
+                    <div class="flex items-end justify-between h-full w-full gap-2 z-10">
+                        <div
+                            class="w-1/4 bg-slate-700 rounded-t-lg h-12 group-hover:h-16 transition-all duration-700 ease-out">
+                        </div>
+                        <div
+                            class="w-1/4 bg-indigo-500/50 rounded-t-lg h-20 group-hover:h-24 transition-all duration-700 ease-out delay-75">
+                        </div>
+                        <div
+                            class="w-1/4 bg-cyan-400/80 rounded-t-lg h-24 group-hover:h-36 transition-all duration-700 ease-out delay-150 relative">
+                            <!-- Yükseliş İkonu -->
+                            <div
+                                class="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-slate-900 text-xs font-bold px-2 py-0.5 rounded shadow-[0_0_15px_rgba(255,255,255,0.5)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-500">
+                                +3 Saat / Gün</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Küçük Kart (Sağ Üst) - 7/24 Kesintisiz -->
+        <div class="bento-card rounded-3xl p-8 group flex flex-col text-center lg:text-left">
+            <div class="h-full flex flex-col">
+                <div
+                    class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20 mb-6 mx-auto lg:mx-0 group-hover:rotate-[15deg] group-hover:scale-110 transition-all z-10">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h4 class="text-xl font-bold text-white mb-3 z-10 tracking-tight">Siz İşinize Odaklanın</h4>
+                <p class="text-slate-400 text-sm flex-1 leading-relaxed z-10">Siz salonda sanatınızı icra ederken,
+                    asistanınız 7/24 randevu taleplerini alıp uygun slotlara yerleştirsin. Telefon bölünmelerine son.
+                </p>
+            </div>
+        </div>
+
+        <!-- 3. Küçük Kart (Alt Sol) - Kolay Yönetim -->
+        <div class="bento-card rounded-3xl p-8 group flex flex-col justify-center items-center">
+            <div class="flex items-center justify-center h-28 mb-4 relative z-10 w-full">
+                <!-- İç içe halkalar animasyonu -->
+                <div
+                    class="absolute inset-0 m-auto w-16 h-16 border-2 border-indigo-500 rounded-full opacity-20 ring-anim">
+                </div>
+                <div class="absolute inset-0 m-auto w-24 h-24 border-2 border-indigo-500 rounded-full opacity-10 ring-anim"
+                    style="animation-delay: 1s"></div>
+
+                <div
+                    class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-[0_0_30px_rgba(99,102,241,0.4)] z-10 shrink-0 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <h4 class="text-xl font-bold text-white mb-2 z-10 tracking-tight">Her Şey Elinizin Altında</h4>
+            <p class="text-slate-400 text-sm text-center leading-relaxed z-10">Kim ne zaman geliyor, hangi işlemi
+                yaptıracak? Tüm bilgiler telefonunuzda, tabletinizde veya bilgisayarınızda bir tık uzağınızda.</p>
+        </div>
+
+        <!-- 4. Büyük Kart (Alt Sağ) - Ek Satış / Çapraz Satış Upsell -->
+        <div class="bento-card rounded-3xl p-8 lg:col-span-2 group">
+            <div class="flex flex-col md:flex-row items-center gap-10 h-full">
+
+                <!-- Fake Checkout UI (Artık Pürüzsüz Hizmet Onayı) -->
+                <div class="w-full md:w-1/2 order-2 md:order-1 relative z-10">
+                    <div
+                        class="bg-slate-900/80 backdrop-blur rounded-2xl border border-slate-700/50 p-5 transform lg:-rotate-2 group-hover:rotate-0 transition-transform duration-500 shadow-xl">
+                        <div class="text-[10px] text-slate-500 font-bold mb-3 uppercase tracking-widest">Pürüzsüz
+                            Müşteri Deneyimi</div>
+
+                        <!-- Seçilen Hizmet Özeti -->
+                        <div class="flex justify-between items-center bg-slate-800 rounded-xl p-3 mb-2">
+                            <span class="text-sm text-white font-medium">Randevu Kaydı</span>
+                            <span class="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded">Onaylandı
+                                ✓</span>
+                        </div>
+
+                        <!-- SMS Hatırlatma -->
+                        <div
+                            class="flex justify-between items-center bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-3 mb-3">
+                            <div class="flex items-center gap-2">
+                                <div
+                                    class="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center shrink-0">
+                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-white text-indigo-100">"Randevunuz perşembe 14:00'te
+                                    onaylanmıştır."</span>
+                            </div>
+                        </div>
+
+                        <!-- Ödeme Notu -->
+                        <div
+                            class="mt-2 pt-3 border-t border-slate-700/50 flex items-center justify-center gap-2 text-slate-400 text-xs">
+                            <svg class="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                                </path>
+                            </svg>
+                            Ödeme işlemleri işletmenizde yapılır.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full md:w-1/2 space-y-4 order-1 md:order-2 z-10">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400 border border-green-500/20 mb-6 group-hover:bg-green-500/20 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            </path>
+                        </svg>
+                    </div>
+                    <h4 class="text-2xl font-bold text-white tracking-tight">Ödeme Stresi Yok</h4>
+                    <p class="text-slate-400 leading-relaxed text-sm lg:text-base">Müşteriler online ödeme adımına
+                        takılmaz, hızlıca randevularını oluştururlar. Muhasebeniz ve tahsilatlarınız salonun samimi
+                        ortamında her zamanki gibi devam eder. Güven kaybı olmaz.</p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Mouse Takip Efekti için JS -->
+    <script>
+        document.querySelectorAll('.bento-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
+</body>
+
+</html>
