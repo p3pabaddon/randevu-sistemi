@@ -72,7 +72,7 @@ const ROICalculator = () => {
                         <div className="glass rounded-3xl p-8 space-y-8">
                             <div>
                                 <div className="flex justify-between mb-4">
-                                    <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Günlük Ortalama Randevu</label>
+                                    <label htmlFor="appointments-range" className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Günlük Ortalama Randevu</label>
                                     <span className="text-primary font-bold">{appointmentsPerDay}</span>
                                 </div>
                                 <input
@@ -89,7 +89,7 @@ const ROICalculator = () => {
 
                             <div>
                                 <div className="flex justify-between mb-4">
-                                    <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Hizmet Başı Ortalama Ücret (TL)</label>
+                                    <label htmlFor="price-range" className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Hizmet Başı Ortalama Ücret (TL)</label>
                                     <span className="text-primary font-bold">{averagePrice} ₺</span>
                                 </div>
                                 <input
@@ -107,7 +107,7 @@ const ROICalculator = () => {
 
                             <div>
                                 <div className="flex justify-between mb-4">
-                                    <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Mevcut "Gelmeyen Müşteri" Oranı</label>
+                                    <label htmlFor="noshow-range" className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Mevcut "Gelmeyen Müşteri" Oranı</label>
                                     <span className="text-primary font-bold">%{noShowRate}</span>
                                 </div>
                                 <input

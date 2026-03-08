@@ -50,7 +50,7 @@ const ReferralSection = () => {
                                             <CheckCircle2 className="w-6 h-6 text-primary" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-lg mb-1">{item.title}</h4>
+                                            <h3 className="font-bold text-lg mb-1">{item.title}</h3>
                                             <p className="text-muted-foreground text-sm">{item.desc}</p>
                                         </div>
                                     </motion.div>

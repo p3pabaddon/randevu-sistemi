@@ -44,7 +44,7 @@ const DashboardSection = () => {
                 {/* Appointments list */}
                 <div className="mt-5">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-sm font-semibold text-foreground">Bugünkü Randevular</h4>
+                    <h3 className="text-sm font-semibold text-foreground">Bugünkü Randevular</h3>
                   </div>
                   <div className="space-y-2">
                     {appointments.map(a => (
