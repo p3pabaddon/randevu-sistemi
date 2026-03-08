@@ -93,7 +93,7 @@ const AIAssistant: React.FC = () => {
                                     <div className="w-16 h-16 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <Sparkles className="text-primary/40" size={32} />
                                     </div>
-                                    <h5 className="text-sm font-bold mb-1">Selam! Ben Codenza Uzmanı.</h5>
+                                    <h5 className="text-sm font-bold mb-1">Selam! Ben Randevu Dünyası Uzmanı.</h5>
                                     <p className="text-xs text-muted-foreground px-6 leading-relaxed">
                                         Randevu sistemimiz hakkında merak ettiğin her şeyi bana sorabilirsin.
                                     </p>
