@@ -1,0 +1,222 @@
+/* ── SERVICE MANAGEMENT ──────────────────────────────────────────────────── */
+.svc-add-row {
+    display: grid;
+    grid-template-columns: 1fr 80px 100px auto;
+    gap: 0.6rem;
+    align-items: end;
+    margin-bottom: 1.25rem;
+}
+
+.svc-add-row .input-group {
+    margin: 0;
+}
+
+#add-svc-btn {
+    height: 38px;
+    white-space: nowrap;
+}
+
+.services-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.service-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: border-color var(--transition), background var(--transition);
+}
+
+.service-row:hover {
+    border-color: rgba(201, 168, 76, 0.3);
+    background: rgba(201, 168, 76, 0.04);
+}
+
+.svc-name {
+    flex: 1;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.svc-meta {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.svc-meta span {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
+}
+
+.svc-del-btn {
+    background: transparent;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: var(--red);
+    border-radius: var(--radius-sm);
+    padding: 0.28rem 0.65rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    transition: background var(--transition), border-color var(--transition);
+    flex-shrink: 0;
+}
+
+.svc-del-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* ── BLOCK GRID ──────────────────────────────────────────────────────────── */
+.block-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.45rem;
+}
+
+.block-slot {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.55rem 0.25rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition);
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.02);
+    user-select: none;
+}
+
+.block-slot:hover:not(.blocked):not(.has-appt) {
+    border-color: rgba(239, 68, 68, 0.4);
+    color: var(--red);
+    background: rgba(239, 68, 68, 0.06);
+    transform: translateY(-1px);
+}
+
+.block-slot.blocked {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: var(--red);
+}
+
+.block-slot.has-appt {
+    border-color: rgba(201, 168, 76, 0.4);
+    color: var(--accent);
+    background: rgba(201, 168, 76, 0.08);
+    cursor: default;
+}
+
+/* ── SETTINGS INFO ───────────────────────────────────────────────────────── */
+.settings-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 2rem;
+    margin-top: 0.5rem;
+}
+
+.settings-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.settings-field label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.settings-field span {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ── WEBHOOK BOX ──────────────────────────────────────────────────────────── */
+.webhook-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 1rem;
+}
+
+.webhook-box code {
+    flex: 1;
+    font-family: 'Courier New', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    word-break: break-all;
+}
+
+/* ── FORM MESSAGE ────────────────────────────────────────────────────────── */
+.form-message {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    margin-top: 0.5rem;
+}
+
+.form-message.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.form-message.success {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--green);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.form-message.hidden {
+    display: none;
+}
+
+/* ── MODAL ROWS ──────────────────────────────────────────────────────────── */
+.modal-row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 0.5rem;
+    align-items: start;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.modal-row:last-child {
+    border-bottom: none;
+}
+
+.modal-row label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding-top: 0.1rem;
+}
+
+.modal-row span {
+    font-size: 0.88rem;
+    font-weight: 600;
+}

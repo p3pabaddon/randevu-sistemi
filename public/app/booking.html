@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Randevu Al</title>
+    <meta name="description" content="Online randevu oluşturun." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="bento-calendar.css?v=1">
+    <link rel="stylesheet" href="expand-map.css?v=1">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <style>
+        /* ── RESET & BASE ──────────────────────────────────────────────────── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #07090f;
+            --card: rgba(15, 21, 32, 0.75);
+            --card-hover: rgba(19, 27, 42, 0.85);
+            --border: rgba(26, 38, 64, 0.6);
+            --border-light: rgba(36, 51, 82, 0.5);
+            --accent: #c9a84c;
+            --accent-2: #e0bf6e;
+            --accent-glow: rgba(201, 168, 76, 0.15);
+            --text: #eef2ff;
+            --muted: #6b7fa0;
+            --dim: #2e3f5c;
+            --green: #22c55e;
+            --red: #ef4444;
+            --radius: 14px;
+            --radius-sm: 8px;
+            --trans: 0.25s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        /* ── LIGHT THEME ─────────────────────────────────────────────────── */
+        html.theme-light {
+            --bg: #f0f2f8;
+            --card: rgba(255, 255, 255, 0.85);
+            --card-hover: rgba(255, 255, 255, 0.95);
+            --border: rgba(200, 210, 230, 0.8);
+            --border-light: rgba(180, 195, 220, 0.7);
+            --text: #1a1f36;
+            --muted: #6b7899;
+            --dim: #a0b0cc;
+        }
+
+        html.theme-light body {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        html.theme-light input,
+        html.theme-light select,
+        html.theme-light textarea {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.12);
+            color: var(--text);
+        }
+
+        html.theme-light input::placeholder,
+        html.theme-light textarea::placeholder {
+            color: var(--dim);
+        }
+
+        html.theme-light input:focus,
+        html.theme-light select:focus,
+        html.theme-light textarea:focus {
+            background: rgba(201, 168, 76, 0.06);
+        }
+
+        html.theme-light select option {
+            background: #fff;
+            color: #1a1f36;
+        }
+
+        html.theme-light .service-card {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        html.theme-light .time-slot {
+            color: var(--text);
+        }
+
+        /* ── THEME BUTTON ────────────────────────────────────────────────── */
+        #theme-btn {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.75);
+            border-radius: 10px;
+            padding: 0.45rem 0.85rem;
+            font-size: 0.82rem;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        #theme-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        html.theme-light #theme-btn {
+            background: rgba(0, 0, 0, 0.06);
+            border-color: rgba(0, 0, 0, 0.12);
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem 4rem;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── BACKGROUND KANVAS ───────────────────────────────────────────────────── */
+        .login-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            /* İçeriğin arkasında kalsın */
+            overflow: hidden;
+        }
+
+        #wavy-canvas {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+
+        /* ── SCROLLBAR ─────────────────────────────────────────────────────── */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--dim);
+            border-radius: 3px;
+        }
+
+        /* ── HEADER ────────────────────────────────────────────────────────── */
+        .page-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            position: relative;
+            z-index: 1;
+            animation: fadeDown 0.5s ease both;
+        }
+
+        .business-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--accent), #7a4a10);
+            margin: 0 auto 1.2rem;
+            box-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(201, 168, 76, 0.06);
+            position: relative;
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+
+        .business-logo::after {
+            content: '';
+            position: absolute;
+            inset: 25%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        @keyframes logoPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 30px var(--accent-glow);
+            }
+
+            50% {
+                box-shadow: 0 0 60px rgba(201, 168, 76, 0.3);
+            }
+        }
+
+        .business-name {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--text) 40%, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .business-tagline {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-top: 0.4rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+        }
+
+        /* ── CARD ──────────────────────────────────────────────────────────── */
+        .form-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 560px;
+            padding: 2.2rem 2rem;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            animation: fadeUp 0.5s ease 0.1s both;
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+
+        /* ── STEPS INDICATOR ──────────────────────────────────────────────── */
+        .steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 2rem;
+        }
+
+        .step-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--muted);
+            transition: all var(--trans);
+            position: relative;
+        }
+
+        .step-dot.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .step-dot.done {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+        }
+
+        .step-line {
+            flex: 1;
+            max-width: 80px;
+            height: 2px;
+            background: var(--border-light);
+            transition: background var(--trans);
+        }
+
+        .step-line.done {
+            background: var(--accent);
+        }
+
+        /* ── SECTION TITLE ─────────────────────────────────────────────────── */
+        .section-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.25rem;
+        }
+
+        /* ── INPUTS ──────────────────────────────────────────────────────── */
+        .field-group {
+            margin-bottom: 1rem;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 0.35rem;
+        }
+
+        label .req {
+            color: var(--accent);
+            margin-left: 2px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 0.7rem 1rem;
+            outline: none;
+            transition: border-color var(--trans), background var(--trans), box-shadow var(--trans);
+            appearance: none;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: var(--dim);
+        }
+
+        input:hover,
+        select:hover,
+        textarea:hover {
+            border-color: var(--border-light);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--accent);
+            background: rgba(201, 168, 76, 0.04);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        select option {
+            background: #131b2a;
+            color: var(--text);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* ── SERVICE CARDS ───────────────────────────────────────────────── */
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-card {
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem 0.75rem;
+            cursor: pointer;
+            transition: all var(--trans);
+            text-align: center;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--accent-glow);
+            opacity: 0;
+            transition: opacity var(--trans);
+        }
+
+        .service-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .service-card:hover::before {
+            opacity: 1;
+        }
+
+        .service-card.selected {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .service-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            font-size: 0.65rem;
+            color: var(--accent);
+            font-weight: 800;
+        }
+
+        .svc-name-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .svc-detail {
+            font-size: 0.7rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .price-original.has-discount {
+            text-decoration: line-through;
+            opacity: 0.5;
+            margin-right: 0.4rem;
+            font-size: 0.75rem;
+        }
+
+        .price-discounted {
+            font-weight: 800;
+            color: var(--text);
+            font-size: 0.95rem;
+            transition: color var(--trans), text-shadow var(--trans);
+        }
+
+        .service-card:hover .price-discounted {
+            color: #39ff14;
+            /* Cırtlak yeşil */
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+        }
+
+        .price-wrapper {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        /* ── EXTRAS (EK HİZMETLER) ───────────────────────────────────────── */
+        .extras-container {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .extras-container.show {
+            display: block;
+            animation: extrasFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes extrasFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        :root.theme-light .extras-container {
+            background: rgba(0, 0, 0, 0.02);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .extras-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--accent);
+        }
+
+        .extra-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6rem 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        :root.theme-light .extra-item {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .extra-item:hover {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        :root.theme-light .extra-item:hover {
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .extra-item.selected {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .extra-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .extra-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .extra-desc {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 0.2rem;
+        }
+
+        .extra-price {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* ── TIME SLOTS ──────────────────────────────────────────────────── */
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+
+        .time-slot {
+            border: 1.5px solid var(--border-light);
+            border-radius: 6px;
+            padding: 0.5rem 0.25rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--trans);
+            color: var(--text);
+            background: transparent;
+        }
+
+        .time-slot:hover:not(.disabled):not(.disabled-blocked):not(.disabled-booked) {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.04);
+        }
+
+        .time-slot.selected {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+        }
+
+        .time-slot.disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+        }
+
+        .time-slot.disabled-blocked {
+            opacity: 0.6;
+            background: repeating-linear-gradient(45deg, rgba(239, 68, 68, 0.05), rgba(239, 68, 68, 0.05) 10px, transparent 10px, transparent 20px);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--muted);
+            cursor: not-allowed;
+        }
+
+        .time-slot.disabled-booked {
+            opacity: 0.25;
+            cursor: not-allowed;
+        }
+
+        /* ── DATE PICKER WRAPPER ────────────────────────────────────────── */
+        .date-wrapper {
+            position: relative;
+        }
+
+        /* ── SUBMIT BUTTON ───────────────────────────────────────────────── */
+        .submit-btn {
+            width: 100%;
+            padding: 0.85rem;
+            background: linear-gradient(135deg, var(--accent), #a07030);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: #07090f;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: all var(--trans);
+            position: relative;
+            overflow: hidden;
+            margin-top: 1.5rem;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(201, 168, 76, 0.4);
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-btn.loading {
+            pointer-events: none;
+        }
+
+        /* ── SPINNER ────────────────────────────────────────────────────── */
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── MESSAGES ────────────────────────────────────────────────────── */
+        .msg {
+            border-radius: var(--radius-sm);
+            padding: 0.65rem 1rem;
+            font-size: 0.81rem;
+            font-weight: 600;
+            margin-top: 0.75rem;
+            display: none;
+        }
+
+        .msg.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--red);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            display: block;
+        }
+
+        .msg.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            display: block;
+        }
+
+        /* ── SUCCESS SCREEN ──────────────────────────────────────────────── */
+        .success-screen {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            display: none;
+        }
+
+        .success-screen.show {
+            display: block;
+        }
+
+        .success-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(34, 197, 94, 0.12);
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 1.5rem;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .success-sub {
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        .success-details {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            text-align: left;
+            display: grid;
+            gap: 0.6rem;
+        }
+
+        .success-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+        }
+
+        .success-row span:first-child {
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .success-row span:last-child {
+            font-weight: 700;
+        }
+
+        .new-booking-btn {
+            background: transparent;
+            border: 1.5px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 0.65rem 1.5rem;
+            cursor: pointer;
+            transition: all var(--trans);
+            letter-spacing: 0.02em;
+        }
+
+        .new-booking-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ── FOOTER ─────────────────────────────────────────────────────── */
+        .page-footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.72rem;
+            color: var(--dim);
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            position: relative;
+            z-index: 1;
+            animation: fadeUp 0.5s ease 0.3s both;
+        }
+
+        /* ── ANIMATIONS ──────────────────────────────────────────────────── */
+        @keyframes fadeDown {
+            from {
+                transform: translateY(-16px);
+                opacity: 0;
+            }
+
+            to {
+                transform: none;
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                transform: translateY(16px);
+                opacity: 0;
+            }
+
+            to {
+                transform: none;
+                opacity: 1;
+            }
+        }
+
+        /* ── RESPONSIVE ──────────────────────────────────────────────────── */
+        @media (max-width: 480px) {
+            .field-row {
+                grid-template-columns: 1fr;
+            }
+
+            .time-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .form-card {
+                padding: 1.5rem 1.25rem;
+            }
+        }
+
+        .map-content {
+            pointer-events: none;
+        }
+
+        .map-content>* {
+            pointer-events: auto;
+        }
+
+        /* ── KVKK CONSENT ────────────────────────────────────────────────── */
+        .kvkk-container {
+            margin-top: 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.85rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1.5px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--trans);
+            user-select: none;
+        }
+
+        .kvkk-container:hover {
+            border-color: rgba(201, 168, 76, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .kvkk-container input {
+            display: none;
+        }
+
+        .kvkk-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid var(--accent);
+            border-radius: 4px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            margin-top: 2px;
+        }
+
+        .kvkk-container input:checked+.kvkk-checkbox {
+            background: var(--accent);
+        }
+
+        .kvkk-checkbox::after {
+            content: '✓';
+            color: #000;
+            font-size: 0.7rem;
+            font-weight: 800;
+            display: none;
+        }
+
+        .kvkk-container input:checked+.kvkk-checkbox::after {
+            display: block;
+        }
+
+        .kvkk-text {
+            font-size: 0.74rem;
+            line-height: 1.5;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .kvkk-text b {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        /* ── KVKK MODAL ──────────────────────────────────────────────────── */
+        .kvkk-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(12px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .kvkk-modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .kvkk-modal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .kvkk-modal-overlay.show .kvkk-modal-card {
+            transform: translateY(0);
+        }
+
+        .kvkk-modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .kvkk-modal-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin: 0;
+        }
+
+        .kvkk-modal-close {
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .kvkk-modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            color: var(--text);
+        }
+
+        .kvkk-modal-body h4 {
+            color: var(--accent);
+            font-size: 0.9rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .kvkk-modal-body p {
+            margin-bottom: 1rem;
+        }
+
+        .kvkk-modal-body ul {
+            padding-left: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .kvkk-modal-body li {
+            margin-bottom: 0.4rem;
+        }
+
+        .kvkk-modal-footer {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid var(--border-light);
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Tema Butonu -->
+    <button id="theme-btn" onclick="toggleBookingTheme()" title="Temayı Değiştir">
+        <span id="theme-btn-icon">🌙</span>
+        <span id="theme-btn-label">Koyu</span>
+    </button>
+
+    <div class="login-bg">
+        <canvas id="wavy-canvas"></canvas>
+    </div>
+    <header class="page-header">
+        <div class="business-logo"></div>
+        <h1 class="business-name" id="biz-name">Yükleniyor...</h1>
+        <p class="business-tagline" id="biz-tagline">Online Randevu</p>
+    </header>
+
+    <div class="form-card">
+
+        <!-- Steps -->
+        <div class="steps">
+            <div class="step-dot active" id="s1">1</div>
+            <div class="step-line" id="l1"></div>
+            <div class="step-dot" id="s2">2</div>
+            <div class="step-line" id="l2"></div>
+            <div class="step-dot" id="s3">3</div>
+        </div>
+
+        <!-- ── ADIM 1: Hizmet & Personel Seçimi ────────────────────────── -->
+        <div id="step-1">
+
+            <!-- MÜŞTERİ BİLGİLERİ -->
+            <div class="section-title">Bilgileriniz</div>
+            <div class="field-row" style="margin-bottom:1rem">
+                <div class="field-group" style="margin-bottom:0">
+                    <label for="f-firstname">Ad <span class="req">*</span></label>
+                    <input type="text" id="f-firstname" placeholder="Adınız" autocomplete="given-name" />
+                </div>
+                <div class="field-group" style="margin-bottom:0">
+                    <label for="f-lastname">Soyad <span class="req">*</span></label>
+                    <input type="text" id="f-lastname" placeholder="Soyadınız" autocomplete="family-name" />
+                </div>
+            </div>
+            <div class="field-group" style="margin-bottom:1.5rem">
+                <label for="f-phone">Telefon <span class="req">*</span></label>
+                <input type="tel" id="f-phone" placeholder="5xx xxx xxxx" autocomplete="tel" inputmode="numeric" />
+            </div>
+
+            <div class="field-group">
+                <div class="section-title">Hizmet Seçin</div>
+                <div class="service-grid" id="service-grid">
+                    <div style="color:var(--muted);font-size:0.8rem;grid-column:1/-1;padding:1rem 0">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <!-- Ek Hizmetler Konteyneri -->
+            <div id="extras-container" class="extras-container">
+                <div class="extras-title">✨ İsteğe Bağlı Ek Hizmetler (Upsell)</div>
+                <div id="extras-list"></div>
+            </div>
+
+            <div class="field-group" style="margin-top:1.5rem">
+                <div class="section-title">Personel Seçin</div>
+                <div class="service-grid" id="staff-grid">
+                    <div style="color:var(--muted);font-size:0.8rem;grid-column:1/-1;padding:1rem 0">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <div id="msg-1" class="msg"></div>
+
+            <button class="submit-btn" id="next-btn-1" onclick="goStep2()">
+                Devam — Tarih &amp; Saat
+            </button>
+            <div
+                style="text-align:center; margin-top:1rem; color:var(--muted); font-size:0.75rem; font-weight:600; font-family:'Montserrat', sans-serif;">
+                <span style="color:var(--accent); font-size:1rem; vertical-align:middle; margin-right:4px;">✦</span>
+                Ödemeniz randevu sonrası işletmede alınacaktır.
+            </div>
+
+            <label class="kvkk-container" for="f-kvkk">
+                <input type="checkbox" id="f-kvkk" />
+                <div class="kvkk-checkbox"></div>
+                <div class="kvkk-text">
+                    Randevu kaydı oluşturmak için kişisel verilerimin işlenmesine dair <b
+                        onclick="openKvkkModal(event)">KVKK
+                        Aydınlatma Metni</b>'ni
+                    okudum ve onaylıyorum.
+                </div>
+            </label>
+
+        </div><!-- /step-1 -->
+
+        <!-- ── ADIM 2: Tarih & Saat ───────────────────────────────────────── -->
+        <div id="step-2" style="display:none">
+            <div class="section-title">Tarih Seçin</div>
+
+            <div class="bento-calendar-card">
+                <div class="calendar-header">
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn" onclick="changeMonth(-1)">❮</button>
+                        <div class="calendar-month-year" id="calendar-month-year">Mart 2026</div>
+                        <button class="calendar-nav-btn" onclick="changeMonth(1)">❯</button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- JS will populate -->
+                </div>
+            </div>
+
+            <input type="hidden" id="f-date" />
+
+            <div class="section-title" style="margin-top:1.25rem">Saat Seçin</div>
+            <div class="time-grid" id="time-grid"></div>
+
+            <div class="field-group" style="margin-top:0.5rem">
+                <label>Not (opsiyonel)</label>
+                <textarea id="f-notes" placeholder="Varsa özel notunuz..."></textarea>
+            </div>
+
+            <div id="msg-2" class="msg"></div>
+
+            <div style="display:flex;gap:0.75rem;margin-top:1.25rem">
+                <button class="submit-btn"
+                    style="background:transparent;border:1.5px solid var(--border-light);color:var(--text);font-weight:700;flex:0 0 auto;width:auto;padding:0.85rem 1.25rem"
+                    onclick="goStep(1)">Geri</button>
+                <button class="submit-btn" style="flex:1" id="next-btn-2" onclick="goStep3()">
+                    Randevuyu Onayla
+                </button>
+            </div>
+        </div>
+
+        <!-- ── ADIM 3: Özet & Gönder ─────────────────────────────────────── -->
+        <div id="step-3" style="display:none">
+            <div class="section-title">Randevu Özeti</div>
+            <div class="success-details" id="summary-box"></div>
+
+            <div id="msg-3" class="msg"></div>
+
+            <div style="display:flex;gap:0.75rem;margin-top:0.5rem">
+                <button class="submit-btn"
+                    style="background:transparent;border:1.5px solid var(--border-light);color:var(--text);font-weight:700;flex:0 0 auto;width:auto;padding:0.85rem 1.25rem"
+                    onclick="goStep(2)">Geri</button>
+                <button class="submit-btn" style="flex:1" id="submit-btn" onclick="submitBooking()">
+                    Randevuyu Oluştur
+                </button>
+            </div>
+
+            <div
+                style="text-align:center; margin-top:1.5rem; color:var(--muted); font-size:0.78rem; font-weight:600; font-family:'Montserrat', sans-serif; background:rgba(255,255,255,0.02); padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border-light);">
+                <div style="color:var(--accent); margin-bottom:4px; font-size:1.1rem;">💳</div>
+                Sistem üzerinden <b>ön ödeme alınmamaktadır.</b><br>
+                Ödemenizi hizmet bitiminde, işletmede güvenle yapabilirsiniz.
+            </div>
+        </div>
+
+        <!-- ── BAŞARILI EKRAN ─────────────────────────────────────────────── -->
+        <div class="success-screen" id="success-screen">
+            <div class="success-icon" style="width:60px; height:60px; margin-bottom:1rem; font-size:1.5rem;">✓</div>
+            <h2 class="success-title" style="font-size:1.1rem; margin-bottom:0.25rem;">Randevunuz Alındı!</h2>
+            <p class="success-sub" style="font-size:0.75rem;">Size kısa süre içinde bildirim gönderilecektir.</p>
+            <div class="success-details" id="success-details" style="margin:1rem 0; padding:0.8rem 1rem; gap:0.4rem;">
+            </div>
+
+            <!-- ── EXPANDABLE MAP MODULE ── -->
+            <div class="map-container" id="map-container">
+                <p class="map-label">İşletme Konumu</p>
+                <div class="map-wrapper" id="map-wrapper">
+                    <div class="map-bg-gradient"></div>
+                    <div class="map-grid-pattern">
+                        <svg width="100%" height="100%">
+                            <defs>
+                                <pattern id="map-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.5" />
+                                </pattern>
+                            </defs>
+                            <rect width="100%" height="100%" fill="url(#map-grid)" />
+                        </svg>
+                    </div>
+
+                    <div class="map-visuals">
+                        <svg class="map-svg" preserveAspectRatio="none">
+                            <line x1="0%" y1="35%" x2="100%" y2="35%" class="map-road" stroke-width="4" />
+                            <line x1="0%" y1="65%" x2="100%" y2="65%" class="map-road" stroke-width="4" />
+                            <line x1="30%" y1="0%" x2="30%" y2="100%" class="map-road" stroke-width="3" />
+                            <line x1="70%" y1="0%" x2="70%" y2="100%" class="map-road" stroke-width="3" />
+                        </svg>
+                        <div class="map-building" style="top:40%; left:10%; width:15%; height:20%;"></div>
+                        <div class="map-building" style="top:15%; left:35%; width:12%; height:15%;"></div>
+                        <div class="map-building" style="top:70%; left:75%; width:18%; height:18%;"></div>
+
+                        <div class="map-marker-container">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" class="map-marker">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+                                    fill="#34D399" />
+                                <circle cx="12" cy="9" r="2.5" fill="white" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="map-content">
+                        <div class="map-header">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="map-icon-svg">
+                                <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+                                <line x1="9" x2="9" y1="3" y2="18" />
+                                <line x1="15" x2="15" y1="6" y2="21" />
+                            </svg>
+                            <div class="map-status">
+                                <div class="map-status-dot"></div><span>LIVE</span>
+                            </div>
+                        </div>
+                        <div class="map-footer">
+                            <h3 class="map-location-name" id="map-location-name">Salon Ayşe</h3>
+                            <p class="map-coordinates" id="map-coords">İstanbul, Avcılar</p>
+                            <div class="map-underline"></div>
+
+                            <!-- Google Maps Button -->
+                            <div id="map-link-btn"
+                                style="margin-top: 0.8rem; display: none; opacity: 0; transition: all 0.3s ease; position: relative; z-index: 100;">
+                                <button class="new-booking-btn"
+                                    style="width: 100%; font-size: 0.7rem; padding: 0.4rem; background: var(--map-emerald); border: none; color: #000; pointer-events: auto;"
+                                    onclick="event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=Avcılar+İstanbul', '_blank')">
+                                    Yol Tarifi Al ↗
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="map-hint">Genişletmek için tıkla</p>
+            </div>
+
+            <button class="new-booking-btn" onclick="resetForm()" style="margin-top:1.5rem;">Yeni Randevu
+                Al</button>
+        </div>
+
+    </div>
+
+    <!-- ── KVKK MODAL ── -->
+    <div id="kvkk-modal" class="kvkk-modal-overlay">
+        <div class="kvkk-modal-card">
+            <div class="kvkk-modal-header">
+                <h3 class="kvkk-modal-title">KVKK Aydınlatma Metni</h3>
+                <button class="kvkk-modal-close" onclick="closeKvkkModal()">&times;</button>
+            </div>
+            <div class="kvkk-modal-body">
+                <p>Değerli Ziyaretçimiz, işletmemiz olarak kişisel verilerinizin güvenliğine önem veriyoruz. 6698
+                    sayılı
+                    Kişisel Verilerin Korunması Kanunu (KVKK) uyarınca, verilerinizin nasıl işlendiği hakkında sizi
+                    bilgilendirmek isteriz.</p>
+
+                <h4>1. Veri Sorumlusu</h4>
+                <p>İşbu randevu sistemi üzerinden toplanan verileriniz, randevu aldığınız işletme tarafından "Veri
+                    Sorumlusu" sıfatıyla işlenmektedir.</p>
+
+                <h4>2. İşlenen Kişisel Verileriniz</h4>
+                <p>Randevu oluşturma sürecinde paylaştığınız aşağıdaki veriler işlenmektedir:</p>
+                <ul>
+                    <li>Ad ve Soyad</li>
+                    <li>Telefon Numarası</li>
+                    <li>İşlem/Hizmet Tercihleri</li>
+                    <li>Randevu Tarih ve Saati</li>
+                </ul>
+
+                <h4>3. Verilerinizin İşlenme Amacı</h4>
+                <p>Kişisel verileriniz; randevu talebinizin alınması, onaylanması, randevu hatırlatması yapılması,
+                    hizmet sunumu süreçlerinin yürütülmesi ve gerektiğinde sizinle iletişime geçilmesi amacıyla
+                    işlenmektedir.</p>
+
+                <h4>4. Verilerinizin Aktarılması</h4>
+                <p>Kişisel verileriniz, yasal yükümlülüklerin yerine getirilmesi amacıyla yetkili kamu kurum ve
+                    kuruluşları ile paylaşılabilecektir. Bunun dışında ticari amaçlarla üçüncü şahıslarla
+                    paylaşılmamaktadır.</p>
+
+                <h4>5. Haklarınız</h4>
+                <p>KVKK'nın 11. maddesi uyarınca; verilerinizin işlenip işlenmediğini öğrenme, yanlış işlenmişse
+                    düzeltilmesini isteme ve verilerinizin silinmesini talep etme haklarına sahipsiniz.</p>
+            </div>
+            <div class="kvkk-modal-footer">
+                <button class="new-booking-btn" onclick="closeKvkkModal()">Anladım</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="page-footer">
+        <span id="footer-biz"></span> &nbsp;·&nbsp; Online Randevu Sistemi
+    </footer>
+
+    <script>
+        /* ─── CONFIG ──────────────────────────────────────────────────────── */
+        const API = window.location.origin + '/api';
+        const params = new URLSearchParams(window.location.search);
+        const TENANT_SLUG = params.get('tenant') || 'salon-ayse';
+
+        /* ─── STATE ───────────────────────────────────────────────────────── */
+        const form = {
+            firstname: '', lastname: '', phone: '',
+            serviceId: null, serviceName: '',
+            staffId: '', staffName: 'Farketmez',
+            date: '', time: '', notes: '',
+            extras: [], // YENİ: Seçili ek hizmetlerin ID'leri
+        };
+
+        let tenant = null;
+        let services = [];
+        let staff = [];
+        let appointmentsData = [];
+        let blockedSlotsData = [];
+        let currentStep = 1;
+        const TODAY = new Date().toISOString().slice(0, 10);
+
+        /* ─── INIT ────────────────────────────────────────────────────────── */
+        async function init() {
+            try {
+                const res = await fetch(`${API}/tenants/${TENANT_SLUG}`);
+                if (!res.ok) throw new Error('İşletme bulunamadı.');
+                const data = await res.json();
+                tenant = data.tenant;
+
+                // YENİ: Süresi dolmuş kampanyaları booking ekranında da sıfırla
+                const now = new Date();
+                services = (data.tenant.services || []).map(svc => {
+                    if (svc.campaign_ends_at && new Date(svc.campaign_ends_at) <= now) {
+                        return { ...svc, discounted_price: null, campaign_label: null };
+                    }
+                    return svc;
+                });
+
+                document.getElementById('biz-name').textContent = tenant.name;
+                document.getElementById('biz-tagline').textContent = tenant.address || 'Online Randevu';
+                document.getElementById('footer-biz').textContent = tenant.name;
+                document.title = `Randevu Al — ${tenant.name}`;
+
+
+
+                try { const r = await fetch(`${API}/staff/${tenant.id}`); staff = (await r.json()).staff || []; } catch (e) { }
+                renderServices();
+                renderStaff();
+                setupDate();
+            } catch (e) {
+                document.getElementById('biz-name').textContent = 'Bağlantı Hatası';
+                document.getElementById('biz-tagline').textContent = e.message;
+            }
+        }
+
+        function renderServices() {
+            const grid = document.getElementById('service-grid');
+            if (!services.length) {
+                grid.innerHTML = '<div style="color:var(--muted);font-size:0.8rem;grid-column:1/-1">Hizmet bulunamadı.</div>';
+                return;
+            }
+            grid.innerHTML = services.map(s => `
+        <div class="service-card" id="svc-${s.id}" onclick="selectService('${s.id}','${esc(s.name)}')">
+          <span class="svc-name-label">${esc(s.name)}</span>
+          <span class="svc-detail">
+            ${s.duration_minutes ? s.duration_minutes + ' dk' : ''}
+            <span class="price-wrapper">
+              ${s.price != null ? ' · <span class="price-original ' + (s.discounted_price ? 'has-discount' : '') + '">' + Number(s.price).toLocaleString('tr-TR') + ' ₺</span>' : ''}
+              ${s.discounted_price != null ? ' <span class="price-discounted">' + Number(s.discounted_price).toLocaleString('tr-TR') + ' ₺</span>' : ''}
+            </span>
+          </span>
+        </div>`).join('');
+        }
+
+        function selectService(id, name) {
+            services.forEach(s => document.getElementById('svc-' + s.id)?.classList.remove('selected'));
+            document.getElementById('svc-' + id)?.classList.add('selected');
+            form.serviceId = id;
+            form.serviceName = name;
+            form.extras = []; // Servis değişince sıfırla
+
+            // Hizmetin extlaları var mı kontrol et
+            const selectedService = services.find(s => s.id === id);
+            const extrasContainer = document.getElementById('extras-container');
+            const extrasList = document.getElementById('extras-list');
+
+            if (selectedService && selectedService.service_extras && selectedService.service_extras.length > 0) {
+                extrasList.innerHTML = selectedService.service_extras.map(ex => `
+                    <div class="extra-item" id="extra-${ex.id}" onclick="toggleExtra('${ex.id}')">
+                        <div class="extra-info">
+                            <span class="extra-name">${esc(ex.name)}</span>
+                            <span class="extra-desc">${ex.duration_minutes ? `${ex.duration_minutes} dk` : ''}</span>
+                        </div>
+                        ${ex.price ? `<span class="extra-price">+${Number(ex.price).toLocaleString('tr-TR')} ₺</span>` : ''}
+                    </div>
+                `).join('');
+                extrasContainer.classList.add('show');
+            } else {
+                extrasContainer.classList.remove('show');
+                setTimeout(() => {
+                    if (!extrasContainer.classList.contains('show')) {
+                        extrasList.innerHTML = '';
+                    }
+                }, 500);
+            }
+        }
+
+        function toggleExtra(id) {
+            const el = document.getElementById('extra-' + id);
+            if (!el) return;
+
+            if (form.extras.includes(id)) {
+                form.extras = form.extras.filter(x => x !== id);
+                el.classList.remove('selected');
+            } else {
+                form.extras.push(id);
+                el.classList.add('selected');
+            }
+        }
+
+        function renderStaff() {
+            const grid = document.getElementById('staff-grid');
+            let html = `<div class="service-card selected" id="stf-any" onclick="selectStaff('','Farketmez')">
+              <span class="svc-name-label">Farketmez</span>
+              <span class="svc-detail">Herhangi biri</span>
+            </div>`;
+            if (staff.length) {
+                html += staff.map(s => {
+                    const fullName = esc(s.name) + (s.surname ? ' ' + esc(s.surname) : '');
+                    return `
+                    <div class="service-card" id="stf-${s.id}" onclick="selectStaff('${s.id}','${fullName.replace(/'/g, "\\'")}')">
+                        <span class="svc-name-label">${fullName}</span>
+                        ${s.role ? `<span class="svc-detail">${esc(s.role)}</span>` : ''}
+                    </div>`;
+                }).join('');
+            }
+            grid.innerHTML = html;
+        }
+
+        function selectStaff(id, name) {
+            document.querySelectorAll('[id^="stf-"]').forEach(el => el.classList.remove('selected'));
+            document.getElementById('stf-' + (id || 'any'))?.classList.add('selected');
+            form.staffId = id;
+            form.staffName = name;
+            renderTimeSlots();
+        }
+
+        /* ─── DATE & TIME ─────────────────────────────────────────────────── */
+        /* ─── BENTO CALENDAR LOGIC ────────────────────────────────────────── */
+        let calendarDate = new Date(); // Takvimde görüntülenen ay
+
+        function setupDate() {
+            renderCalendar();
+            fetchAvailabilityAndRender();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthYearLabel = document.getElementById('calendar-month-year');
+
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+
+            const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+            monthYearLabel.textContent = `${monthNames[month]} ${year}`;
+
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const dayNames = ["PZT", "SAL", "ÇAR", "PER", "CUM", "CTS", "PAZ"];
+            // JS getDay() 0=Pazar, 1=Pazartesi. TR takvimi için 0=Pazartesi yapalım.
+            const firstDayShifted = (firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1);
+
+            let html = dayNames.map(d => `<div class="calendar-day-name">${d}</div>`).join('');
+
+            // Boş günler
+            for (let i = 0; i < firstDayShifted; i++) {
+                html += `<div class="calendar-day empty"></div>`;
+            }
+
+            // Ayın günleri
+            const todayObj = new Date();
+            todayObj.setHours(0, 0, 0, 0);
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dateStr = `${year}-${pad(month + 1)}-${pad(i)}`;
+                const loopDate = new Date(year, month, i);
+                const isPast = loopDate < todayObj;
+                const isSelected = form.date === dateStr;
+
+                html += `
+                    <div class="calendar-day ${isPast ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" 
+                         ${!isPast ? `onclick="selectCalendarDate('${dateStr}')"` : ''}>
+                        ${i}
+                    </div>`;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function selectCalendarDate(dateStr) {
+            form.date = dateStr;
+            document.getElementById('f-date').value = dateStr;
+            renderCalendar();
+            fetchAvailabilityAndRender();
+        }
+
+        function changeMonth(delta) {
+            calendarDate.setMonth(calendarDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        async function fetchAvailabilityAndRender() {
+            if (!form.date) return;
+            // Fetch appointments and blocked slots for the selected date
+            try {
+                const r1 = await fetch(`${API}/appointments/${tenant.id}?date=${form.date}`);
+                appointmentsData = (await r1.json()).appointments || [];
+            } catch (e) { appointmentsData = []; }
+
+            try {
+                const r2 = await fetch(`${API}/blocked-slots/${tenant.id}?date=${form.date}`);
+                const bRes = await r2.json();
+                blockedSlotsData = bRes.blocked || bRes.slots || [];
+            } catch (e) { blockedSlotsData = []; }
+
+            renderTimeSlots();
+        }
+
+        function renderTimeSlots() {
+            const grid = document.getElementById('time-grid');
+            const now = new Date();
+            const isToday = form.date === TODAY;
+            // Seçilen tarih tamamen geçmişte mi? (bugünden önceki bir gün)
+            const isPastDate = form.date < TODAY;
+            const slots = [];
+
+            for (let h = 9; h <= 20; h++) {
+                ['00', '30'].forEach(m => {
+                    const val = pad(h) + ':' + m;
+
+                    // Geçmiş saat kontrolü:
+                    // - Tarih geçmişte → tüm saatler kapalı
+                    // - Bugün → o anın saatinden önceki saatler kapalı
+                    const pastOnToday = isToday && (h < now.getHours() || (h === now.getHours() && +m <= now.getMinutes()));
+                    const isPast = isPastDate || pastOnToday;
+
+                    let isBlocked = false;
+                    let isBooked = false;
+
+                    const normalizedTime = val + ':00';
+
+                    const isGenerallyBlocked = blockedSlotsData.some(b => b.blocked_time === normalizedTime && b.staff_id === null);
+
+                    if (isGenerallyBlocked) {
+                        isBlocked = true; // Genel işletme kapaması
+                    } else if (form.staffId) {
+                        // Belirli personel seçili
+                        isBlocked = blockedSlotsData.some(b => b.blocked_time === normalizedTime && b.staff_id === form.staffId);
+                        isBooked = appointmentsData.some(a => a.appointment_time === normalizedTime && a.staff_id === form.staffId && a.status !== 'cancelled');
+                    } else if (staff.length > 0) {
+                        // Farketmez seçili - tüm personel doluysa kapat
+                        const staffCount = staff.length;
+                        let unavailableCount = 0;
+
+                        staff.forEach(s => {
+                            const stfBlock = blockedSlotsData.some(b => b.blocked_time === normalizedTime && b.staff_id === s.id);
+                            const stfBook = appointmentsData.some(a => a.appointment_time === normalizedTime && a.staff_id === s.id && a.status !== 'cancelled');
+                            if (stfBlock || stfBook) unavailableCount++;
+                        });
+
+                        if (unavailableCount >= staffCount) {
+                            isBooked = true;
+                        }
+                    } else {
+                        // Personel sistemi kullanılmıyorsa (eski mantık fallback)
+                        isBlocked = blockedSlotsData.some(b => b.blocked_time === normalizedTime);
+                        isBooked = appointmentsData.some(a => a.appointment_time === normalizedTime && a.status !== 'cancelled');
+                    }
+
+                    slots.push({ val, isPast, isBlocked, isBooked });
+                });
+            }
+
+            grid.innerHTML = slots.map(s => {
+                let cssClass = '';
+                let onclick = '';
+
+                if (s.isPast) { cssClass = 'disabled'; }
+                else if (s.isBlocked) { cssClass = 'disabled-blocked'; }
+                else if (s.isBooked) {
+                    cssClass = 'disabled-booked';
+                }
+                else {
+                    cssClass = form.time === s.val ? 'selected' : '';
+                    onclick = `onclick="selectTime('${s.val}')"`;
+                }
+
+                return `<div class="time-slot ${cssClass}" ${onclick}>${s.val}</div>`;
+            }).join('');
+        }
+
+        function selectTime(val) {
+            form.time = val;
+            document.querySelectorAll('.time-slot:not(.disabled):not(.disabled-blocked):not(.disabled-booked)').forEach(el => {
+                el.classList.toggle('selected', el.textContent.trim() === val);
+            });
+        }
+
+        /* ─── NAVIGATION ──────────────────────────────────────────────────── */
+        function goStep2() {
+            form.firstname = document.getElementById('f-firstname').value.trim();
+            form.lastname = document.getElementById('f-lastname').value.trim();
+            form.phone = document.getElementById('f-phone').value.trim();
+
+            if (!form.firstname || !form.lastname || !form.phone) {
+                return showMsg('msg-1', 'Ad, soyad ve telefon zorunludur.', 'error');
+            }
+
+            // Telefon Format Kontrolü (5xx xxx xxxx - Tam 10 hane)
+            const cleanPhone = form.phone.replace(/\D/g, '');
+            if (cleanPhone.length !== 10 || !cleanPhone.startsWith('5')) {
+                return showMsg('msg-1', 'Lütfen geçerli bir telefon numarası giriniz (5xx xxx xxxx).', 'error');
+            }
+            form.phone = cleanPhone; // Backend'e temiz hali gitsin (appointments.js zaten +90 ekliyor)
+
+            if (!form.serviceId) {
+                return showMsg('msg-1', 'Lütfen bir hizmet seçin.', 'error');
+            }
+
+            if (!document.getElementById('f-kvkk').checked) {
+                return showMsg('msg-1', 'Lütfen KVKK metnini onaylayın.', 'error');
+            }
+
+            // staffId opsiyonel, boşsa Farketmez
+            hideMsg('msg-1');
+            goStep(2);
+        }
+
+        function goStep3() {
+            if (!form.date) return showMsg('msg-2', 'Lütfen tarih seçin.', 'error');
+            if (!form.time) return showMsg('msg-2', 'Lütfen saat seçin.', 'error');
+            form.notes = document.getElementById('f-notes').value.trim();
+            hideMsg('msg-2');
+            renderSummary();
+            goStep(3);
+        }
+
+        function goStep(n) {
+            [1, 2, 3].forEach(i => {
+                document.getElementById('step-' + i).style.display = i === n ? 'block' : 'none';
+                const dot = document.getElementById('s' + i);
+                dot.classList.toggle('active', i === n);
+                dot.classList.toggle('done', i < n);
+            });
+            [1, 2].forEach(i => {
+                document.getElementById('l' + i)?.classList.toggle('done', i < n);
+            });
+            currentStep = n;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* ─── SUMMARY ─────────────────────────────────────────────────────── */
+        function renderSummary() {
+            const fullName = form.firstname + ' ' + form.lastname;
+            const [y, m, d] = form.date.split('-');
+            const dateStr = d + '.' + m + '.' + y;
+
+            // Fiyat Hesaplama
+            const selectedService = services.find(s => s.id === form.serviceId);
+            let totalPrice = 0;
+            let extrasHtml = '';
+
+            if (selectedService) {
+                totalPrice += selectedService.discounted_price ? Number(selectedService.discounted_price) : Number(selectedService.price || 0);
+
+                // Seçili ekstraları bul
+                const selExtras = [];
+                if (selectedService.service_extras) {
+                    selectedService.service_extras.forEach(ex => {
+                        if (form.extras.includes(ex.id)) {
+                            selExtras.push(ex);
+                            totalPrice += Number(ex.price || 0);
+                        }
+                    });
+                }
+
+                if (selExtras.length > 0) {
+                    extrasHtml = `<div class="success-row" style="margin-top:0.4rem; padding-top:0.4rem; border-top:1px dashed rgba(255,255,255,0.1);"><span style="color:var(--accent);">Ek Hizmetler:</span></div>`;
+                    extrasHtml += selExtras.map(ex => `
+                        <div class="success-row" style="font-size:0.75rem;">
+                            <span>— ${esc(ex.name)}</span>
+                            <span>${ex.price ? `+${Number(ex.price).toLocaleString('tr-TR')} ₺` : 'Ücretsiz'}</span>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            document.getElementById('summary-box').innerHTML = `
+        <div class="success-row"><span>Müşteri</span><span>${esc(fullName)}</span></div>
+        <div class="success-row"><span>Telefon</span><span>${esc(form.phone)}</span></div>
+        <div class="success-row"><span>Hizmet</span><span>${esc(form.serviceName)}</span></div>
+        <div class="success-row"><span>Personel</span><span>${esc(form.staffName)}</span></div>
+        <div class="success-row"><span>Tarih</span><span>${dateStr}</span></div>
+        <div class="success-row"><span>Saat</span><span>${form.time}</span></div>
+        ${extrasHtml}
+        <div class="success-row" style="margin-top:0.6rem; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.1); font-size:0.95rem; color:var(--accent);">
+            <span><b>Toplam Tutar</b></span>
+            <span><b>${form.promoApplied ? (totalPrice * (1 - (form.discountRate || 0.1))).toLocaleString('tr-TR') : totalPrice.toLocaleString('tr-TR')} ₺</b></span>
+        </div>
+        ${form.promoApplied ? `<div style="text-align:right; font-size:0.7rem; color:var(--green); margin-top:2px;">✨ %${Math.round((form.discountRate || 0.1) * 100)} İndirim Uygulandı</div>` : ''}
+        ${form.notes ? `<div class="success-row" style="margin-top:0.5rem"><span>Not</span><span>${esc(form.notes)}</span></div>` : ''}
+      `;
+        }
+
+        /* ─── SUBMIT ──────────────────────────────────────────────────────── */
+        async function submitBooking() {
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Gönderiliyor...';
+            hideMsg('msg-3');
+
+            try {
+                let finalNotes = form.notes || '';
+                if (form.promoApplied) {
+                    const discountPercent = Math.round((form.discountRate || 0.1) * 100);
+                    finalNotes = `[MIRROR-QR-${discountPercent}] ` + finalNotes;
+                }
+
+                const res = await fetch(`${API}/appointments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tenant_id: tenant.id,
+                        staff_id: form.staffId || null,
+                        customer_name: form.firstname + ' ' + form.lastname,
+                        customer_phone: form.phone,
+                        service_id: form.serviceId,
+                        extra_ids: form.extras.length > 0 ? form.extras : undefined,
+                        appointment_date: form.date,
+                        appointment_time: form.time,
+                        notes: finalNotes || null,
+                    }),
+                });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.error || 'Bir hata oluştu.');
+
+                // Başarı ekranı
+                const [y, m, d] = form.date.split('-');
+                const dateStr = d + '.' + m + '.' + y;
+                document.getElementById('success-details').innerHTML = `
+          <div class="success-row"><span>Hizmet</span><span>${esc(form.serviceName)}${form.extras.length > 0 ? ` (+${form.extras.length} Ek)` : ''}</span></div>
+          <div class="success-row"><span>Personel</span><span>${esc(form.staffName)}</span></div>
+          <div class="success-row"><span>Tarih</span><span>${dateStr}</span></div>
+          <div class="success-row"><span>Saat</span><span>${form.time}</span></div>
+          <div class="success-row"><span>İşletme</span><span>${esc(tenant.name)}</span></div>
+          ${tenant.phone ? `<div class="success-row"><span>Telefon</span><span>${esc(tenant.phone)}</span></div>` : ''}
+        `;
+                document.getElementById('step-3').style.display = 'none';
+                document.getElementById('success-screen').classList.add('show');
+                document.querySelector('.steps').style.display = 'none';
+                initExpandMap();
+                playNotificationSound();
+
+                // İndirim kullanıldıysa başarılı randevudan SONRA token'ı kaydet
+                if (form.promoApplied && form.campaignKey) {
+                    localStorage.setItem(form.campaignKey, 'true');
+                }
+            } catch (err) {
+                showMsg('msg-3', err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Randevuyu Oluştur';
+            }
+        }
+
+        /* ─── RESET ───────────────────────────────────────────────────────── */
+        function resetForm() {
+            form.firstname = form.lastname = form.phone = form.notes = form.time = '';
+            form.serviceId = null; form.serviceName = '';
+            document.getElementById('f-firstname').value = '';
+            document.getElementById('f-lastname').value = '';
+            document.getElementById('f-phone').value = '';
+            document.getElementById('f-notes').value = '';
+            renderServices();
+            document.getElementById('success-screen').classList.remove('show');
+            document.querySelector('.steps').style.display = '';
+
+            // Map reset
+            const wrapper = document.getElementById('map-wrapper');
+            if (wrapper) wrapper.classList.remove('expanded');
+
+            goStep(1);
+        }
+
+        /* ─── MAP LOGIC ───────────────────────────────────────────────────── */
+        function initExpandMap() {
+            const container = document.getElementById('map-container');
+            const wrapper = document.getElementById('map-wrapper');
+            const locationName = document.getElementById('map-location-name');
+            const coordsLabel = document.getElementById('map-coords');
+
+            if (!container || !wrapper) return;
+
+            // Update with tenant info
+            if (tenant) {
+                locationName.textContent = tenant.name;
+                // coordsLabel could be updated if database had it
+            }
+
+            // Click to Expand
+            wrapper.onclick = (e) => {
+                e.stopPropagation();
+                const isExpanded = wrapper.classList.toggle('expanded');
+
+                // Show/Hide Google Maps Button
+                const btn = document.getElementById('map-link-btn');
+                if (btn) {
+                    if (isExpanded) {
+                        btn.style.display = 'block';
+                        setTimeout(() => { btn.style.opacity = '1'; }, 50);
+                    } else {
+                        btn.style.opacity = '0';
+                        setTimeout(() => { btn.style.display = 'none'; }, 300);
+                    }
+                }
+            };
+
+            // 3D Tilt Effect
+            container.onmousemove = (e) => {
+                if (wrapper.classList.contains('expanded')) {
+                    wrapper.style.transform = '';
+                    return;
+                }
+                const rect = wrapper.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+
+                const factor = 15;
+                const rotateX = -y / factor;
+                const rotateY = x / factor;
+
+                wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            };
+
+            container.onmouseleave = () => {
+                wrapper.style.transform = 'rotateX(0deg) rotateY(0deg)';
+            };
+        }
+
+        /* ─── UTILS ───────────────────────────────────────────────────────── */
+        const localDateStr = (date = new Date()) => {
+            const offset = date.getTimezoneOffset() * 60000;
+            return new Date(date.getTime() - offset).toISOString().slice(0, 10);
+        };
+        const pad = n => String(n).padStart(2, '0');
+        const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const showMsg = (id, txt, type) => { const el = document.getElementById(id); el.textContent = txt; el.className = 'msg ' + type; };
+        const hideMsg = id => { const el = document.getElementById(id); el.className = 'msg'; el.textContent = ''; };
+
+        /* ─── WAVY BACKGROUND ─────────────────────────────────────────────── */
+        function initWavyBackground() {
+            const canvas = document.getElementById('wavy-canvas');
+            if (!canvas) return; // Silent return if not found
+            if (typeof SimplexNoise === 'undefined') {
+                console.error("SimplexNoise is not loaded!");
+                return;
+            }
+
+            const ctx = canvas.getContext('2d');
+            const noise = new SimplexNoise();
+
+            let w, h, nt, i, x;
+
+            const initCanvas = () => {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+                ctx.filter = `blur(10px)`;
+                nt = 0;
+            };
+
+            window.addEventListener('resize', initCanvas);
+            initCanvas();
+
+            const drawWave = (n) => {
+                nt += 0.002;
+                for (i = 0; i < n; i++) {
+                    ctx.beginPath();
+                    ctx.lineWidth = 50; // waveWidth
+                    let strokeColor = '';
+                    switch (i % 5) {
+                        case 0: strokeColor = '#38bdf8'; break; // blue
+                        case 1: strokeColor = '#818cf8'; break; // indigo
+                        case 2: strokeColor = '#c084fc'; break; // purple
+                        case 3: strokeColor = '#e879f9'; break; // fuchsia
+                        case 4: strokeColor = '#2dd4bf'; break; // teal
+                    }
+                    ctx.strokeStyle = strokeColor + '80'; // 0.5 opacity (hex 80)
+                    for (x = 0; x < w; x += 5) {
+                        var y = noise.noise3D(x / 800, 0.3 * i, nt) * 100;
+                        ctx.lineTo(x, y + h * 0.5); // align to center
+                    }
+                    ctx.stroke();
+                    ctx.closePath();
+                }
+            };
+
+            const render = () => {
+                ctx.fillStyle = "#07090f"; // Matches --bg
+                ctx.globalAlpha = 1; // waveOpacity
+                ctx.fillRect(0, 0, w, h);
+                drawWave(5);
+                requestAnimationFrame(render);
+            };
+
+            render();
+        }
+
+        // ── TEMA ──────────────────────────────────────────────────────────────
+        function applyBookingTheme(theme) {
+            const icon = document.getElementById('theme-btn-icon');
+            const label = document.getElementById('theme-btn-label');
+            if (theme === 'light') {
+                document.documentElement.classList.add('theme-light');
+                if (icon) icon.textContent = '☀️';
+                if (label) label.textContent = 'Açık';
+            } else {
+                document.documentElement.classList.remove('theme-light');
+                if (icon) icon.textContent = '🌙';
+                if (label) label.textContent = 'Koyu';
+            }
+        }
+
+        function toggleBookingTheme() {
+            const isLight = document.documentElement.classList.contains('theme-light');
+            const next = isLight ? 'dark' : 'light';
+            localStorage.setItem('randevu-theme', next);
+            applyBookingTheme(next);
+        }
+
+        // Sayfa yüklendiğinde kaydedilmiş temayı yükle
+        applyBookingTheme(localStorage.getItem('randevu-theme') || 'dark');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initWavyBackground();
+
+            // Telefon Input Formatlayıcı (5xx xxx xxxx)
+            const phoneInput = document.getElementById('f-phone');
+            if (phoneInput) {
+                phoneInput.setAttribute('maxlength', '15'); // 555 555 5555 formatı için
+                phoneInput.addEventListener('input', (e) => {
+                    let val = e.target.value.replace(/\D/g, '');
+                    if (val.length > 10) val = val.slice(0, 10);
+
+                    let formatted = '';
+                    if (val.length > 0) formatted += val.substring(0, 3);
+                    if (val.length > 3) formatted += ' ' + val.substring(3, 6);
+                    if (val.length > 6) formatted += ' ' + val.substring(6, 8);
+                    if (val.length > 8) formatted += ' ' + val.substring(8, 10);
+
+                    e.target.value = formatted;
+                });
+            }
+
+            checkQRDiscount();
+        });
+
+        function checkQRDiscount() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const promo = urlParams.get('promo');
+            const tenantSlug = urlParams.get('tenant');
+
+            if (promo === 'qr' || promo === 'qr10') {
+                const discount = parseInt(urlParams.get('d')) || 10;
+                const header = urlParams.get('h') || 'Mirror QR İndirimi';
+
+                // Benzersiz kampanya anahtarı: İşletme, İndirim oranı ve Başlık
+                const campaignKey = `qr_used_${tenantSlug}_${discount}_${encodeURIComponent(header)}`;
+
+                const used = localStorage.getItem(campaignKey);
+                // Geriye dönük uyumluluk için eski anahtarı da kontrol et (sadece yeni kampanyaları bloklamamak için bunu silebiliriz ama kalsın)
+                // const legacyUsed = localStorage.getItem('qr_discount_used'); 
+
+                if (used /* || legacyUsed */) {
+                    alert('Bu kampanyadan ("' + header + '") daha önce faydalandınız. Sizi standart fiyatlara yönlendiriyoruz.');
+                    return;
+                }
+
+                form.promoApplied = true;
+                form.discountRate = discount / 100;
+                form.campaignKey = campaignKey; // Başarılı randevuda kaydetmek üzere sakla
+                showMsg('msg-1', `✨ ${header}: %${discount} İndirim Kazandınız!`, 'success');
+            }
+        }
+
+        // ── SES ──────────────────────────────────────────────────────────────
+        let _audioCtx = null;
+        function _unlockAudio() {
+            if (_audioCtx) return;
+            try {
+                _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (_audioCtx.state === 'suspended') _audioCtx.resume();
+            } catch (_) { }
+        }
+        ['click', 'keydown', 'touchstart', 'mousedown'].forEach(ev => {
+            document.addEventListener(ev, _unlockAudio, { once: false });
+        });
+
+        function playNotificationSound() {
+            try {
+                if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (_audioCtx.state === 'suspended') _audioCtx.resume();
+                const ctx = _audioCtx;
+                const notes = [523.25, 659.25, 783.99];
+                notes.forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.13);
+                    gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.13);
+                    gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + i * 0.13 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.13 + 0.55);
+                    osc.start(ctx.currentTime + i * 0.13);
+                    osc.stop(ctx.currentTime + i * 0.13 + 0.6);
+                });
+            } catch (e) { console.warn('[Sound] Çalınamadı:', e.message); }
+        }
+
+        function openKvkkModal(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            document.getElementById('kvkk-modal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+
+
+        function closeKvkkModal() {
+            document.getElementById('kvkk-modal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        // Waitlist mantığı kaldırıldı
+
+        init();
+    </script>
+</body>
+
+</html>

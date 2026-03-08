@@ -1,0 +1,1704 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Randevu Yönetimi</title>
+    <meta name="description" content="İşletmenizin randevularını gerçek zamanlı olarak yönetin." />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- QR Code Generator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css" id="fp-dark-theme"
+        disabled>
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="stylesheet" href="bento-calendar.css?v=1">
+    <link rel="stylesheet" href="settings.css?v=2" />
+    <link rel="stylesheet" href="dock.css?v=2" />
+    <link rel="stylesheet" href="preloader.css?v=1" />
+    <style>
+        /* ══ YENİ LOGIN KART TASARIMI ══════════════════════════════════════ */
+
+        /* Login ekranı tam ekran ortalama */
+        .login-screen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        /* Kart — glassmorphism */
+        .login-new-card {
+            width: 100%;
+            max-width: 380px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.25rem;
+            padding: 2.5rem 2rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+            animation: cardIn 0.35s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(24px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .login-new-title {
+            font-size: 1.85rem;
+            font-weight: 600;
+            color: #fff;
+            text-align: center;
+            margin: 0 0 0.35rem;
+            letter-spacing: -0.03em;
+        }
+
+        .login-new-sub {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.45);
+            text-align: center;
+            margin: 0 0 1.75rem;
+        }
+
+        /* Pill input alanı */
+        .login-new-field {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            height: 48px;
+            padding: 0 1.2rem;
+            margin-bottom: 0.85rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .login-new-field:focus-within {
+            border-color: rgba(99, 102, 241, 0.65);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .login-new-field svg {
+            flex-shrink: 0;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        .login-new-field input {
+            flex: 1;
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            outline: none !important;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.88rem;
+            -webkit-box-shadow: none !important;
+            -webkit-text-fill-color: #fff !important;
+            box-shadow: none !important;
+        }
+
+        .login-new-field input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .login-new-field input:-webkit-autofill,
+        .login-new-field input:-webkit-autofill:hover,
+        .login-new-field input:-webkit-autofill:focus,
+        .login-new-field input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+            transition: background-color 5000s ease-in-out 0s;
+            -webkit-text-fill-color: #fff !important;
+        }
+
+        /* Şifremi unuttum satırı */
+        .login-new-forgot-row {
+            text-align: left;
+            margin-bottom: 0.75rem;
+        }
+
+        .login-new-forgot {
+            background: none;
+            border: none;
+            color: #818cf8;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 0;
+            transition: text-decoration 0.15s;
+        }
+
+        .login-new-forgot:hover {
+            text-decoration: underline;
+        }
+
+        /* Giriş Butonu */
+        .login-new-submit {
+            width: 100%;
+            height: 44px;
+            border-radius: 9999px;
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.02em;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-new-submit:hover {
+            background: #4338ca;
+            box-shadow: 0 6px 24px rgba(79, 70, 229, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .login-new-submit:active {
+            transform: translateY(0);
+        }
+
+        /* Login error mesajı */
+        .login-error {
+            font-size: 0.78rem;
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            padding: 0.45rem 0.8rem;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        /* Light tema uyumu */
+        :root.theme-light .login-new-card {
+            background: rgba(255, 255, 255, 0.75);
+            border-color: rgba(0, 0, 0, 0.08);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+        }
+
+        :root.theme-light .login-new-title {
+            color: #1e1b4b;
+        }
+
+        :root.theme-light .login-new-sub {
+            color: rgba(0, 0, 0, 0.45);
+        }
+
+        :root.theme-light .login-new-field {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        :root.theme-light .login-new-field svg {
+            color: rgba(0, 0, 0, 0.45);
+        }
+
+        :root.theme-light .login-new-field input {
+            color: #1e1b4b !important;
+            -webkit-text-fill-color: #1e1b4b !important;
+            background: transparent !important;
+            -webkit-box-shadow: none !important;
+            box-shadow: none !important;
+        }
+
+        :root.theme-light .login-new-field input::placeholder {
+            color: rgba(0, 0, 0, 0.35) !important;
+        }
+
+        :root.theme-light .login-new-field input:-webkit-autofill,
+        :root.theme-light .login-new-field input:-webkit-autofill:hover,
+        :root.theme-light .login-new-field input:-webkit-autofill:focus,
+        :root.theme-light .login-new-field input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+            -webkit-text-fill-color: #1e1b4b !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        :root.theme-light #login-theme-btn {
+            background: rgba(0, 0, 0, 0.06) !important;
+            border-color: rgba(0, 0, 0, 0.12) !important;
+            color: rgba(0, 0, 0, 0.6) !important;
+        }
+
+
+        .reset-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.72);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+        }
+
+        .reset-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem 2rem 1.75rem;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(201, 168, 76, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+            animation: modalIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(14px) scale(.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .reset-card h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .reset-card p.reset-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: -0.3rem;
+        }
+
+        .reset-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.15s;
+        }
+
+        .reset-close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .forgot-link {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            letter-spacing: 0.02em;
+            transition: color 0.15s;
+            padding: 0;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .forgot-link:hover {
+            color: var(--accent);
+        }
+
+        /* ── Tema Butonu (sidebar içinde) ── */
+        .btn-theme-sidebar {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+            padding: 0.3rem 0.7rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        .btn-theme-sidebar:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        /* Block grid */
+        .block-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+        }
+
+        .block-slot {
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 0.25rem;
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            color: var(--text-primary);
+            background: transparent;
+            position: relative;
+        }
+
+        .block-slot:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .block-slot.blocked {
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: var(--red);
+        }
+
+        .block-slot.blocked::after {
+            content: '✕';
+            display: block;
+            font-size: 0.6rem;
+            opacity: 0.7;
+        }
+
+        .block-slot.has-appt {
+            border-color: var(--yellow);
+            color: var(--yellow);
+        }
+
+        /* Service row delete button */
+        .svc-delete-btn {
+            background: transparent;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: var(--red);
+            border-radius: var(--radius-sm);
+            padding: 0.25rem 0.6rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .svc-delete-btn:hover {
+            background: rgba(239, 68, 68, 0.12);
+        }
+
+        /* Ek Hizmetler Listesi CSS */
+        .extra-services-container {
+            margin-top: 0.75rem;
+            padding-left: 1rem;
+            border-left: 2px solid rgba(255, 255, 255, 0.05);
+        }
+
+        :root.theme-light .extra-services-container {
+            border-left-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .extra-svc-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+            flex-wrap: nowrap;
+        }
+
+        .extra-svc-item>div:first-child {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .extra-svc-item .svc-del-btn {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        :root.theme-light .extra-svc-item {
+            background: rgba(0, 0, 0, 0.02);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-add-extra {
+            margin-top: 0.25rem;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.7rem;
+            border: 1px dashed var(--accent);
+            color: var(--accent);
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        /* ── PREMIUM NOTIFICATION SYSTEM (Indigo Theme) ── */
+        .noti-trigger {
+            position: relative;
+            background: #6366f1;
+            /* indigo-500 */
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .noti-trigger:hover {
+            background: #4f46e5;
+            /* indigo-600 */
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        :root.theme-light .noti-trigger {
+            background: #6366f1;
+        }
+
+        .noti-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            /* red-500 */
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 2px solid var(--bg-deep);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 10;
+        }
+
+        .noti-badge.visible {
+            display: flex;
+        }
+
+        /* Dialog & Panel Styling */
+        .noti-dialog-card {
+            background: var(--bg-card);
+            border: 2px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            width: 95%;
+            max-width: 448px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            position: relative;
+        }
+
+        .noti-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+        }
+
+        .noti-item.unread {
+            background: rgba(99, 102, 241, 0.08);
+            /* indigo-50/dark */
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+
+        .noti-item:hover {
+            background: rgba(99, 102, 241, 0.12);
+            border-color: #6366f1;
+        }
+
+        .noti-item-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            background: #e2e8f0;
+            color: #475569;
+            flex-shrink: 0;
+        }
+
+        .noti-item.unread .noti-item-avatar {
+            background: #c7d2fe;
+            color: #4338ca;
+        }
+
+        .noti-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            max-width: 448px;
+            background: var(--bg-card);
+            border-left: 1px solid var(--border);
+            z-index: 11001;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .noti-panel.visible {
+            transform: translateX(0);
+        }
+
+        .noti-panel-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 11000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .noti-panel-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .btn-add-extra:hover {
+            background: var(--accent-glow);
+            border-style: solid;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── GİRİŞ EKRANI ARKA PLAN EFEKTLERİ (WAVY BACKGROUND) ────────────── -->
+    <div class="login-bg" id="login-bg">
+        <canvas id="wavy-canvas"></canvas>
+    </div>
+
+    <!-- ── ŞİFRE SIFIRLAMA MODAL ────────────────────────────────────────────── -->
+    <div id="reset-overlay" class="reset-overlay hidden">
+        <div class="reset-card">
+            <button class="reset-close-btn" id="reset-close-btn" title="Kapat">&#10005;</button>
+            <h2>🔑 Şifre Değiştir</h2>
+            <p class="reset-hint">Şifrenizi sıfırlamak için 8 haneli kurtarma kodunuzu (PIN) girin.</p>
+            <div class="input-group">
+                <label for="reset-slug">İşletme Kodu</label>
+                <input id="reset-slug" type="text" placeholder="örn: salon-ayse" autocomplete="off"
+                    spellcheck="false" />
+            </div>
+
+            <div class="input-group">
+                <label for="reset-recovery-pin">Kurtarma Kodu (PIN)</label>
+                <input id="reset-recovery-pin" type="text" placeholder="8 haneli PIN kodu" autocomplete="off" />
+            </div>
+
+            <div class="input-group">
+                <label for="reset-new-pw">Yeni Şifre</label>
+                <input id="reset-new-pw" type="password" placeholder="En az 4 karakter" autocomplete="new-password" />
+            </div>
+            <div class="input-group">
+                <label for="reset-confirm-pw">Yeni Şifre (Tekrar)</label>
+                <input id="reset-confirm-pw" type="password" placeholder="Yeni şifreyi tekrar girin"
+                    autocomplete="new-password" />
+            </div>
+            <button id="reset-submit-btn" class="btn btn-primary btn-full">Şifreyi Güncelle</button>
+            <p id="reset-msg" class="login-error hidden"></p>
+        </div>
+    </div>
+
+    <!-- ── HİZMET DÜZENLEME MODAL ────────────────────────────────────────────── -->
+    <div id="edit-svc-overlay" class="reset-overlay hidden">
+        <div class="reset-card">
+            <button class="reset-close-btn" id="edit-svc-close-btn" title="Kapat">&#10005;</button>
+            <h2>✏️ Hizmet Düzenle</h2>
+            <input type="hidden" id="edit-svc-id" />
+
+            <div class="input-group">
+                <label for="edit-svc-name">Hizmet Adı</label>
+                <input id="edit-svc-name" type="text" placeholder="örn: Masaj" autocomplete="off" />
+            </div>
+
+            <div class="input-group">
+                <label for="edit-svc-duration">Süre (dk)</label>
+                <input id="edit-svc-duration" type="number" min="5" step="5" />
+            </div>
+
+            <div class="input-group">
+                <label for="edit-svc-price">Ücret (₺)</label>
+                <input id="edit-svc-price" type="number" min="0" />
+            </div>
+
+            <div class="input-group">
+                <label for="edit-svc-discount">İndirim (₺) Opsiyonel</label>
+                <input id="edit-svc-discount" type="number" min="0" placeholder="Opsiyonel" />
+            </div>
+
+            <button id="edit-svc-submit-btn" class="btn btn-primary btn-full">Kaydet</button>
+            <p id="edit-svc-msg" class="login-error hidden"></p>
+        </div>
+    </div>
+
+    <!-- ── EK HİZMET (UPSELL) EKLEME MODAL ────────────────────────────────────── -->
+    <div id="add-extra-svc-overlay" class="reset-overlay hidden">
+        <div class="reset-card">
+            <button class="reset-close-btn" id="add-extra-close-btn" title="Kapat">&#10005;</button>
+            <h2>✨ Ek Hizmet Ekle</h2>
+            <p class="reset-hint" id="add-extra-subtitle">Masaj hizmetine özel ekstra ekleyin.</p>
+            <input type="hidden" id="add-extra-parent-id" />
+
+            <div class="input-group">
+                <label for="extra-svc-name">Ek Hizmet Adı</label>
+                <input id="extra-svc-name" type="text" placeholder="örn: Kafa Masajı" autocomplete="off" />
+            </div>
+
+            <div class="input-group">
+                <label for="extra-svc-duration">Süre (dk)</label>
+                <input id="extra-svc-duration" type="number" min="0" step="5"
+                    placeholder="0 (İsteğe bağlı, süreyi uzatır)" />
+            </div>
+
+            <div class="input-group">
+                <label for="extra-svc-price">Ek Ücret (₺)</label>
+                <input id="extra-svc-price" type="number" min="0" placeholder="0" />
+            </div>
+
+            <button id="add-extra-submit-btn" class="btn btn-primary btn-full">+ Ekle</button>
+            <p id="add-extra-msg" class="login-error hidden"></p>
+        </div>
+    </div>
+
+    <!-- ── LOGIN EKRANI ─────────────────────────────────────────────────── -->
+    <div id="login-screen" class="login-screen">
+        <!-- Tema butonu (sağ üst) -->
+        <button id="login-theme-btn" onclick="toggleTheme()" title="Temayı Değiştir"
+            style="position:fixed;top:1.25rem;right:1.25rem;z-index:9999;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);border-radius:8px;padding:0.45rem 0.8rem;font-size:0.85rem;cursor:pointer;transition:all 0.2s;font-family:'Montserrat',sans-serif;backdrop-filter:blur(8px);">🌙</button>
+
+        <!-- Login Kartı -->
+        <form id="login-form" class="login-new-card" onsubmit="return false;">
+            <h1 class="login-new-title">Giriş Yap</h1>
+            <p class="login-new-sub">Devam etmek için giriş yapın</p>
+
+            <!-- İşletme Kodu -->
+            <div class="login-new-field">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                <input id="tenant-slug-input" type="text" placeholder="Kullanıcı Adı" autocomplete="off"
+                    spellcheck="false" />
+            </div>
+
+            <!-- Şifre -->
+            <div class="login-new-field">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <input id="admin-password-input" type="password" placeholder="Şifre" autocomplete="current-password" />
+            </div>
+
+            <!-- Şifremi unuttum -->
+            <div class="login-new-forgot-row">
+                <button type="button" class="login-new-forgot" id="forgot-pw-btn">Şifremi unuttum</button>
+            </div>
+
+            <!-- Giriş Butonu -->
+            <button id="login-btn" type="submit" class="login-new-submit">Giriş Yap</button>
+
+            <!-- Hata mesajı -->
+            <p id="login-error" class="login-error hidden"></p>
+        </form>
+    </div>
+
+
+    <!-- ── ANİME NAVBAR (Mobil) ──────────────────────────────────────────── -->
+    <nav id="anime-navbar" class="anime-navbar hidden">
+        <div class="anime-navbar-pill">
+            <button class="anime-nav-item active" data-tab="today">
+                <div class="anime-mascot">
+                    <div class="mascot-face">
+                        <div class="mascot-eye left"></div>
+                        <div class="mascot-eye right"></div>
+                        <div class="mascot-cheek left"></div>
+                        <div class="mascot-cheek right"></div>
+                        <div class="mascot-mouth"></div>
+                    </div>
+                    <div class="mascot-tail"></div>
+                </div>
+                <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg></span>
+                <span class="anime-nav-label">Bugün</span>
+                <div class="anime-active-glow"></div>
+            </button>
+            <button class="anime-nav-item" data-tab="all">
+                <div class="anime-mascot">
+                    <div class="mascot-face">
+                        <div class="mascot-eye left"></div>
+                        <div class="mascot-eye right"></div>
+                        <div class="mascot-cheek left"></div>
+                        <div class="mascot-cheek right"></div>
+                        <div class="mascot-mouth"></div>
+                    </div>
+                    <div class="mascot-tail"></div>
+                </div>
+                <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6" />
+                        <line x1="8" y1="12" x2="21" y2="12" />
+                        <line x1="8" y1="18" x2="21" y2="18" />
+                        <line x1="3" y1="6" x2="3.01" y2="6" />
+                        <line x1="3" y1="12" x2="3.01" y2="12" />
+                        <line x1="3" y1="18" x2="3.01" y2="18" />
+                    </svg></span>
+                <span class="anime-nav-label">Tümü</span>
+                <div class="anime-active-glow"></div>
+            </button>
+            <button class="anime-nav-item" data-tab="new">
+                <div class="anime-mascot">
+                    <div class="mascot-face">
+                        <div class="mascot-eye left"></div>
+                        <div class="mascot-eye right"></div>
+                        <div class="mascot-cheek left"></div>
+                        <div class="mascot-cheek right"></div>
+                        <div class="mascot-mouth"></div>
+                    </div>
+                    <div class="mascot-tail"></div>
+                </div>
+                <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="16" />
+                        <line x1="8" y1="12" x2="16" y2="12" />
+                    </svg></span>
+                <span class="anime-nav-label">Yeni</span>
+                <div class="anime-active-glow"></div>
+            </button>
+            <button class="anime-nav-item" data-tab="services">
+                <div class="anime-mascot">
+                    <div class="mascot-face">
+                        <div class="mascot-eye left"></div>
+                        <div class="mascot-eye right"></div>
+                        <div class="mascot-cheek left"></div>
+                        <div class="mascot-cheek right"></div>
+                        <div class="mascot-mouth"></div>
+                    </div>
+                    <div class="mascot-tail"></div>
+                </div>
+                <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                        <rect x="14" y="14" width="7" height="7" rx="1" />
+                    </svg></span>
+                <span class="anime-nav-label">Hizmetler</span>
+                <div class="anime-active-glow"></div>
+            </button>
+            <button class="anime-nav-item" data-tab="crm">
+                <div class="anime-mascot">
+                    <div class="mascot-face">
+                        <div class="mascot-eye left"></div>
+                        <div class="mascot-eye right"></div>
+                        <div class="mascot-cheek left"></div>
+                        <div class="mascot-cheek right"></div>
+                        <div class="mascot-mouth"></div>
+                    </div>
+                    <div class="mascot-tail"></div>
+                </div>
+                <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg></span>
+                <span class="anime-nav-label">CRM</span>
+                <div class="anime-active-glow"></div>
+            </button>
+            <button class="anime-nav-item" data-tab="campaigns">
+                <div class="anime-mascot">
+                    <div class="mascot-face">
+                        <div class="mascot-eye left"></div>
+                        <div class="mascot-eye right"></div>
+                        <div class="mascot-cheek left"></div>
+                        <div class="mascot-cheek right"></div>
+                        <div class="mascot-mouth"></div>
+                    </div>
+                    <div class="mascot-tail"></div>
+                </div>
+                <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg></span>
+                <span class="anime-nav-label">Silinenler</span>
+                <div class="anime-active-glow"></div>
+            </button>
+            <button class="anime-nav-item" data-tab="reports">
+                <div class="anime-mascot">
+                    <div class="mascot-face">
+                        <div class="mascot-eye left"></div>
+                        <div class="mascot-eye right"></div>
+                        <div class="mascot-cheek left"></div>
+                        <div class="mascot-cheek right"></div>
+                        <div class="mascot-mouth"></div>
+                    </div>
+                    <div class="mascot-tail"></div>
+                </div>
+                <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10" />
+                        <line x1="12" y1="20" x2="12" y2="4" />
+                        <line x1="6" y1="20" x2="6" y2="14" />
+                    </svg></span>
+                <span class="anime-nav-label">Raporlar</span>
+                <div class="anime-active-glow"></div>
+            </button>
+            <!-- Bekleme sekmesi kaldırıldı -->
+            <button class="anime-nav-item" data-tab="settings">
+                <div class="anime-mascot">
+                    <div class="mascot-face">
+                        <div class="mascot-eye left"></div>
+                        <div class="mascot-eye right"></div>
+                        <div class="mascot-cheek left"></div>
+                        <div class="mascot-cheek right"></div>
+                        <div class="mascot-mouth"></div>
+                    </div>
+                    <div class="mascot-tail"></div>
+                </div>
+                <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                    </svg></span>
+                <span class="anime-nav-label">Denetim</span>
+                <div class="anime-active-glow"></div>
+            </button>
+        </div>
+    </nav>
+    <button id="mobile-theme-toggle" class="theme-btn-float" title="Temayı Değiştir">
+        <span id="mobile-theme-icon">🌙</span>
+    </button>
+
+
+    <!-- ── ANA DASHBOARD ────────────────────────────────────────────────── -->
+    <div id="app" class="app hidden">
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-mark small"></div>
+                <span class="sidebar-brand">Randevu</span>
+            </div>
+            <div class="dock-wrapper">
+                <div class="dock" id="main-dock">
+                    <button class="dock-item active" data-tab="today" id="nav-today">
+                        <div class="dock-label">Bugün</div>
+                        <div class="dock-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                <polyline points="9 22 9 12 15 12 15 22" />
+                            </svg>
+                        </div>
+                    </button>
+                    <button class="dock-item" data-tab="all" id="nav-all">
+                        <div class="dock-label">Tüm Randevular</div>
+                        <div class="dock-icon">
+                            <svg viewBox="0 0 24 24">
+                                <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                        </div>
+                    </button>
+                    <button class="dock-item" data-tab="new" id="nav-new">
+                        <div class="dock-label">Yeni Randevu</div>
+                        <div class="dock-icon">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="16" />
+                                <line x1="8" y1="12" x2="16" y2="12" />
+                            </svg>
+                        </div>
+                    </button>
+                    <button class="dock-item" data-tab="services" id="nav-services">
+                        <div class="dock-label">Hizmetler</div>
+                        <div class="dock-icon">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="3" width="7" height="7" rx="1" />
+                                <rect x="14" y="3" width="7" height="7" rx="1" />
+                                <rect x="3" y="14" width="7" height="7" rx="1" />
+                                <rect x="14" y="14" width="7" height="7" rx="1" />
+                            </svg>
+                        </div>
+                    </button>
+                    <button class="dock-item" data-tab="crm" id="nav-crm">
+                        <div class="dock-label">Müşteri (CRM)</div>
+                        <div class="dock-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
+                        </div>
+                    </button>
+                    <button class="dock-item" data-tab="campaigns" id="nav-campaigns">
+                        <div class="dock-label">Silinen Randevular</div>
+                        <div class="dock-icon">
+                            <svg viewBox="0 0 24 24">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                        </div>
+                    </button>
+                    <button class="dock-item" data-tab="reports" id="nav-reports">
+                        <div class="dock-label">Raporlar</div>
+                        <div class="dock-icon">
+                            <svg viewBox="0 0 24 24">
+                                <line x1="18" y1="20" x2="18" y2="10" />
+                                <line x1="12" y1="20" x2="12" y2="4" />
+                                <line x1="6" y1="20" x2="6" y2="14" />
+                            </svg>
+                        </div>
+                    </button>
+                    <!-- Bekleme dock öğesi kaldırıldı -->
+                    <button class="dock-item" data-tab="settings" id="nav-settings">
+                        <div class="dock-label">Denetim</div>
+                        <div class="dock-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            <div class="sidebar-footer">
+                <div class="sidebar-footer-top">
+                    <button id="theme-toggle-btn" class="btn-theme-sidebar" title="Temayı Değiştir">
+                        <span id="theme-icon">🌙</span>
+                        <span id="theme-label">Koyu</span>
+                    </button>
+                </div>
+                <div class="sidebar-footer-bottom">
+                    <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                        <div id="realtime-badge" class="realtime-badge">
+                            <span class="pulse-dot"></span>
+                            <span>Canlı</span>
+                        </div>
+                        <button id="logout-btn" class="btn-logout">Çıkış</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h2 id="page-title">Bugünün Randevuları</h2>
+                    <div id="tenant-name-badge" class="tenant-badge"></div>
+                </div>
+                <div class="topbar-right">
+                    <button id="topbar-noti-btn" class="noti-trigger" title="Bildirimler"
+                        style="margin-right:0.75rem; background:#6366f1; color:white;">
+                        <i data-lucide="bell-ring" style="width:18px; height:18px;"></i>
+                        <span id="topbar-noti-badge" class="noti-badge">0</span>
+                        <span class="noti-label">Bildirimler</span>
+                    </button>
+                    <div id="current-datetime" class="datetime-display"></div>
+                    <div id="connection-status" class="connection-status connected">Bağlı</div>
+                </div>
+            </header>
+
+            <!-- TAB: BUGÜN -->
+            <section id="tab-today" class="tab-content active">
+                <div class="stats-row" id="stats-row">
+                    <div class="stat-card"><span class="stat-value" id="stat-total">–</span><span
+                            class="stat-label">Toplam</span></div>
+                    <div class="stat-card"><span class="stat-value" id="stat-confirmed">–</span><span
+                            class="stat-label">Onaylı</span></div>
+                    <div class="stat-card"><span class="stat-value" id="stat-pending">–</span><span
+                            class="stat-label">Bekleyen</span></div>
+                    <div class="stat-card"><span class="stat-value" id="stat-cancelled">–</span><span
+                            class="stat-label">İptal</span></div>
+                </div>
+                <div class="section-header">
+                    <h3>Bugün — <span id="today-date-label"></span></h3>
+                    <button class="btn btn-secondary" id="refresh-today-btn">Yenile</button>
+                </div>
+                <div id="today-appointments" class="appointments-grid">
+                    <div class="loading-state">Yükleniyor...</div>
+                </div>
+            </section>
+
+            <!-- TAB: TÜM RANDEVULAR -->
+            <section id="tab-all" class="tab-content hidden">
+                <div class="filters-bar">
+                    <div class="filter-item calendar-filter">
+                        <label>Tarih Seçin</label>
+                        <div class="bento-calendar-card" id="cal-filter-container">
+                            <div class="calendar-header">
+                                <div class="calendar-nav">
+                                    <button type="button" class="calendar-nav-btn" data-action="prev">❮</button>
+                                    <div class="calendar-month-year" id="cal-filter-month-year">Mart 2026</div>
+                                    <button type="button" class="calendar-nav-btn" data-action="next">❯</button>
+                                </div>
+                            </div>
+                            <div class="calendar-grid" id="cal-filter-grid"></div>
+                            <input type="hidden" id="filter-date" />
+                        </div>
+                    </div>
+                    <div class="filter-group-right">
+                        <div class="input-group inline">
+                            <label for="filter-status">Durum</label>
+                            <select id="filter-status">
+                                <option value="">Tümü</option>
+                                <option value="pending">Bekleyen</option>
+                                <option value="confirmed">Onaylı</option>
+                                <option value="cancelled">İptal</option>
+                            </select>
+                        </div>
+                        <div class="input-group inline">
+                            <label for="filter-staff">Personel</label>
+                            <select id="filter-staff">
+                                <option value="">Tümü</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn btn-primary" id="apply-filter-btn">Filtrele</button>
+                            <button class="btn btn-ghost" id="clear-filter-btn">Temizle</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="all-appointments" class="appointments-grid" style="margin-top:1.5rem;">
+                    <div class="loading-state">Yükleniyor...</div>
+                </div>
+            </section>
+
+            <!-- Waitlist tab içeriği kaldırıldı -->
+
+            <!-- TAB: YENİ RANDEVU -->
+            <section id="tab-new" class="tab-content hidden">
+                <div class="form-card">
+                    <h3>Yeni Randevu Oluştur</h3>
+                    <p class="form-hint">Manuel randevu girişi için bu formu kullanın.</p>
+                    <form id="new-appointment-form" novalidate>
+                        <div class="form-row">
+                            <div class="input-group"><label for="f-name">Ad Soyad</label><input type="text" id="f-name"
+                                    placeholder="Müşteri adı soyadı" required /></div>
+                            <div class="input-group"><label for="f-phone">Telefon</label><input type="tel" id="f-phone"
+                                    placeholder="+905xx xxx xx xx" required /></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="f-service">Hizmet</label>
+                                <select id="f-service">
+                                    <option value="">Seçiniz</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="f-staff">Personel</label>
+                                <select id="f-staff">
+                                    <option value="">Farketmez (Herhangi Biri)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group" style="flex: 1;">
+                                <label>Tarih Seçin</label>
+                                <div class="bento-calendar-card" id="cal-new-container">
+                                    <div class="calendar-header">
+                                        <div class="calendar-nav">
+                                            <button type="button" class="calendar-nav-btn" data-action="prev">❮</button>
+                                            <div class="calendar-month-year" id="cal-new-month-year">...</div>
+                                            <button type="button" class="calendar-nav-btn" data-action="next">❯</button>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-grid" id="cal-new-grid"></div>
+                                    <input type="hidden" id="f-date" required />
+                                </div>
+                            </div>
+                            <div class="input-group" style="flex: 0 0 200px;">
+                                <label for="f-time">Saat</label>
+                                <select id="f-time" required>
+                                    <option value="">Seçiniz</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="f-notes">Notlar</label>
+                            <textarea id="f-notes" rows="3" placeholder="Ek notlar (opsiyonel)"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="create-btn">Randevu Oluştur</button>
+                            <p id="form-message" class="form-message hidden"></p>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- TAB: AYARLAR -->
+            <section id="tab-settings" class="tab-content hidden">
+                <div class="settings-split-layout">
+                    <div class="settings-left">
+                        <div class="form-card">
+                            <h3>İşletme Bilgileri</h3>
+                            <div id="settings-info" class="settings-info">
+                                <div class="loading-state">Yükleniyor...</div>
+                            </div>
+                        </div>
+
+                        <div class="form-card" style="margin-top:1.5rem">
+                            <h3>Müşteri Form Linki</h3>
+                            <p class="form-hint">Bu linki müşterilerinizle paylaşın:</p>
+                            <div class="webhook-box">
+                                <code id="booking-url"></code>
+                                <button class="btn btn-ghost btn-sm" id="copy-booking-btn">Kopyala</button>
+                            </div>
+                        </div>
+
+                        <div class="form-card" style="margin-top:1.5rem">
+                            <h3>Saat Yönetimi</h3>
+                            <p class="form-hint">Kapatmak istediğiniz saate tıklayın — kırmızı = kapalı.</p>
+                            <div class="form-row" style="margin-bottom:1.25rem;">
+                                <div class="input-group" style="flex: 1;">
+                                    <label>Tarih Seçin</label>
+                                    <div class="bento-calendar-card" id="cal-block-container">
+                                        <div class="calendar-header">
+                                            <div class="calendar-nav">
+                                                <button type="button" class="calendar-nav-btn"
+                                                    data-action="prev">❮</button>
+                                                <div class="calendar-month-year" id="cal-block-month-year">...</div>
+                                                <button type="button" class="calendar-nav-btn"
+                                                    data-action="next">❯</button>
+                                            </div>
+                                        </div>
+                                        <div class="calendar-grid" id="cal-block-grid"></div>
+                                        <input type="hidden" id="block-date" />
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label>Personel</label>
+                                    <select id="block-staff">
+                                        <option value="">Tümü için kapat (Farketmez dahil)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="block-grid" class="block-grid">
+                                <div class="loading-state">Tarih seçin...</div>
+                            </div>
+                        </div>
+
+                        <div class="form-card" style="margin-top:1.5rem" id="qr-section">
+                            <div
+                                style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+                                <h3 style="margin:0;">🪞 Mirror QR (Hızlı Randevu)</h3>
+                                <span class="badge badge-accent" style="font-size:0.65rem;">SATIŞ ODAKLI</span>
+                            </div>
+                            <p class="form-hint" style="margin-bottom:1.5rem;">Bu QR kodu dükkanınıza asın.
+                                Müşterileriniz
+                                okuttuğunda belirlediğiniz indirimle randevu alabilir.</p>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+                                <div class="form-group">
+                                    <label class="form-label">İndirim Oranı (%)</label>
+                                    <input type="number" id="qr-discount-input" class="form-input" value="10" min="0"
+                                        max="100">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Üst Yazı (Başlık)</label>
+                                    <input type="text" id="qr-header-input" class="form-input"
+                                        value="HIZLI RANDEVU & İNDİRİM">
+                                </div>
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label class="form-label">Alt Yazı (Slogan)</label>
+                                    <input type="text" id="qr-footer-input" class="form-input"
+                                        value="Kodu Okut, Sıra Bekleme!">
+                                </div>
+                            </div>
+
+                            <div id="qr-printable-area"
+                                style="background:white; padding:2rem; border-radius:1.5rem; text-align:center; color:#000; box-shadow:0 10px 30px rgba(0,0,0,0.1); margin-bottom:1.5rem;">
+                                <div id="qr-biz-name"
+                                    style="font-weight:800; font-size:1.4rem; margin-bottom:0.1rem; color:#000;">Dükkan
+                                    Adı
+                                </div>
+                                <div id="qr-header-preview"
+                                    style="font-size:0.8rem; margin-bottom:1.5rem; color:#666; font-weight:600; text-transform:uppercase;">
+                                    HIZLI RANDEVU & %10 İNDİRİM</div>
+                                <div id="qr-code" style="display:flex; justify-content:center; margin-bottom:1.5rem;">
+                                </div>
+                                <div id="qr-footer-preview"
+                                    style="font-size:0.75rem; color:#888; border-top:1px dashed #eee; padding-top:1rem; margin-top:1rem;">
+                                    Kodu Okut, Sıra Bekleme!</div>
+                            </div>
+
+                            <div style="display:flex; gap:0.75rem;">
+                                <button class="btn btn-primary" id="print-qr-btn" style="flex:1;">
+                                    <i data-lucide="printer"
+                                        style="width:16px; height:16px; display:inline-block; vertical-align:middle; margin-right:0.5rem;"></i>
+                                    Yazdır (A4)
+                                </button>
+                                <button class="btn btn-ghost" id="download-qr-btn" style="flex:1;">
+                                    <i data-lucide="download"
+                                        style="width:16px; height:16px; display:inline-block; vertical-align:middle; margin-right:0.5rem;"></i>
+                                    İndir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-right dashboard-container">
+                        <div class="bento-grid">
+                            <!-- Card 1: Revenue -->
+                            <div class="bento-card span-2" id="bento-revenue">
+                                <div class="bento-gradient g-blue"></div>
+                                <div class="bento-content">
+                                    <h3>Toplam Kazanç</h3>
+                                    <p class="bento-value">₺0</p>
+                                    <p class="bento-subtitle">Tüm zamanların onaylanan geliri</p>
+                                </div>
+                            </div>
+                            <!-- Card 2: Today's Load -->
+                            <div class="bento-card" id="bento-load">
+                                <div class="bento-gradient g-cyan"></div>
+                                <div class="bento-content">
+                                    <h3>Randevu Doluluğu</h3>
+                                    <p class="bento-value">0%</p>
+                                    <p class="bento-subtitle">Mevcut doluluk</p>
+                                </div>
+                            </div>
+                            <!-- Card 3: Satisfaction -->
+                            <div class="bento-card" id="bento-satisfaction">
+                                <div class="bento-gradient g-purple"></div>
+                                <div class="bento-content">
+                                    <h3>Memnuniyet</h3>
+                                    <p class="bento-value">4.9/5</p>
+                                    <p class="bento-subtitle">Müşteri puanı</p>
+                                </div>
+                            </div>
+                            <!-- Card 4: New Customers -->
+                            <div class="bento-card span-2" id="bento-new-customers">
+                                <div class="bento-gradient g-green"></div>
+                                <div class="bento-content">
+                                    <h3>Yeni Müşteriler</h3>
+                                    <p class="bento-value">0</p>
+                                    <p class="bento-subtitle">Bugünkü keşifler</p>
+                                </div>
+                            </div>
+                            <!-- Card 5: Cancellation Rate -->
+                            <div class="bento-card span-3" id="bento-cancellation">
+                                <div class="bento-gradient g-orange"></div>
+                                <div class="bento-content">
+                                    <h3>İptal Oranı</h3>
+                                    <p class="bento-value">0%</p>
+                                    <p class="bento-subtitle">Haftalık kayıp analizi</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-card" style="margin-top:1.5rem">
+                            <h3>Çalışanlar (Ekip)</h3>
+                            <p class="form-hint">Müşterilerin seçebilmesi için personellerinizi ekleyin.</p>
+                            <div class="svc-add-row" id="staff-add-row"
+                                style="display:flex; flex-direction:column; gap:1rem; align-items:stretch; background:var(--bg-deep); padding:1.25rem; border-radius:var(--radius); border:1px solid var(--border);">
+                                <div
+                                    style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:1rem;">
+                                    <div class="input-group">
+                                        <label>Ad *</label>
+                                        <input type="text" id="staff-name" placeholder="örn: Ayşe, Ahmet..." />
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Soyad <span
+                                                style="font-weight:400; color:var(--text-muted);">(Opsiyonel)</span></label>
+                                        <input type="text" id="staff-surname" placeholder="örn: Yılmaz" />
+                                    </div>
+                                </div>
+                                <div
+                                    style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:1rem;">
+                                    <div class="input-group">
+                                        <label>Telefon <span
+                                                style="font-weight:400; color:var(--text-muted);">(Opsiyonel)</span></label>
+                                        <input type="tel" id="staff-phone" placeholder="05xx xxx xx xx" />
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Pozisyon/Rol <span
+                                                style="font-weight:400; color:var(--text-muted);">(Opsiyonel)</span></label>
+                                        <input type="text" id="staff-role" placeholder="örn: Kıdemli Kuaför" />
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label>Adres <span
+                                            style="font-weight:400; color:var(--text-muted);">(Opsiyonel)</span></label>
+                                    <textarea id="staff-address" placeholder="Personel adresi (opsiyonel)"
+                                        style="min-height:60px; resize:vertical; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem; width:100%;"></textarea>
+                                </div>
+                                <button class="btn btn-primary" id="add-staff-btn" style="width:100%;">+ Personel
+                                    Ekle</button>
+                            </div>
+                            <p id="staff-msg" class="form-message hidden"></p>
+                            <div id="staff-list" class="services-list" style="margin-top: 1rem;">
+                                <div class="loading-state">Henüz personel eklenmemiş.</div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: CRM — MÜŞTERİ YÖNETİMİ -->
+            <section id="tab-crm" class="tab-content hidden">
+                <div class="section-header">
+                    <h3>👥 Müşteri Yönetimi — CRM</h3>
+                </div>
+                <div style="margin-bottom:1.25rem; display:flex; gap:0.75rem;">
+                    <input id="crm-search" type="text" placeholder="🔍 Ad veya telefon ile ara..."
+                        style="flex:1; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
+                    <button class="btn btn-secondary" id="crm-refresh-btn">Yenile</button>
+                </div>
+                <div id="crm-list" class="appointments-grid">
+                    <div class="loading-state">Yükleniyor...</div>
+                </div>
+                <!-- Müşteri Detay Panel -->
+                <div id="crm-detail-overlay" class="reset-overlay hidden" style="z-index:10500;">
+                    <div class="reset-card" style="max-width:540px; max-height:85vh; overflow-y:auto;">
+                        <button class="reset-close-btn" id="crm-detail-close">✕</button>
+                        <h2 id="crm-detail-name" style="margin-bottom:0.25rem;">Müşteri</h2>
+                        <p id="crm-detail-phone"
+                            style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1rem;"></p>
+                        <div id="crm-detail-stats"
+                            style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1.25rem;">
+                        </div>
+                        <h4 style="margin-bottom:0.75rem; font-size:0.85rem; opacity:0.7;">RANDEVU GEÇMİŞİ</h4>
+                        <div id="crm-detail-history"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: HİZMETLER -->
+            <section id="tab-services" class="tab-content hidden">
+                <div class="section-header" style="margin-bottom:0.5rem;">
+                    <h3>Hizmetler</h3>
+                    <button class="btn btn-secondary" id="services-refresh-btn">Yenile</button>
+                </div>
+                <p class="form-hint" style="margin-bottom:1.5rem;">Sunduğunuz hizmetleri detaylı olarak ekleyip yönetin
+                    — müşteri randevu formunda bunları görecek.</p>
+
+                <div
+                    style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; margin-bottom:1.5rem;">
+                    <div style="display:grid; grid-template-columns:1fr; gap:1rem; margin-bottom:1rem;">
+                        <div class="input-group">
+                            <label>Hizmet Adı *</label>
+                            <input type="text" id="new-svc-name" placeholder="örn: Tüm Vücut Masajı">
+                        </div>
+                    </div>
+
+                    <div
+                        style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:1rem; margin-bottom:1rem;">
+                        <div class="input-group">
+                            <label>Süre (dk) *</label>
+                            <input type="number" id="new-svc-dur" placeholder="60">
+                        </div>
+                        <div class="input-group">
+                            <label>Normal Ücret (₺) *</label>
+                            <input type="number" id="new-svc-price" placeholder="1000">
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr; gap:1rem; margin-bottom:1rem;">
+                        <div class="input-group">
+                            <label>Kısa Açıklama <span
+                                    style="font-weight:400; color:var(--text-muted);">(Opsiyonel)</span></label>
+                            <textarea id="new-svc-desc"
+                                placeholder="Hizmetin müşteriye faydaları ve içeriği hakkında kısa bir bilgi..."
+                                style="min-height:70px; resize:vertical; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem; width:100%;"></textarea>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr; gap:1rem; margin-bottom:1.25rem;">
+                        <div class="input-group">
+                            <label>Etki Eden Bölge <span
+                                    style="font-weight:400; color:var(--text-muted);">(Opsiyonel)</span></label>
+                            <input type="text" id="new-svc-bodyarea" placeholder="örn: Sırt, Yüz, Tüm Vücut...">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" id="add-svc-btn" style="width:100%;">+ Hizmet Ekle</button>
+                    <p id="svc-msg" class="form-message hidden"></p>
+                </div>
+
+                <div id="services-list" class="appointments-grid"
+                    style="display:flex; flex-direction:column; gap:0.5rem;">
+                    <div class="loading-state">Yükleniyor...</div>
+                </div>
+
+                <!-- Ek Hizmet Modal -->
+                <div id="extra-svc-overlay" class="reset-overlay hidden" style="z-index: 10500;">
+                    <div class="reset-card" style="max-width:400px;">
+                        <button class="reset-close-btn" id="extra-svc-close">✕</button>
+                        <h2 style="margin-bottom:0.25rem;">✨ Ek Hizmet (Upsell) Ekle</h2>
+                        <p class="form-hint" style="margin-bottom:1.25rem;">Müşterinin randevu alırken seçebileceği
+                            isteğe bağlı hizmetler.</p>
+
+                        <div class="input-group" style="margin-bottom:0.85rem;">
+                            <label for="extra-svc-name">Ek Hizmet Adı</label>
+                            <input type="text" id="extra-svc-name" placeholder="örn: Kafa Masajı, Altın Maske..."
+                                style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1.25rem;">
+                            <div class="input-group">
+                                <label for="extra-svc-dur">Ek Süre (Dk)</label>
+                                <input type="number" id="extra-svc-dur" placeholder="15"
+                                    style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
+                            </div>
+                            <div class="input-group">
+                                <label for="extra-svc-price">Ek Ücret (₺)</label>
+                                <input type="number" id="extra-svc-price" placeholder="350"
+                                    style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" id="extra-svc-save-btn" style="width:100%;">Ekle</button>
+                        <p id="extra-svc-msg" class="form-message hidden"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: RAPORLAR — PERSONEL PERFORMANSI -->
+            <section id="tab-reports" class="tab-content hidden">
+                <div class="section-header">
+                    <h3>📊 Personel Performans Raporu</h3>
+                </div>
+                <div style="display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+                    <button class="btn btn-primary" id="report-btn-all" data-period="all">Tüm Zamanlar</button>
+                    <button class="btn btn-secondary" id="report-btn-month" data-period="month">Bu Ay</button>
+                    <button class="btn btn-secondary" id="report-btn-week" data-period="week">Bu Hafta</button>
+                </div>
+                <div id="reports-total"
+                    style="margin-bottom:1.5rem; padding:1rem 1.25rem; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); display:flex; align-items:center; gap:1rem;">
+                    <span style="font-size:1.75rem; font-weight:800; color:var(--accent);"
+                        id="reports-total-revenue">₺0</span>
+                    <span style="color:var(--text-muted); font-size:0.85rem;">Toplam Onaylı Gelir</span>
+                </div>
+                <div id="reports-list" class="appointments-grid">
+                    <div class="loading-state">Yükleniyor...</div>
+                </div>
+            </section>
+
+            <!-- TAB: SİLİNEN RANDEVULAR -->
+            <section id="tab-campaigns" class="tab-content hidden">
+                <div class="section-header">
+                    <h3>🗑️ Silinen Randevular (Son 24 Saat)</h3>
+                    <button class="btn btn-secondary" id="deleted-refresh-btn">Yenile</button>
+                </div>
+                <p class="form-hint" style="margin-bottom:1.25rem;">Silinen randevular 24 saat boyunca burada saklanır,
+                    ardından sistemden kalıcı olarak temizlenir.</p>
+
+                <div id="deleted-appointments-list" class="appointments-grid">
+                    <div class="loading-state">Yükleniyor...</div>
+                </div>
+
+                <!-- Kampanya Düzenleme Modal -->
+                <div id="campaign-edit-overlay" class="reset-overlay hidden" style="z-index:10500;">
+                    <div class="reset-card" style="max-width:440px;">
+                        <button class="reset-close-btn" id="campaign-edit-close">✕</button>
+                        <h2 style="margin-bottom:0.25rem;" id="campaign-svc-name">Hizmet</h2>
+                        <p class="form-hint" style="margin-bottom:1.25rem;">Kampanya süresi dolduğunda booking
+                            sayfasında normal fiyat görünür.</p>
+                        <div class="input-group" style="margin-bottom:0.85rem;">
+                            <label>Kampanya Etiketi</label>
+                            <input type="text" id="campaign-label-input"
+                                placeholder="örn: Bahar İndirimi, Flash Sale..."
+                                style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
+                        </div>
+                        <div class="input-group" style="margin-bottom:0.85rem;">
+                            <label>İndirimli Fiyat (₺)</label>
+                            <input type="number" id="campaign-price-input" min="0" placeholder="0"
+                                style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
+                        </div>
+                        <div class="input-group" style="margin-bottom:1.25rem;">
+                            <label>Kampanya Bitiş Tarihi & Saati</label>
+                            <input type="datetime-local" id="campaign-ends-input"
+                                style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
+                        </div>
+                        <div style="display:flex; gap:0.75rem;">
+                            <button class="btn btn-primary" id="campaign-save-btn" style="flex:1;">💾 Kaydet</button>
+                            <button class="btn btn-ghost" id="campaign-clear-btn"
+                                style="flex:1; border:1px solid var(--red); color:var(--red);">🗑 Kaldır</button>
+                        </div>
+                        <p id="campaign-msg" class="form-message hidden"></p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ── NOTIFICATION PANEL ── -->
+    <div id="noti-overlay" class="noti-panel-overlay"></div>
+    <div id="noti-panel" class="noti-panel">
+        <div class="noti-header"
+            style="padding: 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+                <i data-lucide="bell-ring" style="color:#6366f1; width:22px; height:22px;"></i>
+                <h2 style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin:0;">Tüm Bildirimler
+                </h2>
+            </div>
+            <button id="noti-close-btn"
+                style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:1.25rem; line-height:1;">&#10005;</button>
+        </div>
+        <div id="noti-list" class="noti-list" style="flex:1; overflow-y:auto; padding:1rem;">
+            <!-- Notifications injected here -->
+        </div>
+        <div style="padding:1.25rem; border-top:1px solid var(--border); background:var(--bg-card);">
+            <button id="noti-mark-all-read" class="btn btn-primary btn-full"
+                style="background:#6366f1; height:44px; font-weight:600; width:100%; border-radius:8px; border:none; color:white; cursor:pointer;">Tümünü
+                Okundu Say</button>
+        </div>
+    </div>
+
+    <!-- ── NOTIFICATION ALERT DIALOG ── -->
+    <div id="noti-dialog-overlay" class="reset-overlay hidden"
+        style="z-index:12000; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; position:fixed; inset:0;">
+        <div class="noti-dialog-card">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
+                <div style="display:flex; align-items:center; gap:0.6rem;">
+                    <i data-lucide="bell-ring" style="color:#6366f1; width:22px; height:22px;"></i>
+                    <h2 style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin:0;">Bildirimler
+                    </h2>
+                </div>
+                <button id="noti-dialog-mark-read" class="forgot-link"
+                    style="font-size:0.7rem; text-decoration:none;">Tümünü okundu say</button>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.25rem;" id="noti-dialog-desc">Bekleyen
+                0 okunmamış randevunuz var.</p>
+
+            <div id="noti-dialog-list" style="margin-bottom:1.5rem;">
+                <!-- Son 2 bildirim -->
+            </div>
+
+            <div style="display:flex; gap:0.75rem;">
+                <button id="noti-dialog-close" class="btn btn-ghost"
+                    style="flex:1; border:1px solid var(--border); height:40px; border-radius:8px; cursor:pointer; background:transparent; color:var(--text-primary);">Kapat</button>
+                <button id="noti-dialog-view-all" class="btn btn-primary"
+                    style="flex:1; background:#6366f1; height:40px; font-weight:600; border-radius:8px; border:none; color:white; cursor:pointer;">Hepsini
+                    Gör</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── RANDEVU DETAY MODAL ─────────────────────────────────────────────── -->
+    <div id="detail-modal" class="modal hidden">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-title">Randevu Detayı</h3>
+                <button class="modal-close" id="modal-close-btn">&#10005;</button>
+            </div>
+            <div id="modal-body" class="modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="modal-confirm-btn">Onayla</button>
+                <button class="btn btn-danger" id="modal-cancel-btn">İptal Et</button>
+                <button class="btn btn-whatsapp" id="modal-whatsapp-btn">WhatsApp Gönder</button>
+                <button class="btn btn-success hidden" id="modal-restore-btn">🔄 Geri Yükle</button>
+                <button class="btn btn-ghost" id="modal-delete-btn"
+                    style="margin-left:auto;border-color:rgba(239,68,68,.4);color:#ef4444;"
+                    title="Randevuyu Kalıcı Sil">🗑 Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── GLOBAL HELLO PRELOADER ── -->
+    <div id="preloader" class="hidden">
+        <div class="preloader-word-container" id="preloader-word-container">
+            <span class="preloader-dot"></span>
+            <span id="preloader-word">Hello</span>
+        </div>
+        <svg class="preloader-svg">
+            <path id="preloader-path" />
+        </svg>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="app.js?v=10"></script>
+</body>
+
+</html>
