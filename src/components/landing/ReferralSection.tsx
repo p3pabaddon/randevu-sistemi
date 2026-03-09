@@ -83,6 +83,8 @@ const ReferralSection = () => {
                                     <img
                                         src="https://images.unsplash.com/photo-1556742044-3c52d6e88c62?auto=format&fit=crop&q=80&w=800"
                                         alt="Referral Program"
+                                        width="800"
+                                        height="600"
                                         className="rounded-[2rem] w-full grayscale-[0.2] hover:grayscale-0 transition-all"
                                     />
                                 </div>
