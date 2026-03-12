@@ -1,4 +1,4 @@
-﻿/* ─────────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────
    Appointment Dashboard — app.js
    Stack: Vanilla JS + Supabase JS CDN + REST API (Express backend)
    ───────────────────────────────────────────────────────────────────────── */
@@ -1525,13 +1525,13 @@ function renderServicesList() {
             extrasHtml = `<div class="extra-services-container">
                 <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.3rem;">Ek Hizmetler:</div>
                 ${extras.map(ex => `
-                    <div class="extra-svc-item" data-id="${ex.id}">
-                        <div>
+                    <div class="extra-svc-item" data-id="${ex.id}" style="display:flex; flex-wrap:wrap; gap:0.5rem; justify-content:space-between; align-items:center;">
+                        <div style="flex:1; min-width:150px;">
                             <strong>${esc(ex.name)}</strong>
                             ${ex.duration_minutes ? ` <span style="opacity:0.7">(${ex.duration_minutes} dk)</span>` : ''}
                             ${ex.price ? ` <span style="color:var(--accent); font-weight:600; margin-left:0.3rem">+${Number(ex.price).toLocaleString('tr-TR')} ₺</span>` : ''}
                         </div>
-                        <div style="display:flex; gap:0.4rem;">
+                        <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
                             <button class="svc-del-btn" style="color:var(--accent); border-color:var(--accent); padding:0.15rem 0.4rem; font-size:0.65rem;" data-action="edit-extra" data-id="${ex.id}" data-parent-id="${s.id}">Düzenle</button>
                             <button class="svc-del-btn" style="color:var(--red); border-color:var(--red); padding:0.15rem 0.4rem; font-size:0.65rem;" data-action="delete-extra" data-id="${ex.id}">Sil</button>
                         </div>
@@ -1542,8 +1542,8 @@ function renderServicesList() {
 
         return `
     <div class="service-row" data-svc-id="${s.id}" style="display:block; padding-bottom:0.75rem;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.75rem;">
+          <div style="flex:1; min-width:200px;">
               <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.4rem;">
                   <strong>${esc(s.name)}</strong>
                   ${s.body_area ? `<span style="font-size:0.65rem; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); padding:0.15rem 0.4rem; border-radius:4px; color:var(--text-primary); font-weight:600;">${esc(s.body_area)}</span>` : ''}
@@ -1554,7 +1554,7 @@ function renderServicesList() {
                 ${s.campaign_ends_at ? `<span style="font-size:0.65rem; color:var(--text-muted);">⌛ ${new Date(s.campaign_ends_at).toLocaleDateString('tr-TR')}</span>` : ''}
               </div>
               ${s.description ? `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem; line-height:1.4; max-width:95%;">${esc(s.description)}</div>` : ''}
-              <span class="svc-meta" style="display:flex;align-items:center;gap:0.3rem;white-space:nowrap;line-height:1;margin-top:0.35rem;">
+              <span class="svc-meta" style="display:flex;align-items:center;flex-wrap:wrap;gap:0.3rem;line-height:1;margin-top:0.35rem;">
                 ${s.duration_minutes ? `<span>${s.duration_minutes} dk</span>` : ''}
                 <span style="display:inline-flex;align-items:center;white-space:nowrap;">
                   ${s.price != null ? `<span style="${s.discounted_price ? 'text-decoration:line-through;opacity:0.6;margin-right:0.4rem;font-size:0.75rem;' : 'font-size:0.85rem;'}">${Number(s.price).toLocaleString('tr-TR')} ₺</span>` : ''}
@@ -1563,7 +1563,7 @@ function renderServicesList() {
               </span>
           </div>
           <div style="display:flex; flex-direction:column; gap:0.3rem;">
-              <div style="display:flex; gap:0.3rem;">
+              <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">
                   <button class="svc-del-btn" style="color:var(--accent);border-color:var(--accent);" data-action="edit-svc" data-id="${s.id}">Düzenle</button>
                   <button class="svc-del-btn" style="color:var(--green);border-color:var(--green);" data-action="manage-campaign" data-id="${s.id}">Kampanya</button>
                   <button class="svc-del-btn" data-action="delete-svc" data-id="${s.id}">Sil</button>
