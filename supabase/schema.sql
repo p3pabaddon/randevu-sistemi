@@ -12,6 +12,9 @@ create table if not exists tenants (
   email text,
   address text,
   whatsapp_number text,             -- İşletmenin WhatsApp numarası
+  password text,                    -- Giriş şifresi (bcrypt hash)
+  recovery_pin text,                -- Şifre kurtarma pini
+  trial_ends_at timestamptz,        -- Deneme süresi bitiş tarihi
   created_at timestamptz default now()
 );
 
@@ -56,11 +59,14 @@ create index if not exists idx_appointments_tenant on appointments(tenant_id);
 create index if not exists idx_appointments_date on appointments(appointment_date);
 create index if not exists idx_services_tenant on services(tenant_id);
 
--- 6. ÖRNEK VERİ (test için)
-insert into tenants (name, slug, phone, email, address, whatsapp_number, password, recovery_pin) values
-  ('Salon Ayşe', 'salon-ayse', '+905551234567', 'ayse@saloorn.com', 'İstanbul, Kadıköy', '+905551234567', null, null),
-  ('Diyar Media', 'diyar-media', '05426381638', null, 'fotoğraf ve kamera', '05426381638', '$2b$10$B/N71SjIqTWHcPRI75w.H.rY3ji5zKtvafg.4tf3XdAyXxIHnRRLK', 'HHSN7DXR')
-on conflict (slug) do nothing;
+-- 6. İŞLETME KAYITLARI (Aktif ve Deneme Sürecindekiler)
+insert into tenants (name, slug, phone, email, address, whatsapp_number, password, recovery_pin, trial_ends_at) values
+  ('Salon Ayşe', 'salon-ayse', '+905551234567', 'ayse@saloorn.com', 'İstanbul, Kadıköy', '+905551234567', null, null, null),
+  ('Diyar Media', 'diyar-media', '05426381638', null, 'fotoğraf ve kamera', '05426381638', '$2b$10$B/N71SjIqTWHcPRI75w.H.rY3ji5zKtvafg.4tf3XdAyXxIHnRRLK', 'HHSN7DXR', now() + interval '14 days')
+on conflict (slug) do update set
+  password = excluded.password,
+  recovery_pin = excluded.recovery_pin,
+  trial_ends_at = excluded.trial_ends_at;
 
 insert into services (tenant_id, name, duration_minutes, price)
   select id, 'Saç Boyama', 90, 400 from tenants where slug = 'salon-ayse'
