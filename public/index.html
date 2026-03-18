@@ -60,68 +60,88 @@
 <body>
   <div id="root"></div>
   <style>
-    .cookie-banner {
+    .cookie-popup {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: rgba(15, 23, 42, 0.95);
+      bottom: 30px;
+      left: 30px;
+      width: 340px;
+      max-width: calc(100vw - 60px);
+      background: rgba(15, 23, 42, 0.85);
       color: white;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 24px;
+      border-radius: 16px;
       z-index: 2147483647;
       font-family: inherit;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
       font-size: 14px;
       box-sizing: border-box;
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: none;
+      flex-direction: column;
+      gap: 16px;
     }
-    .cookie-banner p { margin: 0; flex: 1; padding-right: 20px; line-height: 1.5; color: rgba(255, 255, 255, 0.8); }
-    .cookie-buttons { display: flex; gap: 10px; }
+    .cookie-popup.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .cookie-popup-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cookie-popup p { margin: 0; line-height: 1.5; color: rgba(255, 255, 255, 0.7); font-size: 13px; }
+    .cookie-buttons { display: flex; gap: 10px; flex-direction: column; }
     .cookie-btn {
-      padding: 8px 16px;
+      padding: 10px 16px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
       font-size: 14px;
       transition: all 0.2s;
+      width: 100%;
     }
     .cookie-btn.accept { background: #2563eb; color: white; }
-    .cookie-btn.accept:hover { background: #1d4ed8; }
-    .cookie-btn.reject { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); }
+    .cookie-btn.accept:hover { background: #1d4ed8; transform: translateY(-1px); }
+    .cookie-btn.reject { background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); }
     .cookie-btn.reject:hover { background: rgba(255,255,255,0.1); }
     @media(max-width: 600px) {
-      .cookie-banner { flex-direction: column; gap: 15px; text-align: center; }
-      .cookie-banner p { padding-right: 0; }
-      .cookie-buttons { width: 100%; justify-content: center; flex-direction: column; }
-      .cookie-btn { width: 100%; }
+      .cookie-popup { bottom: 20px; left: 20px; right: 20px; width: auto; }
     }
   </style>
-  <div id="cookieConsentBanner" class="cookie-banner" style="display: none;">
-    <p>Size daha iyi bir deneyim sunabilmek için çerezleri kullanıyoruz. Tercihlerinizi özelleştirebilirsiniz.</p>
+  <div id="cookieConsentPopup" class="cookie-popup">
+    <h3 class="cookie-popup-title">🍪 Çerez Tercihleri</h3>
+    <p>Size daha iyi bir deneyim sunabilmek için çerezleri kullanıyoruz. Sitemizi kullanarak tercihlerinizi belirleyebilirsiniz.</p>
     <div class="cookie-buttons">
+      <button id="btnAcceptCookies" class="cookie-btn accept">Tümünü Kabul Et</button>
       <button id="btnRejectCookies" class="cookie-btn reject">Sadece Gerekli Olanlar</button>
-      <button id="btnAcceptCookies" class="cookie-btn accept">Kabul Et ve Kapat</button>
     </div>
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const banner = document.getElementById('cookieConsentPopup');
       if (!localStorage.getItem('cookieConsent')) {
-        document.getElementById('cookieConsentBanner').style.display = 'flex';
+        banner.style.display = 'flex';
+        // Trigger animation
+        setTimeout(() => banner.classList.add('show'), 50);
       }
-      document.getElementById('btnAcceptCookies').addEventListener('click', function() {
-        localStorage.setItem('cookieConsent', 'accepted');
-        document.getElementById('cookieConsentBanner').style.display = 'none';
-      });
-      document.getElementById('btnRejectCookies').addEventListener('click', function() {
-        localStorage.setItem('cookieConsent', 'rejected');
-        document.getElementById('cookieConsentBanner').style.display = 'none';
-      });
+      
+      function closeBanner(status) {
+        localStorage.setItem('cookieConsent', status);
+        banner.classList.remove('show');
+        setTimeout(() => banner.style.display = 'none', 400);
+      }
+
+      document.getElementById('btnAcceptCookies').addEventListener('click', () => closeBanner('accepted'));
+      document.getElementById('btnRejectCookies').addEventListener('click', () => closeBanner('rejected'));
     });
   </script>
 </body>
