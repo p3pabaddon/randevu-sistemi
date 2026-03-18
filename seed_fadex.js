@@ -1,5 +1,5 @@
-require('dotenv').config();
-const supabase = require('../lib/supabase');
++require('dotenv').config();
+const supabase = require('./lib/supabase');
 const bcrypt = require('bcryptjs');
 
 async function run() {
@@ -9,7 +9,7 @@ async function run() {
     const recoveryPin = 'FADEXLAB';
 
     console.log('Fadexlab tenant oluşturuluyor...');
-    
+
     let { data: tenant, error: tErr } = await supabase
         .from('tenants')
         .insert([{
@@ -27,18 +27,17 @@ async function run() {
 
     if (tErr) {
         if (tErr.code === '23505') {
-            console.log('Bu işletme slugı zaten var, bilgileri güncelliyorum (servisleri silmiyorum)...');
+            console.log('Bu işletme slugı zaten var, şifre ve bilgileri güncelliyorum...');
             const { data: ext, error: upErr } = await supabase.from('tenants').update({
                 name: 'Fadexlab',
+                password: hashedPassword,
                 phone: '+90 552 618 23 04',
                 whatsapp_number: '+905526182304'
             }).eq('slug', slug).select().single();
             if (upErr) throw upErr;
             tenant = ext;
-            
-            // Gerçek müşteri olduğu için servisleri silmek tehlikeli olabilir.
-            // Sadece eksikse ekleyeceğiz veya manuel müdahale gerekecek.
-            console.log('Var olan servisler korunuyor.');
+
+            await supabase.from('services').delete().eq('tenant_id', tenant.id);
         } else {
             console.error('Tenant oluşturma hatası:', tErr);
             process.exit(1);
@@ -72,7 +71,7 @@ async function run() {
         console.error('Servis hatası:', sErr);
         process.exit(1);
     }
-    
+
     console.log('Başarıyla ' + servicesList.length + ' adet servis eklendi!');
     process.exit(0);
 }
