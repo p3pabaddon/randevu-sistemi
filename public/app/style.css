@@ -2281,7 +2281,7 @@ html.theme-light .bento-subtitle {
         left: 0;
         right: 0;
         z-index: 9999;
-        padding: 56px 1rem 0.75rem;
+        padding: 56px 1rem calc(0.75rem + env(safe-area-inset-bottom));
         /* top = mascot height space */
         pointer-events: none;
         animation: animeNavIn 0.5s cubic-bezier(0.34, 1.2, 0.64, 1) both;
@@ -2635,7 +2635,7 @@ html.theme-light .pagination-link.active {
     justify-content: center;
     color: var(--text-muted);
 }
-/* ¦¦ YENÝ RANDEVU TAB ACCORDION ¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦ */
+/* ï¿½ï¿½ YENï¿½ RANDEVU TAB ACCORDION ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 .new-tab-accordion {
     margin-top: 1.25rem;
     background: var(--bg-card);
@@ -2699,7 +2699,7 @@ html.theme-light .pagination-link.active {
     }
 }
 
-/* ¦¦ DENETÝM (SETTINGS) MOBÝL DÜZENLEMELER ¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦ */
+/* ï¿½ï¿½ DENETï¿½M (SETTINGS) MOBï¿½L Dï¿½ZENLEMELER ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 @media (max-width: 768px) {
 
     /* Settings tab genel padding azalt */
@@ -2707,7 +2707,7 @@ html.theme-light .pagination-link.active {
         padding: 0.75rem 0.75rem 6rem;
     }
 
-    /* Bilgi kartý içindeki 2 sütunlu grid › tek sütun */
+    /* Bilgi kartï¿½ iï¿½indeki 2 sï¿½tunlu grid ï¿½ tek sï¿½tun */
     #tab-settings .settings-info-grid,
     #tab-settings [style*="grid-template-columns: 1fr 1fr"],
     #tab-settings [style*="grid-template-columns:1fr 1fr"] {
@@ -2715,27 +2715,27 @@ html.theme-light .pagination-link.active {
         gap: 0.5rem !important;
     }
 
-    /* Uzun metinler taþmasýn */
+    /* Uzun metinler taï¿½masï¿½n */
     #tab-settings .form-card,
     #tab-settings .bento-card {
         overflow-wrap: break-word;
         word-break: break-all;
     }
 
-    /* Staff add grid › tek sütun */
+    /* Staff add grid ï¿½ tek sï¿½tun */
     #staff-add-row {
         grid-template-columns: 1fr !important;
         gap: 0.5rem !important;
     }
 
-    /* Bento grid mobilde 2 sütun */
+    /* Bento grid mobilde 2 sï¿½tun */
     #tab-settings .bento-grid,
     #tab-reports .bento-grid {
         grid-template-columns: 1fr 1fr !important;
         gap: 0.75rem !important;
     }
 
-    /* span-2 ve span-3 kartlar mobilde tam geniþlik */
+    /* span-2 ve span-3 kartlar mobilde tam geniï¿½lik */
     #tab-settings .bento-card.span-2,
     #tab-settings .bento-card.span-3,
     #tab-reports .bento-card.span-2,
@@ -2743,17 +2743,17 @@ html.theme-light .pagination-link.active {
         grid-column: 1 / -1 !important;
     }
 
-    /* Bento deðer yazý boyutu küçült */
+    /* Bento deï¿½er yazï¿½ boyutu kï¿½ï¿½ï¿½lt */
     .bento-value {
         font-size: 1.5rem !important;
     }
 
-    /* Settings sol panel form kartý padding'i küçült */
+    /* Settings sol panel form kartï¿½ padding'i kï¿½ï¿½ï¿½lt */
     #tab-settings .form-card {
         padding: 1rem !important;
     }
 
-    /* Çalýþma saati grid › tek sütun */
+    /* ï¿½alï¿½ï¿½ma saati grid ï¿½ tek sï¿½tun */
     .hours-grid {
         grid-template-columns: 1fr !important;
     }
@@ -2765,13 +2765,13 @@ html.theme-light .pagination-link.active {
         gap: 0.75rem !important;
     }
 
-    /* Booking URL taþmasýn */
+    /* Booking URL taï¿½masï¿½n */
     .webhook-box code {
         word-break: break-all;
         font-size: 0.72rem;
     }
 
-    /* Tab içerik padding küçült */
+    /* Tab iï¿½erik padding kï¿½ï¿½ï¿½lt */
     .tab-content {
         padding: 0.75rem 0.75rem 6rem;
     }
