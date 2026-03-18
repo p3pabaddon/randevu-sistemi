@@ -1363,7 +1363,7 @@ function populateSettings() {
     updateBentoStats();
 
     // Müşteri form linki
-    const bookingUrl = `${window.location.origin}/booking.html?tenant=${t.slug}`;
+    const bookingUrl = `${window.location.origin}/${t.slug}`;
     $('booking-url').textContent = bookingUrl;
     $('copy-booking-btn').onclick = () => {
         navigator.clipboard.writeText(bookingUrl).then(() => {
@@ -1436,13 +1436,12 @@ function initMirrorQR() {
 
         // Generate URL
         const params = new URLSearchParams({
-            tenant: t.slug,
             promo: 'qr',
             d: discount,
             h: header,
             f: footer
         });
-        const bookingUrl = `${window.location.origin}/booking.html?${params.toString()}`;
+        const bookingUrl = `${window.location.origin}/${t.slug}?${params.toString()}`;
 
         // Clear and Generate
         qrContainer.innerHTML = '';

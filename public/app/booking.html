@@ -1268,9 +1268,7 @@
                             <!-- Google Maps Button -->
                             <div id="map-link-btn"
                                 style="margin-top: 0.8rem; display: none; opacity: 0; transition: all 0.3s ease; position: relative; z-index: 100;">
-                                <button class="new-booking-btn"
-                                    style="width: 100%; font-size: 0.7rem; padding: 0.4rem; background: var(--map-emerald); border: none; color: #000; pointer-events: auto;"
-                                    onclick="event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=Avcılar+İstanbul', '_blank')">
+                                    onclick="event.stopPropagation(); openMap()">
                                     Yol Tarifi Al ↗
                                 </button>
                             </div>
@@ -1848,13 +1846,24 @@
             const locationName = document.getElementById('map-location-name');
             const coordsLabel = document.getElementById('map-coords');
 
-            if (!container || !wrapper) return;
-
-            // Update with tenant info
             if (tenant) {
                 locationName.textContent = tenant.name;
-                // coordsLabel could be updated if database had it
+                const addr = tenant.address || 'İstanbul, Avcılar';
+                coordsLabel.textContent = addr.startsWith('http') ? 'Konum Yayında' : addr;
             }
+
+            window.openMap = () => {
+                if (!tenant || !tenant.address) {
+                    window.open('https://www.google.com/maps/search/?api=1&query=Avcılar+İstanbul', '_blank');
+                    return;
+                }
+                const addr = tenant.address;
+                if (addr.startsWith('http')) {
+                    window.open(addr, '_blank');
+                } else {
+                    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`, '_blank');
+                }
+            };
 
             // Click to Expand
             wrapper.onclick = (e) => {
