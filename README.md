@@ -82,6 +82,23 @@ Dashboard URL: `http://localhost:3000` → giriş: `salon-ayse`
 
 ---
 
+## 🚀 Deployment & Onboarding
+
+### Yeni İşletme Tanımlama (Provisioning)
+Yeni bir müşteri için sistemi kurmak üzere `scripts/provision-tenant.js` dosyasını kullanabilirsiniz. Fadexlab örneği için hazır komut:
+
+```bash
+npm run provision:fadex
+```
+
+Bu komut:
+- İşletme hesabını oluşturur.
+- Gerekli tüm servisleri (Saç, Sakal vb.) otomatik ekler.
+- Şifre ve PIN kodlarını tanımlar.
+- Eğer işletme zaten varsa verilerini güvenli bir şekilde günceller (servisleri silmez).
+
+---
+
 ## Tally.so Entegrasyonu
 
 Tally formunuzun webhook adresine şunu ekleyin:

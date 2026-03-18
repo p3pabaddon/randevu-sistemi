@@ -1,5 +1,5 @@
 require('dotenv').config();
-const supabase = require('./lib/supabase');
+const supabase = require('../lib/supabase');
 const bcrypt = require('bcryptjs');
 
 async function run() {
@@ -27,17 +27,18 @@ async function run() {
 
     if (tErr) {
         if (tErr.code === '23505') {
-            console.log('Bu işletme slugı zaten var, şifre ve bilgileri güncelliyorum...');
+            console.log('Bu işletme slugı zaten var, bilgileri güncelliyorum (servisleri silmiyorum)...');
             const { data: ext, error: upErr } = await supabase.from('tenants').update({
                 name: 'Coşkun Baykuş',
-                password: hashedPassword,
                 phone: '+90 552 618 23 04',
                 whatsapp_number: '+905526182304'
             }).eq('slug', slug).select().single();
             if (upErr) throw upErr;
             tenant = ext;
             
-            await supabase.from('services').delete().eq('tenant_id', tenant.id);
+            // Gerçek müşteri olduğu için servisleri silmek tehlikeli olabilir.
+            // Sadece eksikse ekleyeceğiz veya manuel müdahale gerekecek.
+            console.log('Var olan servisler korunuyor.');
         } else {
             console.error('Tenant oluşturma hatası:', tErr);
             process.exit(1);
