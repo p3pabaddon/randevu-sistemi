@@ -2146,9 +2146,9 @@ function showToast(msg, opts = {}) {
     const toast = document.createElement('div');
     toast.id = 'app-toast';
     toast.innerHTML = `
-      <div style="display:flex;align-items:flex-start;gap:.75rem">
-        <span style="font-size:1.4rem;line-height:1">🔔</span>
-        <div>
+      <div style="display:flex;align-items:flex-start;gap:.75rem;max-width:100%;">
+        <span style="font-size:1.4rem;line-height:1;flex-shrink:0;">🔔</span>
+        <div style="flex:1;min-width:0;word-break:break-word;overflow-wrap:break-word;">
           <div style="font-size:.75rem;opacity:.7;margin-bottom:.2rem;text-transform:uppercase;letter-spacing:.05em">Yeni Randevu</div>
           <div style="font-size:.88rem;font-weight:700;line-height:1.4">${msg}</div>
         </div>
