@@ -59,6 +59,71 @@
 
 <body>
   <div id="root"></div>
+  <style>
+    .cookie-banner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(15, 23, 42, 0.95);
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2147483647;
+      font-family: inherit;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .cookie-banner p { margin: 0; flex: 1; padding-right: 20px; line-height: 1.5; color: rgba(255, 255, 255, 0.8); }
+    .cookie-buttons { display: flex; gap: 10px; }
+    .cookie-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .cookie-btn.accept { background: #2563eb; color: white; }
+    .cookie-btn.accept:hover { background: #1d4ed8; }
+    .cookie-btn.reject { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); }
+    .cookie-btn.reject:hover { background: rgba(255,255,255,0.1); }
+    @media(max-width: 600px) {
+      .cookie-banner { flex-direction: column; gap: 15px; text-align: center; }
+      .cookie-banner p { padding-right: 0; }
+      .cookie-buttons { width: 100%; justify-content: center; flex-direction: column; }
+      .cookie-btn { width: 100%; }
+    }
+  </style>
+  <div id="cookieConsentBanner" class="cookie-banner" style="display: none;">
+    <p>Size daha iyi bir deneyim sunabilmek için çerezleri kullanıyoruz. Tercihlerinizi özelleştirebilirsiniz.</p>
+    <div class="cookie-buttons">
+      <button id="btnRejectCookies" class="cookie-btn reject">Sadece Gerekli Olanlar</button>
+      <button id="btnAcceptCookies" class="cookie-btn accept">Kabul Et ve Kapat</button>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!localStorage.getItem('cookieConsent')) {
+        document.getElementById('cookieConsentBanner').style.display = 'flex';
+      }
+      document.getElementById('btnAcceptCookies').addEventListener('click', function() {
+        localStorage.setItem('cookieConsent', 'accepted');
+        document.getElementById('cookieConsentBanner').style.display = 'none';
+      });
+      document.getElementById('btnRejectCookies').addEventListener('click', function() {
+        localStorage.setItem('cookieConsent', 'rejected');
+        document.getElementById('cookieConsentBanner').style.display = 'none';
+      });
+    });
+  </script>
 </body>
 
 </html>
