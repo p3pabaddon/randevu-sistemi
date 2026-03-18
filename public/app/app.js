@@ -1351,7 +1351,7 @@ function populateSettings() {
             </div>
             <p style="font-size:0.6rem; color:var(--text-muted); margin-top:0.2rem;">Şifrenizi unutursanız bu kodu kullanın. Lütfen güvenli bir yere kaydedin.</p>
         </div>
-        <div class="settings-item"><label>ADRES</label><strong>${esc(state.tenant.address || '-')}</strong></div>
+        <div class="settings-item"><label>ADRES</label><strong>${(state.tenant.address || '').startsWith('http') ? `<a href="${state.tenant.address}" target="_blank" style="color:var(--accent)">Haritada Gör ↗</a>` : esc(state.tenant.address || '-')}</strong></div>
       </div>
       <div class="settings-footer">
           <button id="logout-btn-card" class="btn-logout-mobile" onclick="window.logout()">Hesaptan Çıkış Yap</button>
