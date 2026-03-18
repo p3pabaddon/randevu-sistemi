@@ -11,8 +11,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="bento-calendar.css?v=1">
-    <link rel="stylesheet" href="expand-map.css?v=1">
+    <link rel="stylesheet" href="/app/bento-calendar.css?v=1">
+    <link rel="stylesheet" href="/app/expand-map.css?v=1">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
     <style>
         /* ── RESET & BASE ──────────────────────────────────────────────────── */
@@ -1340,7 +1340,15 @@
         /* ─── CONFIG ──────────────────────────────────────────────────────── */
         const API = window.location.origin + '/api';
         const params = new URLSearchParams(window.location.search);
-        const TENANT_SLUG = params.get('tenant') || 'salon-ayse';
+        
+        let _slug = params.get('tenant');
+        if (!_slug) {
+            const pathParts = window.location.pathname.split('/').filter(Boolean);
+            if (pathParts.length > 0 && pathParts[0] !== 'app') {
+                _slug = pathParts[0];
+            }
+        }
+        const TENANT_SLUG = _slug || 'salon-ayse';
 
         /* ─── STATE ───────────────────────────────────────────────────────── */
         const form = {

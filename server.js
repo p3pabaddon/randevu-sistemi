@@ -205,6 +205,28 @@ app.get('/app/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'app', 'index.html'));
 });
 
+// 5. Tenant Clean URL (e.g. randevudunyasi.com/Fadexlab)
+app.get('/:slug', async (req, res, next) => {
+    const slug = req.params.slug;
+    const reserved = ['api', 'app', 'css', 'js', 'images', 'assets', 'favicon.ico'];
+    if (!slug || reserved.includes(slug.toLowerCase())) return next();
+
+    try {
+        const { data, error } = await supabase
+            .from('tenants')
+            .select('id')
+            .ilike('slug', slug)
+            .single();
+
+        if (data && !error) {
+            return res.sendFile(path.join(__dirname, 'public', 'app', 'booking.html'));
+        }
+    } catch (err) {
+        console.error('[Clean URL Check]', err);
+    }
+    next();
+});
+
 // SPA fallback - Tüm diğer yollar landing page'e gider (React Router desteği)
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
