@@ -9,11 +9,12 @@ files.forEach(file => {
   let content = fs.readFileSync(filePath, 'utf8');
   let originalContent = content;
   
-  content = content.replace(/"\/ Tek Sefer"/g, '"/ Aylık"');
+  // adding hidden class instead of removing the button classes
+  content = content.replace(/"fixed bottom-6 right-6 z-\[9999\]"/g, '"hidden fixed bottom-6 right-6 z-[9999]"');
   
   if (content !== originalContent) {
       fs.writeFileSync(filePath, content, 'utf8');
       console.log(`Updated ${file}`);
   }
 });
-console.log("Tek Sefer replaced with Aylik successfully.");
+console.log("Chat button hidden successfully.");
