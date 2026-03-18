@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding Formu | StructlySolutions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0084ff;
+            --secondary: #001f3f;
+            --text: #1e293b;
+            --gray: #64748b;
+            --border: #cbd5e1;
+            --bg: #f1f5f9;
+        }
+
+        @page {
+            size: A4;
+            margin: 0.5cm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            line-height: 1.4;
+            background-color: white;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-img {
+            height: 70px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: var(--secondary);
+            font-weight: 800;
+            margin-bottom: 2px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: var(--secondary);
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .row {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 15px;
+        }
+
+        .field {
+            flex: 1;
+        }
+
+        .label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+
+        .input-box {
+            width: 100%;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            height: 55px;
+            background-color: #fff;
+            padding: 0 15px;
+            font-size: 1.1rem;
+        }
+
+        .textarea-box {
+            width: 100%;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            height: 120px;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            resize: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+            font-size: 1rem;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+        }
+
+        .note-box {
+            font-size: 1rem;
+            background-color: #f0f9ff;
+            border-radius: 8px;
+            padding: 20px;
+            color: #0369a1;
+            margin-top: 20px;
+            border: 1px solid #bae6fd;
+        }
+
+        @media print {
+            body { padding: 0; }
+            .input-box, .textarea-box { border: 1px solid #000 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo-section">
+                <!-- Yerel path sorunu için ./logo.png kullanıldı -->
+                <img src="./logo.png" alt="Logo" class="logo-img">
+                <div>
+                    <h1>StructlySolutions</h1>
+                    <p style="font-size: 1rem; color: var(--gray); font-weight: 600;">Asistan Kurulum ve Bilgi Formu</p>
+                </div>
+            </div>
+            <div style="text-align: right">
+                <p style="font-size: 0.9rem; font-weight: bold; color: var(--secondary);">Form: #SS-2026</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">1. İşletme Bilgileri</div>
+            <div class="row">
+                <div class="field">
+                    <span class="label">İşletme Adı</span>
+                    <div class="input-box"></div>
+                </div>
+                <div class="field">
+                    <span class="label">Yetkili Kişi</span>
+                    <div class="input-box"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="field">
+                    <span class="label">Randevu Bildirim Numarası (WhatsApp/Telegram)</span>
+                    <div class="input-box"></div>
+                </div>
+                <div class="field">
+                    <span class="label">İşletme E-Posta</span>
+                    <div class="input-box"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">2. Hizmetler ve Fiyatlar</div>
+            <p style="font-size: 0.95rem; color: var(--gray); margin-bottom: 10px; font-weight: 600;">Asistanın müşteriye söyleyeceği fiyat ve süreleri buraya yazın (Maksimum 20 hizmet).</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 55%;">Hizmetin Adı</th>
+                        <th style="width: 25%;">Fiyat (TL)</th>
+                        <th style="width: 20%;">Süre (Dk)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">3. Çalışma Saatleri ve Kurallar</div>
+            <div class="row">
+                <div class="field">
+                    <span class="label">Hafta İçi Mesai Saatleri</span>
+                    <div class="input-box"></div>
+                </div>
+                <div class="field">
+                    <span class="label">Hafta Sonu Mesai Saatleri</span>
+                    <div class="input-box"></div>
+                </div>
+            </div>
+            <div class="field" style="margin-bottom: 15px;">
+                <span class="label">Kapalı Olduğunuz Günler / Tatiller</span>
+                <div class="input-box"></div>
+            </div>
+            <div class="field">
+                <span class="label">Randevu Kuralları (Örn: Gecikme payı, iptal şartları)</span>
+                <div class="textarea-box"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">4. Asistan Karşılaması</div>
+            <div class="field">
+                <span class="label">Asistan Telefonu Nasıl Açsın? (Örn: "Merhaba, [İşletme Adı]'na hoşgeldiniz...")</span>
+                <div class="textarea-box"></div>
+            </div>
+        </div>
+
+        <div class="note-box">
+            <strong>ÖNEMLİ:</strong> Bu formdaki bilgiler <strong>StructlySolutions</strong> ekibi tarafından sisteminize kaydedilecektir. Lütfen bilgilerin doğruluğundan emin olun.
+        </div>
+
+        <div class="footer">
+            © 2026 StructlySolutions - www.structlysolutions.com
+        </div>
+    </div>
+
+</body>
+</html>

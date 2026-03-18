@@ -60,28 +60,11 @@ create index if not exists idx_services_tenant on services(tenant_id);
 
 -- 6. İŞLETME KAYITLARI
 insert into tenants (name, slug, phone, email, address, whatsapp_number, password, recovery_pin) values
-  ('Salon Ayşe', 'salon-ayse', '+905551234567', 'ayse@saloorn.com', 'İstanbul, Kadıköy', '+905551234567', null, null),
-  ('Diyar Media', 'diyar-media', '05426381638', null, 'fotoğraf ve kamera', '05426381638', 'DiyarMedia2024!', 'HHSN7DXR')
+  ('Salon Ayşe', 'salon-ayse', '+905551234567', 'ayse@saloorn.com', 'İstanbul, Kadıköy', '+905551234567', null, null)
 on conflict (slug) do update set
   password = excluded.password,
   recovery_pin = excluded.recovery_pin;
 
 insert into services (tenant_id, name, duration_minutes, price)
   select id, 'Saç Boyama', 90, 400 from tenants where slug = 'salon-ayse'
-on conflict do nothing;
-
-insert into services (tenant_id, name, duration_minutes, price)
-  select id, 'Video Çekimi', 120, 10000 from tenants where slug = 'diyar-media'
-on conflict do nothing;
-
-insert into services (tenant_id, name, duration_minutes, price)
-  select id, 'Dış Çekim', 180, 15000 from tenants where slug = 'diyar-media'
-on conflict do nothing;
-
-insert into services (tenant_id, name, duration_minutes, price)
-  select id, 'Dron Çekimi', 60, 3000 from tenants where slug = 'diyar-media'
-on conflict do nothing;
-
-insert into services (tenant_id, name, duration_minutes, price)
-  select id, 'Ses Sistemi Kiralık', 240, 5000 from tenants where slug = 'diyar-media'
 on conflict do nothing;
