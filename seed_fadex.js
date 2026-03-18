@@ -37,6 +37,7 @@ async function run() {
             if (upErr) throw upErr;
             tenant = ext;
 
+            console.log('Var olan servisler siliniyor ve yeniden yükleniyor...');
             await supabase.from('services').delete().eq('tenant_id', tenant.id);
         } else {
             console.error('Tenant oluşturma hatası:', tErr);

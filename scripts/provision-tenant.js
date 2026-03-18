@@ -36,9 +36,10 @@ async function run() {
             if (upErr) throw upErr;
             tenant = ext;
             
-            // Gerçek müşteri olduğu için servisleri silmek tehlikeli olabilir.
-            // Sadece eksikse ekleyeceğiz veya manuel müdahale gerekecek.
-            console.log('Var olan servisler korunuyor.');
+            // Gerçek müşteri olduğu için servisleri silmek tehlikeli olabilir, 
+            // ama burada tam bir reset istiyoruz (duplicate önlemek için).
+            console.log('Var olan servisler siliniyor ve yeniden yükleniyor...');
+            await supabase.from('services').delete().eq('tenant_id', tenant.id);
         } else {
             console.error('Tenant oluşturma hatası:', tErr);
             process.exit(1);
