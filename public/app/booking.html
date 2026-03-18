@@ -1268,8 +1268,7 @@
                             <!-- Google Maps Button -->
                             <div id="map-link-btn"
                                 style="margin-top: 0.8rem; display: none; opacity: 0; transition: all 0.3s ease; position: relative; z-index: 100;">
-                                <button class="new-booking-btn" style="padding: 0.5rem 1rem; font-size: 0.8rem; height: auto;"
-                                    onclick="event.stopPropagation(); openMap()">
+                                <button class="new-booking-btn" style="width: 100%; font-size: 0.7rem; padding: 0.4rem; background: var(--map-emerald); border: none; color: #000; pointer-events: auto;" onclick="event.stopPropagation(); openMap()">
                                     Yol Tarifi Al ↗
                                 </button>
                             </div>
@@ -1384,7 +1383,8 @@
                 });
 
                 document.getElementById('biz-name').textContent = tenant.name;
-                document.getElementById('biz-tagline').textContent = tenant.address || 'Online Randevu';
+                const addr = tenant.address || 'Online Randevu';
+                document.getElementById('biz-tagline').textContent = addr.startsWith('http') ? 'Online Randevu' : addr;
                 document.getElementById('footer-biz').textContent = tenant.name;
                 document.title = `Randevu Al — ${tenant.name}`;
 
@@ -1850,7 +1850,7 @@
             if (tenant) {
                 locationName.textContent = tenant.name;
                 const addr = tenant.address || 'İstanbul, Avcılar';
-                coordsLabel.textContent = addr.startsWith('http') ? 'Konum Yayında' : addr;
+                coordsLabel.textContent = (addr.startsWith('http') || addr.length > 50) ? 'İşletme Konumu' : addr;
             }
 
             window.openMap = () => {
