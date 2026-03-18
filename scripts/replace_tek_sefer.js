@@ -9,11 +9,11 @@ files.forEach(file => {
   let content = fs.readFileSync(filePath, 'utf8');
   let originalContent = content;
   
-  content = content.replace(/SMS Bildirim Desteği/g, 'Otomatik Hatırlatmalar');
+  content = content.replace(/"\/ Tek Sefer"/g, '"/ Aylık"');
   
   if (content !== originalContent) {
       fs.writeFileSync(filePath, content, 'utf8');
       console.log(`Updated ${file}`);
   }
 });
-console.log("SMS Feature text updated successfully.");
+console.log("Tek Sefer replaced with Aylik successfully.");
