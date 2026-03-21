@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const supabase = require('../lib/supabase');
 const { authenticateTenant } = require('../middleware/auth');
+const { requireFeature } = require('../middleware/featureGate');
 
 // GET /api/reports/staff/:tenantId — Personel performans raporu
-router.get('/staff/:tenantId', authenticateTenant, async (req, res) => {
+router.get('/staff/:tenantId', authenticateTenant, requireFeature('advanced_reports'), async (req, res) => {
     try {
         const { tenantId } = req.params;
         if (tenantId !== req.tenantId) return res.status(403).json({ error: 'Erişim reddedildi.' });

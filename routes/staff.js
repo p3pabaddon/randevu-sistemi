@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const supabase = require('../lib/supabase');
 const { authenticateTenant } = require('../middleware/auth');
+const { requireFeature } = require('../middleware/featureGate');
 const { staffSchema } = require('../lib/validation');
 
 // ─── GET /api/staff/:tenantId ────────────────────────────────────────────────
@@ -18,7 +19,7 @@ router.get('/:tenantId', async (req, res) => {
 });
 
 // ─── POST /api/staff  (Admin) ───────────────────────────────────────────────
-router.post('/', authenticateTenant, async (req, res) => {
+router.post('/', authenticateTenant, requireFeature('staff_management'), async (req, res) => {
     const { error: valError } = staffSchema.validate(req.body);
     if (valError) return res.status(400).json({ error: valError.details[0].message });
 

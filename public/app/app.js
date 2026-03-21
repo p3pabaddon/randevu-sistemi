@@ -2441,7 +2441,65 @@ function initNotifications() {
         dialogOverlay.classList.add('hidden');
         updateNotiBadges();
     };
+
+    // Sayfa yüklenince admin bildirimlerini de çek
+    setTimeout(loadAdminNotifications, 2000);
 }
+
+// ── Admin Bildirimlerini Çek ve Göster ─────────────────────────────────────
+async function loadAdminNotifications() {
+    try {
+        const res = await fetch(`${API_BASE}/tenant-notifications`, { credentials: 'include' });
+        if (!res.ok) return;
+        const { notifications } = await res.json();
+        if (!notifications || !notifications.length) return;
+
+        // Daha önce gösterilmemiş bildirimleri ekle
+        const shownIds = JSON.parse(localStorage.getItem('shown_admin_notifs') || '[]');
+        let newCount = 0;
+
+        notifications.forEach(n => {
+            if (shownIds.includes(n.id)) return;
+
+            const noti = {
+                id: 'admin_' + n.id,
+                initials: '📢',
+                customer_name: n.title,
+                service_name: 'Platform Bildirimi',
+                message: n.message,
+                time: new Date(n.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+                read: false,
+                rawData: null, // Admin bildirimi, randevu detayı yok
+                isAdminNotif: true
+            };
+
+            // Mükerrer kontrolü
+            if (!state.notifications.some(x => x.id === noti.id)) {
+                state.notifications.unshift(noti);
+                newCount++;
+            }
+
+            shownIds.push(n.id);
+        });
+
+        // Max 100 kayıt tut localStorage'da
+        if (shownIds.length > 100) shownIds.splice(0, shownIds.length - 100);
+        localStorage.setItem('shown_admin_notifs', JSON.stringify(shownIds));
+
+        if (newCount > 0) {
+            if (state.notifications.length > 50) state.notifications.splice(50);
+            updateNotiBadges();
+            renderNotifications();
+            playNotificationSound();
+            showToast(`${newCount} yeni platform bildirimi var!`);
+        }
+    } catch (err) {
+        console.log('[Admin Notifications] Çekilemedi:', err.message);
+    }
+}
+
+// Her 60 saniyede admin bildirimlerini kontrol et
+setInterval(loadAdminNotifications, 60000);
 
 function addNotification(data) {
     // Aynı id'li bildirim varsa mükerrer eklemeyi önle
@@ -2496,11 +2554,11 @@ function renderNotifications() {
             </div>`;
     } else {
         list.innerHTML = state.notifications.map(n => `
-            <div class="noti-item ${n.read ? '' : 'unread'}" onclick="handleNotiClick('${n.id}')">
-                <div class="noti-item-avatar">${n.initials}</div>
+            <div class="noti-item ${n.read ? '' : 'unread'}" onclick="handleNotiClick('${n.id}')" ${n.isAdminNotif ? 'style="border-left:3px solid #c9a84c;"' : ''}>
+                <div class="noti-item-avatar" ${n.isAdminNotif ? 'style="background:linear-gradient(135deg,#c9a84c,#b8963f);font-size:1.1rem;"' : ''}>${n.initials}</div>
                 <div style="flex:1;">
                     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.15rem;">
-                        <span style="font-weight:700; font-size:0.88rem; color:var(--text-primary);">${esc(n.customer_name)}</span>
+                        <span style="font-weight:700; font-size:0.88rem; color:${n.isAdminNotif ? '#c9a84c' : 'var(--text-primary)'};">${n.isAdminNotif ? '📢 ' : ''}${esc(n.customer_name)}</span>
                         <span style="font-size:0.7rem; color:var(--text-muted);">${n.time}</span>
                     </div>
                     <div style="font-size:0.78rem; color:var(--text-secondary); line-height:1.4;">${esc(n.message)}</div>
@@ -2546,8 +2604,8 @@ window.handleNotiClick = (id) => {
         if (panel) panel.classList.remove('visible');
         if (dialogOverlay) dialogOverlay.classList.add('hidden');
 
-        // Detay kartını aç
-        if (n.rawData) {
+        // Detay kartını aç (admin bildirimi değilse)
+        if (n.rawData && !n.isAdminNotif) {
             openModal(n.rawData);
         }
     }

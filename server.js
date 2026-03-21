@@ -17,9 +17,13 @@ const waitlistRouter = require('./routes/waitlist');
 const customersRouter = require('./routes/customers');
 const reportsRouter = require('./routes/reports');
 const aiRouter = require('./routes/ai');
+const adminRouter = require('./routes/admin/index');
+const tenantTicketsRouter = require('./routes/tenantTickets');
+const tenantNotificationsRouter = require('./routes/tenantNotifications');
 const { sseHandler } = require('./lib/sse');
 const supabase = require('./lib/supabase');
 const { loginSchema } = require('./lib/validation');
+const { sendWhatsApp, buildReminder2hMessage, buildReminder40mMessage } = require('./services/whatsapp');
 
 // ── ENV CHECK ───────────────────────────────────────────────────────────────
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY'];
@@ -32,6 +36,14 @@ if (!process.env.JWT_SECRET) {
 }
 
 const app = express();
+
+// ── Global Crash Koruması ────────────────────────────────────────────────
+process.on('uncaughtException', (err) => {
+    console.error('[UNCAUGHT EXCEPTION]', err.message, err.stack);
+});
+process.on('unhandledRejection', (reason) => {
+    console.error('[UNHANDLED REJECTION]', reason);
+});
 
 // Trust reverse proxy for rate limiting (e.g., Render, Heroku)
 app.set('trust proxy', 1);
@@ -178,6 +190,9 @@ app.use('/api/waitlist', waitlistRouter);
 app.use('/api/customers', customersRouter);
 app.use('/api/reports', reportsRouter);
 app.use('/api/ai', aiRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/tickets', tenantTicketsRouter);
+app.use('/api/tenant-notifications', tenantNotificationsRouter);
 
 // Birleştirilmiş Yapı: Landing Page ve App
 
@@ -194,6 +209,16 @@ app.get('/app', (req, res, next) => {
     next();
 });
 
+// Admin Panel
+app.get('/admin', (req, res, next) => {
+    if (!req.url.endsWith('/')) return res.redirect(301, '/admin/');
+    next();
+});
+app.use('/admin', express.static(path.join(__dirname, 'public', 'admin')));
+app.get('/admin/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html'));
+});
+
 // 2. Orijinal App (public/app) - /app/ yolundan servis edilir
 app.use('/app', express.static(path.join(__dirname, 'public', 'app')));
 
@@ -208,7 +233,7 @@ app.get('/app/', (req, res) => {
 // 5. Tenant Clean URL (e.g. randevudunyasi.com/Fadexlab)
 app.get('/:slug', async (req, res, next) => {
     const slug = req.params.slug;
-    const reserved = ['api', 'app', 'css', 'js', 'images', 'assets', 'favicon.ico'];
+    const reserved = ['api', 'app', 'admin', 'css', 'js', 'images', 'assets', 'favicon.ico'];
     if (!slug || reserved.includes(slug.toLowerCase())) return next();
 
     try {
@@ -261,10 +286,100 @@ app.listen(PORT, () => {
         }
     }
 
+    // ── HATIRLATMA SİSTEMİ — WhatsApp Randevu Hatırlatmaları ────────────────────
+    // 1) 4+ saatlik randevularda: 2 saat kala hatırlatma
+    // 2) Tüm randevularda: 40 dakika kala hatırlatma
+    async function sendReminderNotifications() {
+        try {
+            const now = new Date();
+            // Türkiye saati (UTC+3) — sunucu UTC ise offset ekle
+            const turkeyOffset = 3 * 60 * 60 * 1000;
+            const turkeyNow = new Date(now.getTime() + turkeyOffset);
+
+            const todayStr = turkeyNow.toISOString().split('T')[0]; // YYYY-MM-DD
+
+            // Bugünkü ve yarınki aktif randevuları çek
+            const tomorrowDate = new Date(turkeyNow);
+            tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+            const tomorrowStr = tomorrowDate.toISOString().split('T')[0];
+
+            const { data: appointments, error } = await supabase
+                .from('appointments')
+                .select('*, services(name), tenants(name, phone)')
+                .in('appointment_date', [todayStr, tomorrowStr])
+                .neq('status', 'cancelled')
+                .is('deleted_at', null);
+
+            if (error) {
+                console.error('[Reminder] DB hatası:', error.message);
+                return;
+            }
+
+            if (!appointments || appointments.length === 0) return;
+
+            for (const appt of appointments) {
+                const apptDateTime = new Date(`${appt.appointment_date}T${appt.appointment_time.slice(0, 5)}:00+03:00`);
+                const diffMs = apptDateTime.getTime() - now.getTime();
+                const diffMinutes = diffMs / (1000 * 60);
+
+                // Geçmiş randevuları atla
+                if (diffMinutes < 0) continue;
+
+                const msgParams = {
+                    customerName: appt.customer_name,
+                    serviceName: appt.services?.name || 'Randevu',
+                    date: appt.appointment_date,
+                    time: appt.appointment_time.slice(0, 5),
+                    businessName: appt.tenants?.name || 'İşletme',
+                    businessPhone: appt.tenants?.phone || '',
+                };
+
+                // ── 2 SAAT KALA HATIRLATMA (sadece 4+ saat önceden alınmış randevular) ──
+                // Randevu oluşturulma zamanı ile randevu zamanı arası 4+ saat ise
+                if (!appt.reminder_2h_sent && diffMinutes <= 120 && diffMinutes > 40) {
+                    // Randevunun ne zaman oluşturulduğunu kontrol et
+                    const createdAt = new Date(appt.created_at);
+                    const bookingToApptHours = (apptDateTime.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
+
+                    if (bookingToApptHours >= 4) {
+                        console.log(`[Reminder-2h] → ${appt.customer_name} (${appt.customer_phone}) | ${appt.appointment_date} ${appt.appointment_time.slice(0, 5)}`);
+                        const message = buildReminder2hMessage(msgParams);
+                        await sendWhatsApp(appt.customer_phone, message);
+
+                        await supabase
+                            .from('appointments')
+                            .update({ reminder_2h_sent: true })
+                            .eq('id', appt.id);
+                    }
+                }
+
+                // ── 40 DAKİKA KALA HATIRLATMA (tüm randevular) ──
+                if (!appt.reminder_40m_sent && diffMinutes <= 40 && diffMinutes > 0) {
+                    console.log(`[Reminder-40m] → ${appt.customer_name} (${appt.customer_phone}) | ${appt.appointment_date} ${appt.appointment_time.slice(0, 5)}`);
+                    const message = buildReminder40mMessage(msgParams);
+                    await sendWhatsApp(appt.customer_phone, message);
+
+                    await supabase
+                        .from('appointments')
+                        .update({ reminder_40m_sent: true })
+                        .eq('id', appt.id);
+                }
+            }
+        } catch (err) {
+            console.error('[Reminder] Beklenmedik hata:', err.message);
+        }
+    }
+
     // İlk çalıştırma — server ayağa kalkar kalkmaz
     cleanupExpiredAppointments();
+    sendReminderNotifications();
 
-    // Sonrasında her saat tekrar çalıştır
+    // Temizleyici: her saat
     setInterval(cleanupExpiredAppointments, 60 * 60 * 1000);
+
+    // Hatırlatma: her 10 dakikada bir kontrol et
+    setInterval(sendReminderNotifications, 10 * 60 * 1000);
+
+    console.log('  → Hatırlatma sistemi aktif (her 10 dk kontrol)');
 });
 

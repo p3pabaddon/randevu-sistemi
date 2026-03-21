@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel — Randevu Sistemi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="admin.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --bg-deep: #0a0c14;
+            --bg-mid: #111827;
+            --bg-card: #161d2e;
+            --bg-sidebar: #0d111c;
+            --border: #1e2d45;
+            --accent: #c9a84c;
+            --accent-hover: #e0bf6e;
+            --accent-glow: rgba(201, 168, 76, 0.18);
+            --text-primary: #f0f4ff;
+            --text-muted: #7b8ca8;
+            --text-dim: #3d4f6a;
+            --green: #22c55e;
+            --yellow: #f59e0b;
+            --red: #ef4444;
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.45);
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── LOGIN SCREEN ─────────────────────────────────────────────────────── -->
+<div id="loginScreen" class="login-screen">
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="logo-icon">
+                <i data-lucide="shield-check" style="width:28px;height:28px"></i>
+            </div>
+            <h2>Admin Panel</h2>
+            <p>Platform yönetim paneline giriş yapın</p>
+        </div>
+        <form class="login-form" onsubmit="doLogin(event)">
+            <div class="form-group">
+                <label>Kullanıcı Adı</label>
+                <input type="text" id="loginUsername" placeholder="admin" required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label>Şifre</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+            <p id="loginError" class="login-error"></p>
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;height:44px;font-size:0.85rem">
+                Giriş Yap
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- ── ADMIN APP ────────────────────────────────────────────────────────── -->
+<div id="adminApp" class="admin-layout" style="display:none">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <i data-lucide="shield-check" style="width:20px;height:20px"></i>
+            </div>
+            <div>
+                <h1>Admin Panel</h1>
+                <span>Randevu Yönetim Sistemi</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Ana Menü</div>
+            <div class="admin-nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+                <i data-lucide="layout-dashboard"></i> Dashboard
+            </div>
+            <div class="admin-nav-item" data-tab="tenants" onclick="switchTab('tenants')">
+                <i data-lucide="building-2"></i> İşletmeler
+            </div>
+
+            <div class="nav-section-label">Finans</div>
+            <div class="admin-nav-item" data-tab="subscriptions" onclick="switchTab('subscriptions')">
+                <i data-lucide="credit-card"></i> Abonelikler
+            </div>
+            <div class="admin-nav-item" data-tab="payments" onclick="switchTab('payments')">
+                <i data-lucide="banknote"></i> Ödemeler
+            </div>
+
+            <div class="nav-section-label">Destek</div>
+            <div class="admin-nav-item" data-tab="tickets" onclick="switchTab('tickets')">
+                <i data-lucide="message-square"></i> Destek Talepleri
+            </div>
+            <div class="admin-nav-item" data-tab="notifications" onclick="switchTab('notifications')">
+                <i data-lucide="bell"></i> Bildirimler
+            </div>
+
+            <div class="nav-section-label">Sistem</div>
+            <div class="admin-nav-item" data-tab="logs" onclick="switchTab('logs')">
+                <i data-lucide="activity"></i> Aktivite Logları
+            </div>
+            <div class="admin-nav-item" data-tab="analytics" onclick="switchTab('analytics')">
+                <i data-lucide="bar-chart-3"></i> İstatistikler
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="admin-user-info">
+                <div class="admin-avatar" id="adminAvatar">A</div>
+                <div>
+                    <div class="admin-name" id="adminDisplayName">Admin</div>
+                    <div class="admin-role">Platform Yöneticisi</div>
+                </div>
+            </div>
+            <div style="display:flex;gap:0.5rem">
+                <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="doLogout()">
+                    <i data-lucide="log-out" style="width:14px;height:14px"></i> Çıkış
+                </button>
+                <button class="btn btn-ghost" title="Şifre Değiştir" onclick="openChangePasswordModal()">
+                    <i data-lucide="settings" style="width:14px;height:14px"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="admin-main">
+        <div class="admin-topbar">
+            <h2 id="topbarTitle">Dashboard</h2>
+            <div class="topbar-actions">
+                <span class="text-muted" style="font-size:0.78rem" id="topbarDate"></span>
+            </div>
+        </div>
+
+        <div class="admin-content">
+
+            <!-- ── DASHBOARD TAB ──────────────────────────────────────── -->
+            <div class="tab-panel active" id="tab-dashboard"></div>
+
+            <!-- ── TENANTS TAB ────────────────────────────────────────── -->
+            <div class="tab-panel" id="tab-tenants"></div>
+
+            <!-- ── SUBSCRIPTIONS TAB ──────────────────────────────────── -->
+            <div class="tab-panel" id="tab-subscriptions"></div>
+
+            <!-- ── PAYMENTS TAB ───────────────────────────────────────── -->
+            <div class="tab-panel" id="tab-payments"></div>
+
+            <!-- ── LOGS TAB ───────────────────────────────────────────── -->
+            <div class="tab-panel" id="tab-logs"></div>
+
+            <!-- ── ANALYTICS TAB ──────────────────────────────────────── -->
+            <div class="tab-panel" id="tab-analytics"></div>
+
+            <!-- ── TICKETS TAB ──────────────────────────────────────── -->
+            <div class="tab-panel" id="tab-tickets"></div>
+
+            <!-- ── NOTIFICATIONS TAB ────────────────────────────────── -->
+            <div class="tab-panel" id="tab-notifications"></div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL ────────────────────────────────────────────────────────────── -->
+<div class="admin-modal" id="adminModal">
+    <div class="modal-overlay" onclick="closeModal()"></div>
+    <div class="modal-card" id="modalCard">
+        <div class="modal-header">
+            <h3 id="modalTitle">Modal</h3>
+            <button class="modal-close" onclick="closeModal()">
+                <i data-lucide="x" style="width:20px;height:20px"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer" id="modalFooter"></div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="admin.js"></script>
+</body>
+</html>
