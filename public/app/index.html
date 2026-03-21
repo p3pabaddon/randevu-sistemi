@@ -927,6 +927,25 @@
                 <span class="anime-nav-label">Raporlar</span>
                 <div class="anime-active-glow"></div>
             </button>
+            <button class="anime-nav-item" data-tab="support">
+                <div class="anime-mascot">
+                    <div class="mascot-face">
+                        <div class="mascot-eye left"></div>
+                        <div class="mascot-eye right"></div>
+                        <div class="mascot-cheek left"></div>
+                        <div class="mascot-cheek right"></div>
+                        <div class="mascot-mouth"></div>
+                    </div>
+                    <div class="mascot-tail"></div>
+                </div>
+                <span class="anime-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg></span>
+                <span class="anime-nav-label">Destek</span>
+                <div class="anime-active-glow"></div>
+            </button>
             <!-- Bekleme sekmesi kaldırıldı -->
             <button class="anime-nav-item" data-tab="settings">
                 <div class="anime-mascot">
@@ -1034,6 +1053,14 @@
                                 <line x1="18" y1="20" x2="18" y2="10" />
                                 <line x1="12" y1="20" x2="12" y2="4" />
                                 <line x1="6" y1="20" x2="6" y2="14" />
+                            </svg>
+                        </div>
+                    </button>
+                    <button class="dock-item" data-tab="support" id="nav-support">
+                        <div class="dock-label">Destek</div>
+                        <div class="dock-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                             </svg>
                         </div>
                     </button>
@@ -1617,6 +1644,65 @@
                 </div>
 
             </section>
+
+            <!-- ── DESTEK TALEPLERİ ── -->
+            <section id="tab-support" class="tab-content hidden">
+                <div class="section-header">
+                    <h3>Destek Talepleriniz</h3>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button class="btn btn-secondary" id="support-refresh-btn">Yenile</button>
+                        <button class="btn btn-primary" id="support-new-btn">+ Yeni Talep</button>
+                    </div>
+                </div>
+                <p class="form-hint" style="margin-bottom:1.25rem;">Platform yönetimiyle iletişim kurmak için destek talebi oluşturabilirsiniz.</p>
+
+                <div id="support-tickets-list" class="appointments-grid">
+                    <div class="loading-state">Yükleniyor...</div>
+                </div>
+            </section>
+
+            <!-- Destek Talep Detay Modal -->
+            <div id="support-detail-overlay" class="reset-overlay hidden" style="z-index:10500;">
+                <div class="reset-card" style="max-width:560px; max-height:80vh; display:flex; flex-direction:column;">
+                    <button class="reset-close-btn" id="support-detail-close">✕</button>
+                    <h2 style="margin-bottom:0.25rem;" id="support-detail-subject">Talep</h2>
+                    <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:1rem;">
+                        <span class="badge" id="support-detail-status">open</span>
+                        <span class="badge" id="support-detail-priority">normal</span>
+                        <span style="font-size:0.75rem; color:var(--text-muted);" id="support-detail-date"></span>
+                        <button id="support-detail-delete" style="margin-left:auto; font-size:0.7rem; padding:0.25rem 0.6rem; border-radius:6px; border:1px solid #ef4444; background:transparent; color:#ef4444; cursor:pointer; font-family:'Montserrat',sans-serif; font-weight:600;">Talebi Sil</button>
+                    </div>
+                    <div id="support-messages-list" style="flex:1; overflow-y:auto; max-height:400px; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.5rem;">
+                    </div>
+                    <div id="support-reply-area" style="display:flex; gap:0.5rem;">
+                        <textarea id="support-reply-input" placeholder="Yanıtınızı yazın..." rows="2"
+                            style="flex:1; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem; resize:none;"></textarea>
+                        <button class="btn btn-primary" id="support-reply-btn" style="align-self:flex-end;">Gönder</button>
+                    </div>
+                    <p id="support-msg" class="form-message hidden" style="margin-top:0.5rem;"></p>
+                </div>
+            </div>
+
+            <!-- Yeni Destek Talebi Modal -->
+            <div id="support-new-overlay" class="reset-overlay hidden" style="z-index:10500;">
+                <div class="reset-card" style="max-width:440px;">
+                    <button class="reset-close-btn" id="support-new-close">✕</button>
+                    <h2 style="margin-bottom:0.25rem;">Yeni Destek Talebi</h2>
+                    <p class="form-hint" style="margin-bottom:1.25rem;">Sorununuzu veya isteğinizi detaylı açıklayın.</p>
+                    <div class="input-group" style="margin-bottom:0.85rem;">
+                        <label>Konu *</label>
+                        <input type="text" id="support-new-subject" placeholder="örn: Ödeme sorunu, Özellik talebi..."
+                            style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem;">
+                    </div>
+                    <div class="input-group" style="margin-bottom:1.25rem;">
+                        <label>Mesaj *</label>
+                        <textarea id="support-new-message" rows="4" placeholder="Detaylı açıklama..."
+                            style="width:100%; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 1rem; color:var(--text-primary); font-family:'Montserrat',sans-serif; font-size:0.85rem; resize:vertical;"></textarea>
+                    </div>
+                    <button class="btn btn-primary" id="support-new-submit" style="width:100%;">Gönder</button>
+                    <p id="support-new-msg" class="form-message hidden" style="margin-top:0.5rem;"></p>
+                </div>
+            </div>
 
             <!-- Kampanya Düzenleme Modal (Global) -->
             <div id="campaign-edit-overlay" class="reset-overlay hidden" style="z-index:10500;">

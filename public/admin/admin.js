@@ -1582,13 +1582,14 @@ async function loadTickets(page = 1) {
     const statusLabels = { open: 'Acik', in_progress: 'Islemde', resolved: 'Cozuldu', closed: 'Kapali' };
 
     let rows = (data.tickets || []).map(t => `
-        <tr style="cursor:pointer" onclick="openTicketDetail('${t.id}')">
-            <td class="fw-700">${esc(t.subject)}</td>
-            <td>${esc(t.tenants?.name || '?')}</td>
-            <td><span class="badge badge-${t.status}">${statusLabels[t.status] || t.status}</span></td>
-            <td><span class="badge badge-${t.priority}">${priorityLabels[t.priority] || t.priority}</span></td>
-            <td>${formatDate(t.created_at)}</td>
-            <td>${formatDate(t.updated_at)}</td>
+        <tr style="cursor:pointer">
+            <td class="fw-700" onclick="openTicketDetail('${t.id}')">${esc(t.subject)}</td>
+            <td onclick="openTicketDetail('${t.id}')">${esc(t.tenants?.name || '?')}</td>
+            <td onclick="openTicketDetail('${t.id}')"><span class="badge badge-${t.status}">${statusLabels[t.status] || t.status}</span></td>
+            <td onclick="openTicketDetail('${t.id}')"><span class="badge badge-${t.priority}">${priorityLabels[t.priority] || t.priority}</span></td>
+            <td onclick="openTicketDetail('${t.id}')">${formatDate(t.created_at)}</td>
+            <td onclick="openTicketDetail('${t.id}')">${formatDate(t.updated_at)}</td>
+            <td><button class="btn btn-sm" style="background:var(--red);color:#fff;font-size:0.7rem;padding:0.2rem 0.5rem" onclick="deleteTicketAdmin('${t.id}')">Sil</button></td>
         </tr>
     `).join('') || '<tr><td colspan="6" class="text-muted" style="text-align:center;padding:2rem">Destek talebi bulunamadi.</td></tr>';
 
@@ -1614,7 +1615,7 @@ async function loadTickets(page = 1) {
                 </div>
             </div>
             <table class="data-table">
-                <thead><tr><th>Konu</th><th>Isletme</th><th>Durum</th><th>Oncelik</th><th>Olusturma</th><th>Guncelleme</th></tr></thead>
+                <thead><tr><th>Konu</th><th>Isletme</th><th>Durum</th><th>Oncelik</th><th>Olusturma</th><th>Guncelleme</th><th></th></tr></thead>
                 <tbody>${rows}</tbody>
             </table>
             ${renderPagination(data.page || 1, data.totalPages || 1, 'loadTickets')}
@@ -1662,6 +1663,7 @@ async function openTicketDetail(id) {
                 <option value="urgent" ${t.priority === 'urgent' ? 'selected' : ''}>Acil</option>
             </select>
             <button class="btn btn-ghost btn-sm" onclick="updateTicketStatus('${t.id}')">Guncelle</button>
+            <button class="btn btn-sm" style="background:var(--red);color:#fff;font-size:0.75rem" onclick="deleteTicketAdmin('${t.id}')">Sil</button>
         </div>
 
         <div class="chat-container">${chatHtml}</div>
@@ -1701,6 +1703,16 @@ async function replyToTicket(id) {
     if (!res.ok) { showToast('Hata', 'error'); return; }
     showToast('Yanit gonderildi.');
     openTicketDetail(id);
+}
+
+async function deleteTicketAdmin(id) {
+    if (!confirm('Bu destek talebini silmek istediginize emin misiniz?')) return;
+    const res = await adminFetch(`${API}/tickets/${id}`, { method: 'DELETE' });
+    if (!res) return;
+    if (!res.ok) { showToast('Silinemedi.', 'error'); return; }
+    showToast('Ticket silindi.');
+    closeModal();
+    loadTickets();
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

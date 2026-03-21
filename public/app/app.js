@@ -579,7 +579,8 @@ const tabMap = {
     crm: { nav: 'nav-crm', section: 'tab-crm', title: 'Müşteri Yönetimi' },
     services: { nav: 'nav-services', section: 'tab-services', title: 'Hizmetler' },
     reports: { nav: 'nav-reports', section: 'tab-reports', title: 'Personel Performansı' },
-    campaigns: { nav: 'nav-campaigns', section: 'tab-campaigns', title: 'Silinen Randevular' }
+    campaigns: { nav: 'nav-campaigns', section: 'tab-campaigns', title: 'Silinen Randevular' },
+    support: { nav: 'nav-support', section: 'tab-support', title: 'Destek Talepleri' }
 };
 
 function initTabs() {
@@ -639,6 +640,7 @@ function switchTab(key) {
     }
     if (key === 'campaigns') loadDeletedAppointments();
     if (key === 'new') loadCampaigns();
+    if (key === 'support') loadSupportTickets();
 }
 
 // ── LOAD SERVICES ─────────────────────────────────────────────────────────────
@@ -2149,7 +2151,7 @@ function showToast(msg, opts = {}) {
       <div style="display:flex;align-items:flex-start;gap:.75rem;max-width:100%;">
         <span style="font-size:1.4rem;line-height:1;flex-shrink:0;">🔔</span>
         <div style="flex:1;min-width:0;word-break:break-word;overflow-wrap:break-word;">
-          <div style="font-size:.75rem;opacity:.7;margin-bottom:.2rem;text-transform:uppercase;letter-spacing:.05em">Yeni Randevu</div>
+          <div style="font-size:.75rem;opacity:.7;margin-bottom:.2rem;text-transform:uppercase;letter-spacing:.05em">${opts.title || 'Yeni Randevu'}</div>
           <div style="font-size:.88rem;font-weight:700;line-height:1.4">${msg}</div>
         </div>
         <button onclick="this.closest('#app-toast').remove()" style="margin-left:auto;background:none;border:none;color:inherit;font-size:1rem;cursor:pointer;opacity:.6;padding:0 0 0 .5rem">✕</button>
@@ -3231,3 +3233,255 @@ function showConfirm(message, onConfirm, confirmText = 'Evet, Devam Et', cancelT
 }
 
 window.deleteWaitlistEntry = deleteWaitlistEntry;
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DESTEK TALEPLERİ (Support Tickets)
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function loadSupportTickets() {
+    const list = $('support-tickets-list');
+    if (!list) return;
+    list.innerHTML = '<div class="loading-state">Yükleniyor...</div>';
+
+    try {
+        const res = await fetch(`${API_BASE}/tickets/my`, { credentials: 'include' });
+        const json = await handleResponse(res, true);
+        const tickets = json.tickets || [];
+
+        if (tickets.length === 0) {
+            list.innerHTML = `
+                <div style="text-align:center; padding:3rem; color:var(--text-muted);">
+                    <p style="font-size:1.1rem; margin-bottom:0.5rem;">Henüz destek talebiniz yok</p>
+                    <p style="font-size:0.85rem;">Yardıma ihtiyacınız varsa "Yeni Talep" butonuna tıklayın.</p>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = tickets.map(t => {
+            const statusMap = {
+                open: { label: 'Açık', color: '#22c55e' },
+                in_progress: { label: 'İşleniyor', color: '#f59e0b' },
+                resolved: { label: 'Çözüldü', color: '#6366f1' },
+                closed: { label: 'Kapalı', color: '#6b7280' }
+            };
+            const priorityMap = {
+                low: { label: 'Düşük', color: '#6b7280' },
+                normal: { label: 'Normal', color: '#3b82f6' },
+                high: { label: 'Yüksek', color: '#f59e0b' },
+                urgent: { label: 'Acil', color: '#ef4444' }
+            };
+            const s = statusMap[t.status] || statusMap.open;
+            const p = priorityMap[t.priority] || priorityMap.normal;
+            const date = new Date(t.created_at).toLocaleDateString('tr-TR');
+
+            return `
+                <div class="form-card" style="transition:border-color 0.2s;"
+                     onmouseenter="this.style.borderColor='var(--gold)'" onmouseleave="this.style.borderColor='var(--border)'">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem; cursor:pointer;" onclick="openSupportDetail('${t.id}')">
+                        <h4 style="font-size:0.95rem; font-weight:600; color:var(--text-primary); margin:0;">${esc(t.subject)}</h4>
+                        <span style="font-size:0.7rem; color:var(--text-muted); white-space:nowrap;">${date}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; gap:0.5rem; cursor:pointer;" onclick="openSupportDetail('${t.id}')">
+                            <span style="font-size:0.7rem; padding:0.15rem 0.5rem; border-radius:999px; background:${s.color}22; color:${s.color}; font-weight:600;">${s.label}</span>
+                            <span style="font-size:0.7rem; padding:0.15rem 0.5rem; border-radius:999px; background:${p.color}22; color:${p.color}; font-weight:600;">${p.label}</span>
+                        </div>
+                        <button onclick="event.stopPropagation();deleteSupportTicket('${t.id}')" style="font-size:0.7rem; padding:0.2rem 0.6rem; border-radius:6px; border:1px solid var(--red); background:transparent; color:var(--red); cursor:pointer; font-family:'Montserrat',sans-serif; font-weight:600;">Sil</button>
+                    </div>
+                </div>`;
+        }).join('');
+    } catch (e) {
+        console.error('Support tickets error:', e);
+        list.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--red);">Yüklenirken hata oluştu.</div>';
+    }
+}
+
+async function openSupportDetail(ticketId) {
+    const overlay = $('support-detail-overlay');
+    overlay.classList.remove('hidden');
+
+    const msgList = $('support-messages-list');
+    msgList.innerHTML = '<div class="loading-state">Yükleniyor...</div>';
+
+    try {
+        const res = await fetch(`${API_BASE}/tickets/${ticketId}`, { credentials: 'include' });
+        const json = await handleResponse(res, true);
+        const ticket = json.ticket;
+        const messages = json.messages || [];
+
+        $('support-detail-subject').textContent = ticket.subject;
+
+        const statusMap = { open: 'Açık', in_progress: 'İşleniyor', resolved: 'Çözüldü', closed: 'Kapalı' };
+        const priorityMap = { low: 'Düşük', normal: 'Normal', high: 'Yüksek', urgent: 'Acil' };
+        $('support-detail-status').textContent = statusMap[ticket.status] || ticket.status;
+        $('support-detail-priority').textContent = priorityMap[ticket.priority] || ticket.priority;
+        $('support-detail-date').textContent = new Date(ticket.created_at).toLocaleString('tr-TR');
+
+        // Detay modal silme butonu
+        const delBtn = $('support-detail-delete');
+        if (delBtn) {
+            delBtn.onclick = async () => {
+                if (!confirm('Bu destek talebini silmek istediğinize emin misiniz?')) return;
+                try {
+                    const r = await fetch(`${API_BASE}/tickets/${ticketId}`, { method: 'DELETE', credentials: 'include' });
+                    await handleResponse(r);
+                    overlay.classList.add('hidden');
+                    showToast('Destek talebi silindi.', { title: 'Destek' });
+                    loadSupportTickets();
+                } catch (err) {
+                    showToast('Silinemedi: ' + err.message, { title: 'Hata' });
+                }
+            };
+        }
+
+        // Status badge rengini ayarla
+        const statusEl = $('support-detail-status');
+        const statusColors = { open: '#22c55e', in_progress: '#f59e0b', resolved: '#6366f1', closed: '#6b7280' };
+        statusEl.style.background = (statusColors[ticket.status] || '#6b7280') + '22';
+        statusEl.style.color = statusColors[ticket.status] || '#6b7280';
+
+        if (messages.length === 0) {
+            msgList.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--text-muted);">Henüz mesaj yok.</div>';
+        } else {
+            msgList.innerHTML = messages.map(m => {
+                const isAdmin = m.sender_type === 'admin';
+                return `
+                    <div style="display:flex; justify-content:${isAdmin ? 'flex-start' : 'flex-end'};">
+                        <div style="max-width:80%; padding:0.75rem 1rem; border-radius:${isAdmin ? '4px 12px 12px 12px' : '12px 4px 12px 12px'};
+                            background:${isAdmin ? 'rgba(201,168,76,0.15)' : 'rgba(99,102,241,0.15)'};
+                            border:1px solid ${isAdmin ? 'rgba(201,168,76,0.3)' : 'rgba(99,102,241,0.2)'};">
+                            <div style="font-size:0.7rem; font-weight:600; margin-bottom:0.25rem; color:${isAdmin ? '#c9a84c' : '#6366f1'};">
+                                ${isAdmin ? '👑 Yönetim' : '🏢 Siz'}
+                            </div>
+                            <div style="font-size:0.85rem; color:var(--text-primary); line-height:1.5;">${esc(m.message)}</div>
+                            <div style="font-size:0.65rem; color:var(--text-muted); margin-top:0.25rem; text-align:right;">
+                                ${new Date(m.created_at).toLocaleString('tr-TR')}
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+            msgList.scrollTop = msgList.scrollHeight;
+        }
+
+        // Kapalı ticket'a yanıt verilemesin
+        const replyArea = $('support-reply-area');
+        if (ticket.status === 'closed' || ticket.status === 'resolved') {
+            replyArea.style.display = 'none';
+        } else {
+            replyArea.style.display = 'flex';
+        }
+
+        // Yanıt gönder
+        $('support-reply-btn').onclick = async () => {
+            const msg = $('support-reply-input').value.trim();
+            if (!msg) return;
+            $('support-reply-btn').disabled = true;
+
+            try {
+                const r = await fetch(`${API_BASE}/tickets/${ticketId}/reply`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ message: msg })
+                });
+                await handleResponse(r);
+                $('support-reply-input').value = '';
+                openSupportDetail(ticketId); // Refresh messages
+            } catch (err) {
+                showToast('Yanıt gönderilemedi: ' + err.message);
+            } finally {
+                $('support-reply-btn').disabled = false;
+            }
+        };
+
+    } catch (e) {
+        console.error('Ticket detail error:', e);
+        msgList.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--red);">Yüklenirken hata oluştu.</div>';
+    }
+}
+window.openSupportDetail = openSupportDetail;
+
+async function deleteSupportTicket(ticketId) {
+    if (!confirm('Bu destek talebini silmek istediğinize emin misiniz?')) return;
+    try {
+        const res = await fetch(`${API_BASE}/tickets/${ticketId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        await handleResponse(res);
+        showToast('Destek talebi silindi.', { title: 'Destek' });
+        loadSupportTickets();
+    } catch (err) {
+        showToast('Silinemedi: ' + err.message, { title: 'Hata' });
+    }
+}
+window.deleteSupportTicket = deleteSupportTicket;
+
+function initSupportUI() {
+    // Kapat butonları
+    const closeDetail = $('support-detail-close');
+    const closeNew = $('support-new-close');
+    const detailOverlay = $('support-detail-overlay');
+    const newOverlay = $('support-new-overlay');
+
+    if (closeDetail) closeDetail.onclick = () => detailOverlay.classList.add('hidden');
+    if (closeNew) closeNew.onclick = () => newOverlay.classList.add('hidden');
+    if (detailOverlay) detailOverlay.onclick = e => { if (e.target === detailOverlay) detailOverlay.classList.add('hidden'); };
+    if (newOverlay) newOverlay.onclick = e => { if (e.target === newOverlay) newOverlay.classList.add('hidden'); };
+
+    // Yenile
+    const refreshBtn = $('support-refresh-btn');
+    if (refreshBtn) refreshBtn.onclick = loadSupportTickets;
+
+    // Yeni Talep aç
+    const newBtn = $('support-new-btn');
+    if (newBtn) newBtn.onclick = () => {
+        $('support-new-subject').value = '';
+        $('support-new-message').value = '';
+        const msg = $('support-new-msg');
+        if (msg) msg.classList.add('hidden');
+        newOverlay.classList.remove('hidden');
+    };
+
+    // Yeni Talep gönder
+    const submitBtn = $('support-new-submit');
+    if (submitBtn) submitBtn.onclick = async () => {
+        const subject = $('support-new-subject').value.trim();
+        const message = $('support-new-message').value.trim();
+        const msgEl = $('support-new-msg');
+
+        if (!subject || !message) {
+            msgEl.textContent = 'Konu ve mesaj alanları zorunludur.';
+            msgEl.classList.remove('hidden');
+            msgEl.style.color = 'var(--red)';
+            return;
+        }
+
+        submitBtn.disabled = true;
+        try {
+            const res = await fetch(`${API_BASE}/tickets`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ subject, message })
+            });
+            await handleResponse(res);
+            newOverlay.classList.add('hidden');
+            showToast('Destek talebi oluşturuldu!', { title: 'Destek' });
+            loadSupportTickets();
+        } catch (err) {
+            msgEl.textContent = 'Hata: ' + err.message;
+            msgEl.classList.remove('hidden');
+            msgEl.style.color = 'var(--red)';
+        } finally {
+            submitBtn.disabled = false;
+        }
+    };
+}
+
+// Init çağrısı — DOMContentLoaded veya mevcut init akışına bağla
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSupportUI);
+} else {
+    initSupportUI();
+}

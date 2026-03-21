@@ -106,4 +106,24 @@ router.post('/:id/reply', authenticateTenant, async (req, res) => {
     }
 });
 
+// DELETE /api/tickets/:id — Ticket sil (sadece kendi ticket'ı)
+router.delete('/:id', authenticateTenant, async (req, res) => {
+    try {
+        const { data: ticket } = await supabase
+            .from('support_tickets').select('id')
+            .eq('id', req.params.id).eq('tenant_id', req.tenantId).single();
+
+        if (!ticket) return res.status(404).json({ error: 'Ticket bulunamadı.' });
+
+        await supabase.from('ticket_messages').delete().eq('ticket_id', req.params.id);
+        const { error } = await supabase.from('support_tickets').delete().eq('id', req.params.id);
+        if (error) throw error;
+
+        return res.json({ success: true });
+    } catch (err) {
+        console.error('[Tenant Delete Ticket]', err);
+        return res.status(500).json({ error: 'Sunucu hatası.' });
+    }
+});
+
 module.exports = router;

@@ -105,4 +105,26 @@ router.post('/:id/reply', async (req, res) => {
     }
 });
 
+// DELETE /api/admin/tickets/:id
+router.delete('/:id', async (req, res) => {
+    try {
+        // Önce mesajları sil
+        await supabase.from('ticket_messages').delete().eq('ticket_id', req.params.id);
+        // Sonra ticket'ı sil
+        const { error } = await supabase.from('support_tickets').delete().eq('id', req.params.id);
+        if (error) throw error;
+
+        await logActivity({
+            actorType: 'super_admin', actorId: req.adminId, actorName: req.adminUsername,
+            action: 'ticket.deleted', targetType: 'ticket', targetId: req.params.id,
+            details: {}, ipAddress: req.ip
+        });
+
+        return res.json({ success: true });
+    } catch (err) {
+        console.error('[Admin Delete Ticket]', err);
+        return res.status(500).json({ error: 'Sunucu hatası.' });
+    }
+});
+
 module.exports = router;
